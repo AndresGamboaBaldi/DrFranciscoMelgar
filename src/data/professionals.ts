@@ -12,7 +12,7 @@ import type { Professional } from '../types/professional'
 //  1. DR. FRANCISCO MELGAR — Medicina Estética
 // ────────────────────────────────────────────────────────────────
 const doctor_melgar: Professional = {
-  photos: ['/photos/drmelgar_1.jpeg', '/photos/drmelgar.jpeg'],
+  photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar.jpeg'],
   slug:      'doctor_melgar',
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
@@ -37,9 +37,9 @@ const doctor_melgar: Professional = {
   ],
 
   services: [
-    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  duration: '45 min', price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.' ,  image: '/services/toxina.jpg' },
-    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   duration: '60 min', price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.', image: '/services/acido.jpeg' },
-    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',  image: '/services/labios.jpg'  },
+    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  duration: '45 min', price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
+    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   duration: '60 min', price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
+    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
     { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', duration: '75 min', price: 'Desde Bs. 480', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
     { id: 'peeling',     name: 'Peeling Médico',    tag: 'Renovación',      duration: '50 min', price: 'Desde Bs. 280', icon: '◫', description: 'Renueva la textura y luminosidad de la piel. Trata manchas, poros y marcas desde la primera sesión.' },
     { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    duration: '60 min', price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
@@ -74,7 +74,7 @@ const doctor_melgar: Professional = {
 //  2. BARBER VIP — Barbería de lujo
 // ────────────────────────────────────────────────────────────────
 const barber_vip: Professional = {
-  photos: ['/photos/vip.jpeg'],
+  photos: ['/barber_vip/photos/vip.jpeg'],
   slug:      'barber_vip',
   name:      'Barber VIP',
   shortName: 'Barber VIP',
@@ -97,10 +97,10 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',    name: 'Corte Clásico',    tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',             image: '/services/clasico.jpeg' },
-    { id: 'fade',     name: 'Fade & Degradado', tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',             image: '/services/fade.jpeg' },
-    { id: 'diseno',   name: 'Diseño Capilar',   tag: 'Artístico',duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',  image: '/services/diseno.jpeg' },
-    { id: 'tinte',    name: 'Tinte & Color',    tag: 'Color',    duration: '90 min', price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.' ,  image: '/services/tinte.jpeg'},
+    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
+    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     duration: '90 min', price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
   ],
 
   phone:   '59171234567',
