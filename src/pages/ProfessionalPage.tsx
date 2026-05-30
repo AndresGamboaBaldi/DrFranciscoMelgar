@@ -8,7 +8,7 @@ import About          from '../components/About'
 import BookingSection from '../components/booking/BookingSection'
 import Testimonials   from '../components/Testimonials'
 import Footer         from '../components/Footer'
-import CalendarLink   from '../components/CalendarLink'
+import SetupPage      from './SetupPage'
 
 const Divider = () => (
   <div style={{ width: '100%', height: 1, background: 'linear-gradient(to right, transparent, var(--color-rim), transparent)' }} />
@@ -46,22 +46,28 @@ export default function ProfessionalPage() {
 
   return (
     <ProfessionalContext.Provider value={pro}>
-      {/* Wrap in a div that overrides CSS color variables for this professional */}
       <div style={themeVars}>
-        <Navbar />
-        <main>
-          <Hero />
-          <Divider />
-          <Services />
-          <Divider />
-          <About />
-          <Divider />
-          <BookingSection />
-          <Divider />
-          <Testimonials />
-          {isSetup && (<><Divider /><CalendarLink /></>)}
-        </main>
-        <Footer />
+        {isSetup ? (
+          // Admin panel — only shown to the professional
+          <SetupPage />
+        ) : (
+          // Public site
+          <>
+            <Navbar />
+            <main>
+              <Hero />
+              <Divider />
+              <Services />
+              <Divider />
+              <About />
+              <Divider />
+              <BookingSection />
+              <Divider />
+              <Testimonials />
+            </main>
+            <Footer />
+          </>
+        )}
       </div>
     </ProfessionalContext.Provider>
   )

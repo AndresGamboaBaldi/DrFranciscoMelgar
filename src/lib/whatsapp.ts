@@ -4,10 +4,8 @@ interface NotificationData {
   date: string
   time: string
   phone: string
-  email: string
-  doctorPhone: string      // número del profesional
-  calendarFeedUrl?: string // si está configurado, se incluye el link de sincronización
-  calendarPageUrl?: string // URL de la página /slug/calendar (se construye en BookingSection)
+  doctorPhone: string
+  calendarPageUrl?: string
 }
 
 const CALLMEBOT_KEY = import.meta.env.VITE_CALLMEBOT_KEY as string ?? ''
@@ -21,17 +19,10 @@ function buildMessage(d: NotificationData): string {
     `*Fecha:* ${d.date}`,
     `*Hora:* ${d.time}`,
     `*Telefono:* ${d.phone}`,
-    `*Email:* ${d.email}`,
   ]
 
-  // Incluye link de sincronización si está configurado
-  if (d.calendarPageUrl) {
-    lines.push(
-      `\n*Sincroniza tu agenda (iPhone y Google):*`,
-      `${d.calendarPageUrl}`,
-      `_Toca el link para agregar todas tus citas automaticamente_`
-    )
-  }
+  // El link del calendario se envía manualmente la primera vez
+  // Para enviarlo: notifyDoctor({ ..., sendCalendarLink: true })
 
   return lines.join('\n')
 }

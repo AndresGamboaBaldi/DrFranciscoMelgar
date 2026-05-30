@@ -10,7 +10,7 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 2rem' }}>
-      <p style={{ fontSize: '.65rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '1rem' }}>Plaza</p>
+      <p style={{ fontSize: '.65rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '1rem' }}>Pro.bo</p>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem,6vw,5rem)', fontWeight: 300, color: 'var(--color-ink)', marginBottom: '.5rem', letterSpacing: '-.02em' }}>
         Reserva tu <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>cita</em>
       </h1>

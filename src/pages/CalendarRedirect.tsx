@@ -54,7 +54,7 @@ export default function CalendarRedirect() {
     <div style={PAGE}>
       {/* Logo / brand */}
       <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
-        <p style={{ fontSize: '.65rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.5rem' }}>Plaza</p>
+        <p style={{ fontSize: '.65rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.5rem' }}>Pro.bo</p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 300, color: 'var(--color-ink)' }}>
           Sincroniza tu <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>agenda</em>
         </h1>

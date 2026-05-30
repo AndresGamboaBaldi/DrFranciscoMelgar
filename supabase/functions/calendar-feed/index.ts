@@ -115,7 +115,7 @@ function generateICS(appointments: Appointment[], calName: string, timezone: str
   const header = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Plaza.bo//Citas//ES',
+    'PRODID:-//Pro.bo//Citas//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     fold(`X-WR-CALNAME:📅 Citas — ${calName}`),

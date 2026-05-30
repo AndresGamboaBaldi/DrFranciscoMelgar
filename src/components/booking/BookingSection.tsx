@@ -16,7 +16,7 @@ function formatDate(d: SelectedDate) {
   return `${days[dt.getDay()]}, ${d.d} de ${MONTHS_ES[d.m]} de ${d.y}`
 }
 
-const EMPTY_FORM: BookingFormData = { name: '', phone: '', email: '', age: '', notes: '', consent: false }
+const EMPTY_FORM: BookingFormData = { name: '', phone: '', age: '', notes: '', consent: false }
 
 export default function BookingSection() {
   const pro = useProfessional()
@@ -39,7 +39,6 @@ export default function BookingSection() {
     const e: typeof errors = {}
     if (!form.name.trim())  e.name  = 'Campo requerido'
     if (!form.phone.trim()) e.phone = 'Campo requerido'
-    if (!form.email.trim()) e.email = 'Campo requerido'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -55,7 +54,6 @@ export default function BookingSection() {
         appointment_time: time,
         name:  form.name.trim(),
         phone: form.phone.trim(),
-        email: form.email.trim(),
         age:   form.age ? parseInt(form.age) : null,
         notes: form.notes.trim() || undefined,
         doctor_id: pro.doctorId,
@@ -71,9 +69,7 @@ export default function BookingSection() {
         date:            formatDate(date),
         time,
         phone:           form.phone.trim(),
-        email:           form.email.trim(),
         doctorPhone:     pro.phone,
-        calendarFeedUrl: pro.calendarFeedUrl || undefined,
         calendarPageUrl,
       })
       setSuccess(true)
@@ -106,7 +102,7 @@ export default function BookingSection() {
             <>
               <StepNav step={step} />
               {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} />}
-              {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} doctorId={pro.doctorId} bookingConfig={pro.bookingConfig} />}
+              {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} doctorId={pro.doctorId} bookingConfig={pro.bookingConfig}  />}
               {step === 3 && service && date && time && <ContactForm summary={{ service, date, time }} data={form} onChange={updateForm} errors={errors} />}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid var(--color-rim)' }}>
                 {step > 1 ? <BackBtn onClick={() => setStep(s => Math.max(s-1,1) as BookingStep)} /> : <span />}

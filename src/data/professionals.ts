@@ -71,7 +71,7 @@ const doctor_melgar: Professional = {
   },
 
   doctorId:        'doctor_melgar',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=94e76c14d25ff82bcb5086752dd8b043e92f526ef66da0f988b8602025ecce91',
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=cdebf6a18fc4c3be2c64acffa23b946165c8c5c1ba50981dee6ad5d70df5c5c7',
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ const barber_vip: Professional = {
   },
 
   doctorId:        'barber_vip',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?85f3558620921431c7122ff0418122028763aa4a03e8958264453a4ba5',
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=12d9f83cca937e8db7996811bfafff18bb0e725efacce7c76cad8029bf96fb3e',
 }
 
 // ────────────────────────────────────────────────────────────────

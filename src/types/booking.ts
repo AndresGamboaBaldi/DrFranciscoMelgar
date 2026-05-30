@@ -25,7 +25,6 @@ export interface BookingState {
 export interface BookingFormData {
   name: string
   phone: string
-  email: string
   age: string
   notes: string
   consent: boolean
@@ -38,7 +37,6 @@ export interface Appointment {
   appointment_time: string   // '09:00'
   name: string
   phone: string
-  email: string
   age?: number | null
   notes?: string
   doctor_id?: string

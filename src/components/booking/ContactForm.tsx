@@ -48,9 +48,6 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
         <Field label="Teléfono / WhatsApp *" error={errors.phone}>
           <input type="tel" placeholder="+591 700 00000" value={data.phone} onChange={e => onChange('phone', e.target.value)} style={{ borderColor: errors.phone ? '#c47070' : undefined }} />
         </Field>
-        <Field label="Correo Electrónico *" error={errors.email}>
-          <input type="email" placeholder="tu@correo.com" value={data.email} onChange={e => onChange('email', e.target.value)} style={{ borderColor: errors.email ? '#c47070' : undefined }} />
-        </Field>
         <Field label="Edad">
           <input type="number" placeholder="Ej: 35" min={18} max={90} value={data.age} onChange={e => onChange('age', e.target.value)} />
         </Field>
