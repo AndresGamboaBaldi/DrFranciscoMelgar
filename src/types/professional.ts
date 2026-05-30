@@ -56,8 +56,16 @@ export interface Professional {
   slug: string
 
   /** Optional logo image path (e.g. '/logos/doctor_melgar.png').
-   *  If provided, the Navbar shows the image instead of the text name. */
+   *  If provided, the Navbar shows it alongside the text name. */
   logo?: string
+
+  /**
+   * Photos for the About section.
+   * - 1 photo  → shows as static image
+   * - 2+ photos → auto-rotating carousel (changes every 4.5s)
+   * Paths relative to /public  e.g. ['/photos/dr1.jpg', '/photos/dr2.jpg']
+   */
+  photos?: string[]
 
   // ── Identidad ───────────────────────────────────────────────
   name: string

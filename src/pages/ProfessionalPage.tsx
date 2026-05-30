@@ -48,7 +48,7 @@ function buildThemeVars(pro: Professional): React.CSSProperties {
       '--color-ink-dim':      '#3d3830',   // era #6b6259, ahora mucho más oscuro
       '--color-ink-ghost':    '#6a6055',   // era #a09080, ahora legible
       '--color-nav-scrolled': 'rgba(250,250,248,.96)',
-      '--watermark-stroke':   hexToRgba(accent, 0.1),
+      '--watermark-stroke':   hexToRgba(accent, 0.22),
       '--grain-opacity':      '0.04',
     } as React.CSSProperties
   }

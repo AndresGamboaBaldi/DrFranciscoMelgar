@@ -6,8 +6,8 @@ export default function Footer() {
   const openBooking = useOpenBooking()
 
   return (
-    <footer id="contacto" style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-rim)', padding: '3rem 1.5rem' }}>
-      <div style={{ maxWidth: '52rem', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <footer id="contacto" style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-rim)', padding: 'clamp(2rem,4vw,3.5rem) clamp(1.25rem,4vw,4.5rem)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
         {/* Top row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>

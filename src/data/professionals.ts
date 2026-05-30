@@ -36,17 +36,17 @@ const doctor_melgar: Professional = {
   ],
 
   services: [
-    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  duration: '45 min', price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.' },
-    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   duration: '60 min', price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.' },
+    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  duration: '45 min', price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.' ,  image: '/services/toxina.jpg' },
+    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   duration: '60 min', price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.', image: '/services/acido.jpeg' },
+    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',  image: '/services/labios.jpg'  },
     { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', duration: '75 min', price: 'Desde Bs. 480', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
     { id: 'peeling',     name: 'Peeling Médico',    tag: 'Renovación',      duration: '50 min', price: 'Desde Bs. 280', icon: '◫', description: 'Renueva la textura y luminosidad de la piel. Trata manchas, poros y marcas desde la primera sesión.' },
     { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    duration: '60 min', price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
-    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.' },
   ],
 
   phone:   '59172235605',
   email:   'citas@drmelgar.bo',
-  address: 'Av. Arce #2345, Of. 8B\nLa Paz, Bolivia',
+  address: 'Parque Fidel Anze #2345, Of. 8B\nCochabamba, Bolivia',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 14:00'],
 
   // ── Tema: luz cálida / clínica de lujo ──
@@ -95,20 +95,20 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',       name: 'Corte Clásico',      tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',  image: '/services/test2.jpg' },
-    { id: 'fade',        name: 'Fade & Degradado',   tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.' ,  image: '/services/test.jpg'},
+    { id: 'corte',       name: 'Corte Clásico',      tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',  image: '/services/clasico.jpg' },
+    { id: 'fade',        name: 'Fade & Degradado',   tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.' ,  image: '/services/fade.jpg'},
    
   ],
 
   phone:   '59171234567',
   email:   'citas@barbervip.bo',
-  address: 'Calle 21 de Calacoto #1234\nLa Paz, Bolivia',
+  address: 'Av Uyuni #1234\nCochabamba, Bolivia',
   schedule: ['Mar — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 15:00'],
 
   // ── Tema: azul acero (diferente al médico) ──
   theme: {
-    accent:      '#4a8fa8',
-    accentLight: '#5ca3bf',
+    accent:      '#b07c35',   // dorado más profundo — mejor contraste sobre blanco
+    accentLight: '#c48c45',
   },
 
   // ── Reservas: slots de 30 min, sin anticipación mínima, Mar-Dom ──
