@@ -35,7 +35,7 @@ export default function Hero() {
         {/* Eyebrow */}
         <div className="animate-fade-up" style={{ animationDelay: '.2s', display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '1.25rem' }}>
           <div style={{ width: '2rem', height: 1, background: 'var(--color-gold)', opacity: .6, flexShrink: 0 }} />
-          <span style={{ fontSize: '.75rem', fontWeight: 300, letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
+          <span style={{ fontSize: '.75rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
             {pro.title} — {pro.location}
           </span>
         </div>
@@ -52,14 +52,14 @@ export default function Hero() {
         </h1>
 
         {/* Specialty */}
-        <p className="animate-fade-up" style={{ animationDelay: '.6s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(.9rem, 2vw, 1.35rem)', fontWeight: 300, color: 'var(--color-ink-dim)', marginBottom: '2rem' }}>
+        <p className="animate-fade-up" style={{ animationDelay: '.6s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.1rem, 2.2vw, 1.55rem)', fontWeight: 300, color: 'var(--color-ink)', marginBottom: '2rem' }}>
           {pro.specialty}
         </p>
 
         {/* Quote */}
-        <p className="animate-fade-up" style={{ animationDelay: '.75s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.2rem, 2.5vw, 2.2rem)', fontWeight: 300, lineHeight: 1.45, maxWidth: '28rem', marginBottom: '2.5rem' }}>
+        <p className="animate-fade-up" style={{ animationDelay: '.75s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.4rem, 3vw, 2.5rem)', fontWeight: 300, lineHeight: 1.4, maxWidth: '30rem', marginBottom: '2.5rem', color: 'var(--color-ink)' }}>
           {pro.tagline}
-          <span style={{ display: 'block', color: 'var(--color-ink-dim)', fontSize: '88%' }}>{pro.taglineSub}</span>
+          <span style={{ display: 'block', color: 'var(--color-ink-dim)', fontSize: '90%' }}>{pro.taglineSub}</span>
         </p>
 
         {/* CTAs */}
@@ -73,9 +73,9 @@ export default function Hero() {
             <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M7 1l3 3.5L7 8M1 4.5h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
           </button>
           <a href="#servicios"
-            style={{ display: 'inline-flex', alignItems: 'center', padding: '.85rem 1.75rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 300, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid var(--color-rim-l)', transition: 'color .3s, border-color .3s' }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
+            style={{ display: 'inline-flex', alignItems: 'center', padding: '.85rem 1.75rem', background: 'transparent', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', border: '1.5px solid var(--color-ink-dim)', transition: 'color .3s, border-color .3s, background .3s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.07)'; e.currentTarget.style.borderColor = 'var(--color-ink)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--color-ink-dim)' }}
           >Ver Servicios</a>
         </div>
       </div>

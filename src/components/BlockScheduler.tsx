@@ -77,13 +77,13 @@ export default function BlockScheduler() {
 
   return (
     <div style={{ marginTop: '3rem', borderTop: '1px solid var(--color-rim)', paddingTop: '2.5rem' }}>
-      <p style={{ fontSize: '.62rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '1.5rem' }}>
+      <p style={{ fontSize: '.88rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '1.5rem' }}>
         Bloquear horarios — {pro.name}
       </p>
 
       {/* ── Add block form ── */}
       <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.75rem', marginBottom: '2rem' }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 400, marginBottom: '1.5rem' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, marginBottom: '1.5rem', color: 'var(--color-gold)'}}>
           Agregar bloqueo
         </p>
 
@@ -136,15 +136,26 @@ export default function BlockScheduler() {
       </div>
 
       {/* ── Upcoming blocks list ── */}
-      <div>
-        <p style={{ fontSize: '.75rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', marginBottom: '1rem' }}>
-          Próximos bloqueos {loading ? '…' : `(${blocks.length})`}
-        </p>
+      <div style={{ marginTop: '2.5rem' }}>
+        {/* Section header — clearly visible */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '.75rem', borderBottom: '2px solid var(--color-gold)', gap: '1rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.3rem,2.5vw,1.6rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
+            Próximos bloqueos
+          </h3>
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.1rem', color: 'var(--color-ink-dim)', flexShrink: 0 }}>
+            {loading ? '…' : blocks.length === 0 ? 'ninguno' : `${blocks.length} ${blocks.length === 1 ? 'bloqueo' : 'bloqueos'}`}
+          </span>
+        </div>
 
         {!loading && blocks.length === 0 && (
-          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.9rem', color: 'var(--color-ink-ghost)' }}>
-            Sin bloqueos programados.
-          </p>
+          <div style={{ padding: '1.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1rem', color: 'var(--color-ink-dim)' }}>
+              Sin bloqueos programados
+            </p>
+            <p style={{ fontSize: '.82rem', color: 'var(--color-ink-ghost)', marginTop: '.4rem' }}>
+              Todos los horarios configurados están disponibles
+            </p>
+          </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: blocks.length ? 'var(--color-rim)' : 'transparent' }}>

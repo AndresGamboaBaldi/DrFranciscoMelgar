@@ -191,9 +191,13 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
     const slots = getSlots(selectedDate)
     return (
       <div>
-        <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.95rem', color: 'var(--color-ink-dim)', marginBottom: '1.25rem' }}>
-          {formatSelectedDate(selectedDate)}
-        </p>
+        {/* Selected date — prominent header */}
+        <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-rim)' }}>
+          <p style={{ fontSize: '.68rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.35rem' }}>Fecha seleccionada</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.3rem,3vw,1.65rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+            {formatSelectedDate(selectedDate)}
+          </p>
+        </div>
         {slots.length === 0
           ? <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.93rem', color: 'var(--color-ink-ghost)' }}>Sin horarios disponibles este día.</p>
           : (
@@ -237,7 +241,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', textAlign: 'center', marginBottom: '.5rem' }}>
           {['Lu','Ma','Mi','Ju','Vi','Sá','Do'].map(w => (
-            <span key={w} style={{ fontSize: '.72rem', letterSpacing: '.1em', color: 'var(--color-ink-ghost)', padding: '.3rem 0' }}>{w}</span>
+            <span key={w} style={{ fontSize: '.75rem', letterSpacing: '.08em', color: 'var(--color-ink-dim)', padding: '.3rem 0', fontWeight: 400 }}>{w}</span>
           ))}
         </div>
 
@@ -251,9 +255,22 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
             const today    = isToday(d)
             return (
               <div key={d} onClick={() => !blocked && pickDate(d)}
-                style={{ aspectRatio:'1', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'.78rem', position:'relative', cursor: blocked?'not-allowed':'pointer', background: sel?'var(--color-gold)':'transparent', color: sel?'var(--color-bg)':blocked?'var(--color-ink-ghost)':'var(--color-ink-dim)', opacity: blocked?.25:1, transition:'background .2s,color .2s' }}
-                onMouseEnter={e => { if(!blocked&&!sel) e.currentTarget.style.background='var(--color-surface2)' }}
-                onMouseLeave={e => { if(!sel) e.currentTarget.style.background='transparent' }}
+                style={{
+                  aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '.86rem', fontWeight: blocked ? 300 : 400,
+                  position: 'relative', cursor: blocked ? 'not-allowed' : 'pointer',
+                  background: sel ? 'var(--color-gold)' : 'transparent',
+                  color: sel
+                    ? 'var(--color-bg)'
+                    : blocked
+                      ? 'var(--color-ink-ghost)'   // clearly muted but still readable
+                      : 'var(--color-ink)',          // available = full contrast
+                  opacity: blocked ? .45 : 1,        // was .25 — much more visible now
+                  textDecoration: blocked ? 'line-through' : 'none',  // cross out unavailable
+                  transition: 'background .2s, color .2s',
+                }}
+                onMouseEnter={e => { if (!blocked && !sel) e.currentTarget.style.background = 'color-mix(in srgb, var(--color-gold) 18%, transparent)' }}
+                onMouseLeave={e => { if (!sel) e.currentTarget.style.background = 'transparent' }}
               >
                 {d}
                 {/* Today dot */}

@@ -82,7 +82,8 @@ export default function ProfessionalPage() {
   return (
     <ProfessionalContext.Provider value={pro}>
       <BookingDialogContext.Provider value={{ openBooking: () => setBookingOpen(true) }}>
-        <div style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark' }}>
+        {/* background + color use the INLINE var overrides, not the :root dark defaults */}
+        <div style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark', background: 'var(--color-bg)', color: 'var(--color-ink)', minHeight: '100vh' }}>
           {isSetup ? (
             <SetupPage />
           ) : (

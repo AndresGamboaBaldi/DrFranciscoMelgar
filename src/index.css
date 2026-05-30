@@ -175,18 +175,14 @@ input[type="time"], input[type="date"], input[type="number"] {
 
 @media (max-width: 640px) {
   .booking-dialog-overlay {
-    padding: 0;
-    align-items: flex-end;
-    /* On mobile anchor to bottom */
+    padding: .75rem;
+    align-items: center;
   }
   .booking-dialog-panel {
     max-width: 100%;
-    max-height: min(93vh, 93svh);
-    border-bottom: none;
-    border-left: none; border-right: none;
-    border-radius: 0;
-    margin: 0;
-    align-self: flex-end;
+    max-height: min(92vh, 92svh);
+    margin: auto;
+    align-self: center;
   }
 }
 

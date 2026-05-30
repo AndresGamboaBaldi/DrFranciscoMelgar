@@ -15,7 +15,7 @@ interface Props {
 export default function ServiceSelector({ services, selected, onSelect }: Props) {
   return (
     <div>
-      <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', marginBottom: '1.25rem', lineHeight: 1.7 }}>
+      <p style={{ fontSize: '1rem', color: 'var(--color-ink)', marginBottom: '1.25rem', lineHeight: 1.7, fontWeight: 400 }}>
         Selecciona el servicio de tu interés para comenzar.
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 160px), 1fr))', gap: 1, background: 'var(--color-rim)', marginBottom: '2rem' }}>
@@ -49,10 +49,9 @@ function ServiceCard({ svc, isSelected, onSelect }: { svc: Service; isSelected: 
       {isSelected && (
         <div style={{ position: 'absolute', top: '.75rem', right: '.75rem', width: '1.15rem', height: '1.15rem', background: 'var(--color-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-bg)', fontSize: '.55rem', borderRadius: '50%' }}>✓</div>
       )}
-      <div style={{ fontSize: '1.1rem', marginBottom: '.6rem', color: active ? 'var(--color-gold)' : 'var(--color-ink-ghost)', transition: 'color .2s' }}>{svc.icon}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 400, marginBottom: '.25rem', color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)', transition: 'color .2s', lineHeight: 1.2 }}>{svc.name}</div>
-      <div style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', letterSpacing: '.06em' }}>{svc.duration}</div>
-      <div style={{ fontSize: '.7rem', color: 'var(--color-gold)', fontWeight: 400, marginTop: '.2rem' }}>{svc.price}</div>
+      <div style={{ fontSize: '1.2rem', marginBottom: '.65rem', color: active ? 'var(--color-gold)' : 'var(--color-ink-ghost)', transition: 'color .2s' }}>{svc.icon}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, marginBottom: '.3rem', color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)', transition: 'color .2s', lineHeight: 1.15 }}>{svc.name}</div>
+      <div style={{ fontSize: '.76rem', color: 'var(--color-gold)', fontWeight: 400 }}>{svc.price}</div>
     </div>
   )
 }

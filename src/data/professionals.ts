@@ -90,9 +90,7 @@ const barber_vip: Professional = {
   quote: 'Cada cliente merece salir con más confianza de la que entró.',
   bio: 'Barber VIP nació con la visión de traer a La Paz una experiencia de barbería de lujo: ambiente premium, técnicas modernas y atención personalizada. Nuestro equipo de barberos certificados se especializa en cortes clásicos, fade, diseño de barba y tratamientos capilares.',
   credentials: [
-    { label: 'Especialidad',  value: 'Fade & Cortes Clásicos' },
     { label: 'Certificación', value: 'Barbería Profesional' },
-    { label: 'Servicio',      value: 'Corte + Barba + Grooming' },
     { label: 'Ambiente',      value: 'Premium & Exclusivo' },
   ],
 

@@ -23,7 +23,7 @@ export default function Services() {
           <Reveal delay={100}><h2 className="s-title">Nuestros<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Servicios</em></h2></Reveal>
         </div>
         <Reveal delay={200}>
-          <p style={{ maxWidth: '26rem', fontSize: '.86rem', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>
+          <p style={{ maxWidth: '26rem', fontSize: '.96rem', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>
             Cada servicio se diseña de forma personalizada, con técnica y atención al detalle.
           </p>
         </Reveal>

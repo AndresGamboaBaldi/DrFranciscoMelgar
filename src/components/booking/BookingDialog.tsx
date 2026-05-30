@@ -104,7 +104,7 @@ export default function BookingDialog({ onClose }: Props) {
 
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-rim)', flexShrink: 0, gap: '1rem' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
             Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em>
           </h2>
 
