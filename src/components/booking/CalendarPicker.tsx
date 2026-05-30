@@ -13,6 +13,7 @@ interface Props {
   selectedTime: string | null
   onDateChange: (d: SelectedDate) => void
   onTimeChange: (t: string) => void
+  doctorId?: string
 }
 
 export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange }: Props) {

@@ -62,7 +62,7 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: '.6rem', cursor: 'pointer', fontSize: '.78rem', color: errors.consent ? '#c47070' : 'var(--color-ink-dim)', textTransform: 'none', letterSpacing: 0 }}>
             <input type="checkbox" checked={data.consent} onChange={e => onChange('consent', e.target.checked)}
-              style={{ width: '1rem', height: '1rem', flexShrink: 0, marginTop: '.1rem', accentColor: 'var(--color-gold)', cursor: 'pointer' }} />
+              style={{ width: '1rem', height: '1rem', flexShrink: 0, marginTop: '.1rem', accentColor: 'var(--color-gold)', cursor: 'pointer', appearance: 'auto', WebkitAppearance: 'checkbox', border: 'none', background: 'none', padding: 0 }} />
             <span>Acepto los términos y condiciones y la política de privacidad de la clínica.</span>
           </label>
         </div>

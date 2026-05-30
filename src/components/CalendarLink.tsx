@@ -6,7 +6,8 @@
  * instructions for iPhone and Google Calendar.
  */
 import { useState } from 'react'
-import { getCalendarFeedUrl, getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
+import { useProfessional } from '../context/ProfessionalContext'
+import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
 
 type Tab = 'iphone' | 'google' | 'outlook'
 
@@ -36,9 +37,10 @@ const STEPS_OUTLOOK = [
 ]
 
 export default function CalendarLink() {
+  const pro = useProfessional()
   const [tab, setTab]         = useState<Tab>('iphone')
   const [copied, setCopied]   = useState(false)
-  const feedUrl               = getCalendarFeedUrl()
+  const feedUrl               = pro.calendarFeedUrl
   const webcalUrl             = getWebcalUrl(feedUrl)
   const googleUrl             = getGoogleCalendarUrl(feedUrl)
   const steps                 = tab === 'iphone' ? STEPS_IPHONE : tab === 'google' ? STEPS_GOOGLE : STEPS_OUTLOOK

@@ -41,6 +41,7 @@ export interface Appointment {
   email: string
   age?: number | null
   notes?: string
+  doctor_id?: string
   status?: 'pending' | 'confirmed' | 'cancelled'
   created_at?: string
 }

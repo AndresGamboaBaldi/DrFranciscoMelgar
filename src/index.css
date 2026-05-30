@@ -76,7 +76,7 @@ body::after {
 .animate-scroll-bob { animation: scrollBob 2.5s ease-in-out infinite; }
 
 /* ── Input / form resets ── */
-input, select, textarea {
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   background: var(--color-bg);
   border: 1px solid var(--color-rim);
   color: var(--color-ink);
