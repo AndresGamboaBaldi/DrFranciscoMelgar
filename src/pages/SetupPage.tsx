@@ -61,9 +61,19 @@ export default function SetupPage() {
             </h1>
           </div>
         </div>
-        <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1rem,2.5vw,1.3rem)', color: 'var(--color-ink-dim)', flexShrink: 0 }}>
-          {pro.title}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexShrink: 0 }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(.85rem,2vw,1.1rem)', color: 'var(--color-ink-dim)' }} className="hidden sm:inline">
+            {pro.title}
+          </span>
+          <a href={`/${pro.slug}`}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', textDecoration: 'none', border: '1px solid var(--color-rim-l)', padding: '.4rem .9rem', transition: 'all .2s', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
+          >
+            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+            Ver sitio
+          </a>
+        </div>
       </header>
 
       {/* ── Tab bar ── */}

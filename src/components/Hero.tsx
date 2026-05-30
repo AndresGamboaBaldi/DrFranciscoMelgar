@@ -84,8 +84,8 @@ export default function Hero() {
       <div className="animate-fade-in hidden lg:flex" style={{ animationDelay: '1.2s', position: 'absolute', right: '4.5rem', bottom: '7rem', flexDirection: 'column', gap: '2rem', zIndex: 2 }}>
         {pro.stats.map(s => (
           <div key={s.label} style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1 }}>{s.n}</div>
-            <div style={{ fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginTop: '.2rem' }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem, 4vw, 4rem)', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1 }}>{s.n}</div>
+            <div style={{ fontSize: '.82rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink)', fontWeight: 400, marginTop: '.35rem' }}>{s.label}</div>
           </div>
         ))}
       </div>

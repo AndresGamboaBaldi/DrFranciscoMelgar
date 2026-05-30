@@ -95,8 +95,8 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',       name: 'Corte Clásico',      tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.' },
-    { id: 'fade',        name: 'Fade & Degradado',   tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.' },
+    { id: 'corte',       name: 'Corte Clásico',      tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',  image: '/services/test2.jpg' },
+    { id: 'fade',        name: 'Fade & Degradado',   tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.' ,  image: '/services/test.jpg'},
    
   ],
 

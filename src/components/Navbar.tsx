@@ -34,7 +34,7 @@ export default function Navbar() {
       background: navBg,
       backdropFilter: (scrolled || isLight) ? 'blur(16px)' : 'none',
       borderBottom: scrolled
-        ? '1px solid var(--color-rim)'
+        ? isLight ? '1px solid var(--color-rim)' : '1px solid rgba(255,255,255,.1)'
         : isLight ? '1px solid rgba(229,224,213,.4)' : '1px solid transparent',
       transition: 'padding .4s cubic-bezier(0.16,1,0.3,1), background .4s, border-color .4s',
     }}>
