@@ -12,6 +12,7 @@ import type { Professional } from '../types/professional'
 //  1. DR. FRANCISCO MELGAR — Medicina Estética
 // ────────────────────────────────────────────────────────────────
 const doctor_melgar: Professional = {
+  photos: ['/photos/drmelgar_1.jpeg', '/photos/drmelgar.jpeg'],
   slug:      'doctor_melgar',
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
@@ -73,6 +74,7 @@ const doctor_melgar: Professional = {
 //  2. BARBER VIP — Barbería de lujo
 // ────────────────────────────────────────────────────────────────
 const barber_vip: Professional = {
+  photos: ['/photos/vip.jpeg'],
   slug:      'barber_vip',
   name:      'Barber VIP',
   shortName: 'Barber VIP',
@@ -95,9 +97,10 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',       name: 'Corte Clásico',      tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',  image: '/services/clasico.jpg' },
-    { id: 'fade',        name: 'Fade & Degradado',   tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.' ,  image: '/services/fade.jpg'},
-   
+    { id: 'corte',    name: 'Corte Clásico',    tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',             image: '/services/clasico.jpeg' },
+    { id: 'fade',     name: 'Fade & Degradado', tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',             image: '/services/fade.jpeg' },
+    { id: 'diseno',   name: 'Diseño Capilar',   tag: 'Artístico',duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',  image: '/services/diseno.jpeg' },
+    { id: 'tinte',    name: 'Tinte & Color',    tag: 'Color',    duration: '90 min', price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.' ,  image: '/services/tinte.jpeg'},
   ],
 
   phone:   '59171234567',
@@ -125,11 +128,72 @@ const barber_vip: Professional = {
 }
 
 // ────────────────────────────────────────────────────────────────
+//  3. DR. IVAN SEIFERT — Odontología Estética
+// ────────────────────────────────────────────────────────────────
+const dr_seifert: Professional = {
+  photos: ['/photos/drseifert.jpeg'],
+  slug:      'dr_seifert',
+  name:      'Dr. Ivan Seifert',
+  shortName: 'Dr. Seifert',
+  title:     'Odontólogo Estético',
+  specialty: 'Especialista en odontología estética, restauradora e implantología',
+  location:  'Cochabamba, Bolivia',
+  tagline:   'Una sonrisa perfecta no es suerte,',
+  taglineSub: 'es diseño.',
+  stats: [
+    { n: '+2.000', label: 'Pacientes atendidos' },
+    { n: '12+',    label: 'Años de experiencia' },
+  ],
+
+  aboutTitle: 'el Doctor',
+  quote: 'Cada sonrisa es única. Mi trabajo es revelar la mejor versión de la tuya.',
+  bio: 'El Dr. Ivan Seifert es especialista en Odontología Estética y Restauradora, egresado de la Universidad Mayor de San Andrés con especialización en Implantología Oral en São Paulo, Brasil. Con más de 12 años de experiencia, combina tecnología de vanguardia con un enfoque artístico para crear sonrisas naturales y duraderas, siempre priorizando la salud bucal y el bienestar del paciente.',
+  credentials: [
+    { label: 'Formación',       value: 'Univ. Mayor de San Simon' },
+    { label: 'Especialización', value: 'Implantología · São Paulo' },
+    { label: 'Área principal',  value: 'Odontología Estética' },
+    { label: 'Certificaciones', value: 'ADA · LAOBO · SOB' },
+  ],
+
+  services: [
+    { id: 'limpieza',      name: 'Limpieza & Profilaxis',  tag: 'Preventivo',   duration: '60 min', price: 'Desde Bs. 180', icon: '◈', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/services/limpieza.jpg'  },
+    { id: 'blanqueamiento',name: 'Blanqueamiento Dental',  tag: 'Estético',     duration: '90 min', price: 'Desde Bs. 450', icon: '◉', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/services/blanqueamiento.jpg'  },
+    { id: 'carillas',      name: 'Carillas de Porcelana',  tag: 'Diseño',       duration: 'Variable', price: 'Desde Bs. 650', icon: '◇', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/services/carillas.jpg'  },
+  ],
+
+
+  phone:   '59170788218',          // ← reemplaza con el número real
+  email:   'citas@drseifert.bo',   // ← reemplaza con el email real
+  address: 'Av. Salamanca #1234\nCochabamba, Bolivia',
+  schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 13:00'],
+
+  // ── Tema: azul dental / clínico ──
+  theme: {
+    mode:        'light',
+    accent:      '#2b7a9e',   // azul teal médico — buen contraste sobre blanco
+    accentLight: '#3a8fb5',
+  },
+
+  // ── Reservas: 60 min, 24h anticipación, Lun-Sáb ──
+  bookingConfig: {
+    slotDuration:    60,
+    minAdvanceHours: 24,
+    workDays:        [1, 2, 3, 4, 5, 6],
+    workHours:       { start: '08:00', end: '18:00' },
+    satHours:        { start: '09:00', end: '13:00' },
+  },
+
+  doctorId:        'dr_seifert',
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=bd94b90f5a0d0e6669314ee25b1ef27fdbc439ea787935a4afd150fd37fc6fb6',  // ← completa después del paso 2 abajo
+}
+
+// ────────────────────────────────────────────────────────────────
 //  REGISTRO
 // ────────────────────────────────────────────────────────────────
 export const PROFESSIONALS: Record<string, Professional> = {
   doctor_melgar,
   barber_vip,
+  dr_seifert,
 }
 
 export function getProfessional(slug: string): Professional | null {

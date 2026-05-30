@@ -86,8 +86,8 @@ function ServiceCard({ svc, num, expanded, onToggle }: { svc: Svc; num: string; 
           <span style={{ position: 'absolute', bottom: '.85rem', left: '1.25rem', fontSize: '.65rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,.8)', fontWeight: 400 }}>{svc.tag}</span>
         </div>
       ) : (
-        /* No image — decorative number area */
-        <div style={{ position: 'relative', padding: '2rem 2rem 0' }}>
+        /* No image — content centered vertically */
+        <div style={{ position: 'relative', padding: '2rem 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--color-gold)', transform: `scaleX(${open ? 1 : 0})`, transformOrigin: 'left', transition: 'transform .38s cubic-bezier(0.16,1,0.3,1)' }} />
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '3.5rem', fontWeight: 300, color: open ? 'var(--color-gold)' : 'var(--color-ink-ghost)', lineHeight: 1, opacity: open ? .25 : 1, transition: 'color .25s, opacity .25s' }}>{num}</div>
           <span style={{ fontSize: '.68rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)', display: 'block', marginTop: '.75rem' }}>{svc.tag}</span>
@@ -111,6 +111,7 @@ function ServiceCard({ svc, num, expanded, onToggle }: { svc: Svc; num: string; 
           color: 'var(--color-ink)',
           paddingRight: IS_HOVER_DEVICE ? '0' : '2.5rem',
           marginBottom: svc.image ? '.1rem' : '0',
+          minHeight: '3.5rem',  // reserva espacio para 2 líneas → títulos siempre del mismo alto
         }}>
           {svc.name}
         </h3>

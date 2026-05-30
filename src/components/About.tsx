@@ -149,25 +149,40 @@ function PhotoArea({ photos }: { photos: string[] }) {
         />
       ))}
 
-      {/* Dot indicators — only if multiple photos */}
+      {/* Prev / Next arrows + dots — only if multiple photos */}
       {photos.length > 1 && (
-        <div style={{ position: 'absolute', bottom: '1.1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '.45rem', zIndex: 10 }}>
-          {photos.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => advance(i)}
-              style={{
-                width:  i === current ? '1.5rem' : '.45rem',
-                height: '.45rem',
-                borderRadius: '999px',
-                background: i === current ? 'var(--color-gold)' : 'rgba(255,255,255,.5)',
-                border: 'none', cursor: 'pointer',
-                transition: 'width .4s cubic-bezier(0.16,1,0.3,1), background .3s',
-                padding: 0,
-              }}
-            />
-          ))}
-        </div>
+        <>
+          {/* Prev arrow */}
+          <button
+            onClick={() => advance((current - 1 + photos.length) % photos.length)}
+            style={{ position: 'absolute', left: '.75rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: '2.25rem', height: '2.25rem', borderRadius: '50%', background: 'rgba(0,0,0,.35)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'background .2s' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,.6)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,.35)')}
+            aria-label="Foto anterior"
+          >
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M7.5 1L1.5 7l6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+
+          {/* Next arrow */}
+          <button
+            onClick={() => advance((current + 1) % photos.length)}
+            style={{ position: 'absolute', right: '.75rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: '2.25rem', height: '2.25rem', borderRadius: '50%', background: 'rgba(0,0,0,.35)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'background .2s' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,.6)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,.35)')}
+            aria-label="Foto siguiente"
+          >
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M1.5 1l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+
+          {/* Dot indicators */}
+          <div style={{ position: 'absolute', bottom: '1.1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '.45rem', zIndex: 10 }}>
+            {photos.map((_, i) => (
+              <button key={i} onClick={() => advance(i)}
+                style={{ width: i === current ? '1.5rem' : '.45rem', height: '.45rem', borderRadius: '999px', background: i === current ? 'var(--color-gold)' : 'rgba(255,255,255,.5)', border: 'none', cursor: 'pointer', transition: 'width .4s cubic-bezier(0.16,1,0.3,1), background .3s', padding: 0 }}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

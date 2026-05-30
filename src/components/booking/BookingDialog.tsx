@@ -105,11 +105,14 @@ export default function BookingDialog({ onClose }: Props) {
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-rim)', flexShrink: 0, gap: '1rem' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
-            Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em>
+            {success
+              ? <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>¡Reserva confirmada!</em>
+              : <>Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></>
+            }
           </h2>
 
-          {/* Cancel — prominent */}
-          <button onClick={() => !loading && onClose()} disabled={loading}
+          {/* Cancel — only shown before success */}
+          {!success && <button onClick={() => !loading && onClose()} disabled={loading}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '.4rem',
               background: 'var(--color-surface2)',
@@ -127,7 +130,7 @@ export default function BookingDialog({ onClose }: Props) {
               <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             Cancelar
-          </button>
+          </button>}
         </div>
 
         {/* ── Progress ── */}
