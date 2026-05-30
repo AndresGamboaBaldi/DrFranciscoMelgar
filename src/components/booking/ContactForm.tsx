@@ -1,4 +1,4 @@
-import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
+﻿import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
 
 interface SummaryProps { service: Service; date: SelectedDate; time: string }
 interface Props {
@@ -21,14 +21,14 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
     <div>
       {/* Summary card */}
       <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.25rem 1.5rem', marginBottom: '1.75rem' }}>
-        <p style={{ fontSize: '.6rem', letterSpacing: '.17em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.85rem' }}>Resumen de tu Cita</p>
+        <p style={{ fontSize: '.72rem', letterSpacing: '.17em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.85rem' }}>Resumen de tu Cita</p>
         {[
           { k: 'Servicio', v: summary.service.name },
           { k: 'Fecha',    v: formatDate(summary.date) },
           { k: 'Hora',     v: summary.time },
         ].map(row => (
-          <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '.5rem 0', borderBottom: '1px solid var(--color-rim)', fontSize: '.82rem', gap: '1rem' }}>
-            <span style={{ color: 'var(--color-ink-ghost)', fontSize: '.72rem', flexShrink: 0 }}>{row.k}</span>
+          <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '.5rem 0', borderBottom: '1px solid var(--color-rim)', fontSize: '.9rem', gap: '1rem' }}>
+            <span style={{ color: 'var(--color-ink-ghost)', fontSize: '.84rem', flexShrink: 0 }}>{row.k}</span>
             <span style={{ color: 'var(--color-ink)', textAlign: 'right' }}>{row.v}</span>
           </div>
         ))}
@@ -58,9 +58,9 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
 function Field({ label, children, error }: { label: string; children: React.ReactNode; error?: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
-      <label style={{ fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>{label}</label>
+      <label style={{ fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>{label}</label>
       {children}
-      {error && <span style={{ fontSize: '.68rem', color: '#c47070' }}>{error}</span>}
+      {error && <span style={{ fontSize: '.76rem', color: '#c47070' }}>{error}</span>}
     </div>
   )
 }

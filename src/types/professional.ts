@@ -53,6 +53,10 @@ export interface Professional {
   // ── URL ─────────────────────────────────────────────────────
   slug: string
 
+  /** Optional logo image path (e.g. '/logos/doctor_melgar.png').
+   *  If provided, the Navbar shows the image instead of the text name. */
+  logo?: string
+
   // ── Identidad ───────────────────────────────────────────────
   name: string
   shortName: string

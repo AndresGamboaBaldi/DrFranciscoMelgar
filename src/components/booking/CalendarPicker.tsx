@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import type { SelectedDate } from '../../types/booking'
 import type { BookingConfig } from '../../types/professional'
 import type { BlockedSlot, ScheduleSettings } from '../../lib/supabase'
@@ -25,6 +25,7 @@ interface Props {
   onTimeChange: (t: string) => void
   bookingConfig: BookingConfig
   doctorId: string
+  view?: 'calendar' | 'times' | 'both'  // default: 'both'
 }
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -64,6 +65,14 @@ function isTooSoon(y: number, m: number, d: number, slot: string, minHrs: number
 }
 
 /** Is an entire day blocked or unavailable? */
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado']
+
+function formatSelectedDate(d: SelectedDate): string {
+  const dt = new Date(d.y, d.m, d.d)
+  return `${DAYS_ES[dt.getDay()]} ${d.d} de ${MONTHS_ES[d.m]}`
+}
+
 function isDayUnavailable(y: number, m: number, d: number, cfg: BookingConfig, blocks: BlockedSlot[]): boolean {
   const dt  = new Date(y, m, d)
   const dow = dt.getDay()
@@ -92,8 +101,22 @@ function isDayUnavailable(y: number, m: number, d: number, cfg: BookingConfig, b
 
 // ─────────────────────────────────────────────────────────────
 
-export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, bookingConfig: cfgProp, doctorId }: Props) {
-  const [calMonth, setCalMonth]     = useState(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
+/** Returns the first month (as Date) that has at least one available day */
+function findFirstAvailableMonth(cfg: BookingConfig): Date {
+  let y = TODAY.getFullYear()
+  let m = TODAY.getMonth()
+  for (let attempt = 0; attempt < 13; attempt++) {
+    const days = new Date(y, m + 1, 0).getDate()
+    const hasDay = Array.from({ length: days }, (_, i) => i + 1)
+      .some(d => !isDayUnavailable(y, m, d, cfg, []))
+    if (hasDay) return new Date(y, m, 1)
+    m++; if (m > 11) { m = 0; y++ }
+  }
+  return new Date(y, m, 1)
+}
+
+export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, bookingConfig: cfgProp, doctorId, view = 'both' }: Props) {
+  const [calMonth, setCalMonth]     = useState(() => findFirstAvailableMonth(cfgProp))
   const [bookedSlots, setBooked]    = useState<string[]>([])
   const [monthBlocks, setBlocks]    = useState<BlockedSlot[]>([])
   const [dayBlocks, setDayBlocks]   = useState<BlockedSlot[]>([])
@@ -104,7 +127,18 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
 
   useEffect(() => {
     getScheduleSettings(doctorId).then(s => {
-      if (s) setDbCfg(settingsToConfig(s))
+      if (s) {
+        const resolved = settingsToConfig(s)
+        setDbCfg(resolved)
+        // Re-evaluate start month with DB config (in case it differs from defaults)
+        setCalMonth(prev => {
+          const y = prev.getFullYear(), m = prev.getMonth()
+          const days = new Date(y, m + 1, 0).getDate()
+          const stillHasDay = Array.from({ length: days }, (_, i) => i + 1)
+            .some(d => !isDayUnavailable(y, m, d, resolved, []))
+          return stillHasDay ? prev : findFirstAvailableMonth(resolved)
+        })
+      }
     })
   }, [doctorId])
 
@@ -151,20 +185,59 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
     return monthBlocks.some(b => b.date === dateStr && b.start_time)
   }
 
+  // ── view="times": only show time slots for selected date ──
+  if (view === 'times') {
+    if (!selectedDate) return <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--color-ink-ghost)', fontSize: '.9rem' }}>Primero selecciona una fecha.</p>
+    const slots = getSlots(selectedDate)
+    return (
+      <div>
+        <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.95rem', color: 'var(--color-ink-dim)', marginBottom: '1.25rem' }}>
+          {formatSelectedDate(selectedDate)}
+        </p>
+        {slots.length === 0
+          ? <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.93rem', color: 'var(--color-ink-ghost)' }}>Sin horarios disponibles este día.</p>
+          : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '.5rem' }}>
+              {slots.map(slot => {
+                const busy    = bookedSlots.includes(slot)
+                const adminOff = isSlotBlocked(slot, dayBlocks)
+                const tooSoon  = isTooSoon(selectedDate.y, selectedDate.m, selectedDate.d, slot, cfg.minAdvanceHours)
+                const off      = busy || adminOff || tooSoon
+                const sel      = selectedTime === slot
+                return (
+                  <button key={slot} onClick={() => !off && onTimeChange(slot)} disabled={off}
+                    style={{ padding: '.65rem .5rem', border: `1.5px solid ${sel ? 'var(--color-gold)' : 'var(--color-rim)'}`, textAlign: 'center', fontSize: '.9rem', cursor: off ? 'not-allowed' : 'pointer', background: sel ? 'var(--color-gold)' : 'transparent', color: sel ? 'var(--color-bg)' : off ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', opacity: off ? .3 : 1, transition: 'all .2s', fontFamily: 'var(--font-body)' }}
+                    onMouseEnter={e => { if (!off && !sel) { e.currentTarget.style.borderColor = 'var(--color-gold)'; e.currentTarget.style.color = 'var(--color-ink)' } }}
+                    onMouseLeave={e => { if (!sel) { e.currentTarget.style.borderColor = 'var(--color-rim)'; e.currentTarget.style.color = 'var(--color-ink-dim)' } }}
+                  >{slot}</button>
+                )
+              })}
+            </div>
+          )
+        }
+        {cfg.minAdvanceHours > 0 && (
+          <p style={{ fontSize: '.76rem', color: 'var(--color-ink-ghost)', marginTop: '1.25rem', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+            Mínimo {cfg.minAdvanceHours}h de anticipación requerida.
+          </p>
+        )}
+      </div>
+    )
+  }
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '3.5rem', marginBottom: '2.5rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: view === 'calendar' ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem', marginBottom: '1rem' }}>
 
       {/* ── Calendar ── */}
       <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           <CalBtn onClick={() => shiftMonth(-1)}>‹</CalBtn>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem' }}>{MONTHS[m]} {y}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 400, color: 'var(--color-ink)' }}>{MONTHS[m]} {y}</span>
           <CalBtn onClick={() => shiftMonth(1)}>›</CalBtn>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', textAlign: 'center', marginBottom: '.5rem' }}>
           {['Lu','Ma','Mi','Ju','Vi','Sá','Do'].map(w => (
-            <span key={w} style={{ fontSize: '.62rem', letterSpacing: '.1em', color: 'var(--color-ink-ghost)', padding: '.3rem 0' }}>{w}</span>
+            <span key={w} style={{ fontSize: '.72rem', letterSpacing: '.1em', color: 'var(--color-ink-ghost)', padding: '.3rem 0' }}>{w}</span>
           ))}
         </div>
 
@@ -204,8 +277,8 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
         </div>
       </div>
 
-      {/* ── Time slots ── */}
-      <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.5rem' }}>
+      {/* ── Time slots — hidden in calendar-only view ── */}
+      {view !== 'calendar' && <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.5rem' }}>
         <h4 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', fontWeight:400, marginBottom:'1.2rem' }}>Horarios disponibles</h4>
         {!selectedDate
           ? <p style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontSize:'.88rem', color:'var(--color-ink-ghost)' }}>Selecciona una fecha para ver los horarios.</p>
@@ -234,7 +307,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
               )
             })()
         }
-      </div>
+      </div>}
     </div>
   )
 }

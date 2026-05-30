@@ -1,7 +1,9 @@
-import { useProfessional } from '../context/ProfessionalContext'
+﻿import { useProfessional } from '../context/ProfessionalContext'
+import { useOpenBooking }  from '../context/BookingDialogContext'
 
 export default function Hero() {
   const pro = useProfessional()
+  const openBooking = useOpenBooking()
   const parts = pro.name.split(' ')
   const first = parts.slice(0, -1).join(' ')
   const last  = parts[parts.length - 1]
@@ -33,7 +35,7 @@ export default function Hero() {
         {/* Eyebrow */}
         <div className="animate-fade-up" style={{ animationDelay: '.2s', display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '1.25rem' }}>
           <div style={{ width: '2rem', height: 1, background: 'var(--color-gold)', opacity: .6, flexShrink: 0 }} />
-          <span style={{ fontSize: '.65rem', fontWeight: 300, letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
+          <span style={{ fontSize: '.75rem', fontWeight: 300, letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
             {pro.title} — {pro.location}
           </span>
         </div>
@@ -62,16 +64,16 @@ export default function Hero() {
 
         {/* CTAs */}
         <div className="animate-fade-up" style={{ animationDelay: '.9s', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <a href="#citas"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '.65rem', padding: '.85rem 1.75rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s, transform .2s' }}
+          <button onClick={openBooking}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.65rem', padding: '.85rem 1.75rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s, transform .2s' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-gold-l)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
             onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-gold)'; e.currentTarget.style.transform = 'translateY(0)' }}
           >
             Reservar Cita
             <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M7 1l3 3.5L7 8M1 4.5h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
-          </a>
+          </button>
           <a href="#servicios"
-            style={{ display: 'inline-flex', alignItems: 'center', padding: '.85rem 1.75rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid var(--color-rim-l)', transition: 'color .3s, border-color .3s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', padding: '.85rem 1.75rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 300, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid var(--color-rim-l)', transition: 'color .3s, border-color .3s' }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
           >Ver Servicios</a>
@@ -83,7 +85,7 @@ export default function Hero() {
         {pro.stats.map(s => (
           <div key={s.label} style={{ textAlign: 'right' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1 }}>{s.n}</div>
-            <div style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginTop: '.2rem' }}>{s.label}</div>
+            <div style={{ fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginTop: '.2rem' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -91,7 +93,7 @@ export default function Hero() {
       {/* Scroll hint — hidden on mobile */}
       <div className="animate-fade-in hidden md:flex" style={{ animationDelay: '1.4s', position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', flexDirection: 'column', alignItems: 'center', gap: '.4rem' }}>
         <div className="animate-scroll-bob" style={{ width: 1, height: '3rem', background: 'linear-gradient(to bottom, var(--color-gold), transparent)' }} />
-        <span style={{ fontSize: '.58rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>Scroll</span>
+        <span style={{ fontSize: '.76rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>Scroll</span>
       </div>
     </section>
   )

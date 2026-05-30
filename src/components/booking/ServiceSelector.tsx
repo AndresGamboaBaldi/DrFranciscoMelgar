@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import type { Service } from '../../types/booking'
 import type { ProService } from '../../types/professional'
 
@@ -15,7 +15,7 @@ interface Props {
 export default function ServiceSelector({ services, selected, onSelect }: Props) {
   return (
     <div>
-      <p style={{ fontSize: '.84rem', color: 'var(--color-ink-dim)', marginBottom: '1.25rem', lineHeight: 1.7 }}>
+      <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', marginBottom: '1.25rem', lineHeight: 1.7 }}>
         Selecciona el servicio de tu interés para comenzar.
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 160px), 1fr))', gap: 1, background: 'var(--color-rim)', marginBottom: '2rem' }}>
@@ -51,7 +51,7 @@ function ServiceCard({ svc, isSelected, onSelect }: { svc: Service; isSelected: 
       )}
       <div style={{ fontSize: '1.1rem', marginBottom: '.6rem', color: active ? 'var(--color-gold)' : 'var(--color-ink-ghost)', transition: 'color .2s' }}>{svc.icon}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 400, marginBottom: '.25rem', color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)', transition: 'color .2s', lineHeight: 1.2 }}>{svc.name}</div>
-      <div style={{ fontSize: '.65rem', color: 'var(--color-ink-ghost)', letterSpacing: '.06em' }}>{svc.duration}</div>
+      <div style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', letterSpacing: '.06em' }}>{svc.duration}</div>
       <div style={{ fontSize: '.7rem', color: 'var(--color-gold)', fontWeight: 400, marginTop: '.2rem' }}>{svc.price}</div>
     </div>
   )

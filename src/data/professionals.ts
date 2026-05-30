@@ -17,7 +17,7 @@ const doctor_melgar: Professional = {
   shortName: 'Dr. Melgar',
   title:     'Médico Estético',
   specialty: 'Especialista en estética avanzada y medicina antienvejecimiento',
-  location:  'La Paz, Bolivia',
+  location:  'Cochabamba, Bolivia',
   tagline:    'La belleza no se crea,',
   taglineSub: 'se revela con precisión.',
   stats: [
@@ -78,7 +78,7 @@ const barber_vip: Professional = {
   shortName: 'Barber VIP',
   title:     'Barbería de Lujo',
   specialty: 'Corte, barba y grooming de primera clase en La Paz',
-  location:  'La Paz, Bolivia',
+  location:  'Cochabamba, Bolivia',
   tagline:   'El estilo no es accidental,',
   taglineSub: 'es una decisión.',
   stats: [

@@ -149,20 +149,20 @@ export default function BlockScheduler() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: blocks.length ? 'var(--color-rim)' : 'transparent' }}>
           {blocks.map(b => (
-            <div key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface)', padding: '1rem 1.5rem', gap: '1rem' }}>
+            <div key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface)', padding: '1.1rem 1.5rem', gap: '1rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '.95rem', color: 'var(--color-ink)' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 400, color: 'var(--color-ink)' }}>
                     {formatBlockDate(b.date)}
                   </span>
-                  <span style={{ fontSize: '.72rem', color: 'var(--color-gold)', letterSpacing: '.05em' }}>
+                  <span style={{ fontSize: '.88rem', color: 'var(--color-gold)', fontWeight: 400 }}>
                     {!b.start_time ? 'Todo el día' : `${b.start_time} — ${b.end_time}`}
                   </span>
                 </div>
-                {b.reason && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', marginTop: '.2rem' }}>{b.reason}</p>}
+                {b.reason && <p style={{ fontSize: '.88rem', color: 'var(--color-ink-dim)', marginTop: '.25rem' }}>{b.reason}</p>}
               </div>
               <button onClick={() => handleDelete(b.id)} disabled={deleting === b.id}
-                style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: deleting === b.id ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.4rem .85rem', cursor: deleting === b.id ? 'not-allowed' : 'pointer', transition: 'all .2s', flexShrink: 0 }}
+                style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: deleting === b.id ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.76rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.45rem 1rem', cursor: deleting === b.id ? 'not-allowed' : 'pointer', transition: 'all .2s', flexShrink: 0 }}
                 onMouseEnter={e => { if (deleting !== b.id) { e.currentTarget.style.borderColor = '#c47070'; e.currentTarget.style.color = '#c47070' } }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-rim-l)'; e.currentTarget.style.color = 'var(--color-ink-dim)' }}
               >

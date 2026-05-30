@@ -71,15 +71,14 @@ export default function SetupPage() {
 }
 
 /* ── Admin Section wrapper ── */
-function AdminSection({ num, title, desc, children }: { num: string; title: string; desc: string; children: React.ReactNode }) {
+function AdminSection({ title, desc, children }: { num?: string; title: string; desc: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', marginBottom: '2rem' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 300, color: 'var(--color-gold)', opacity: .25, lineHeight: 1, flexShrink: 0, width: '3.5rem', textAlign: 'right' }}>{num}</div>
-        <div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 300, letterSpacing: '-.01em', marginBottom: '.4rem' }}>{title}</h2>
-          <p style={{ fontSize: '.84rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>
-        </div>
+      <div style={{ marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-rim)' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem,3vw,2.25rem)', fontWeight: 400, letterSpacing: '-.02em', marginBottom: '.5rem', color: 'var(--color-ink)' }}>
+          {title}
+        </h2>
+        <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>
       </div>
       {children}
     </div>

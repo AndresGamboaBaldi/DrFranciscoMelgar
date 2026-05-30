@@ -1,8 +1,10 @@
-import Reveal from './Reveal'
+﻿import Reveal from './Reveal'
 import { useProfessional } from '../context/ProfessionalContext'
+import { useOpenBooking }  from '../context/BookingDialogContext'
 
 export default function About() {
   const pro = useProfessional()
+  const openBooking = useOpenBooking()
 
   return (
     <section id="nosotros" className="s-pad" style={{ position: 'relative' }}>
@@ -33,7 +35,7 @@ export default function About() {
               boxShadow: '0 4px 20px rgba(0,0,0,.15)',
             }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.2rem' }}>{pro.stats[0]?.n}</div>
-              <div style={{ fontSize: '.6rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>{pro.stats[0]?.label}</div>
+              <div style={{ fontSize: '.72rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>{pro.stats[0]?.label}</div>
             </div>
           </div>
         </Reveal>
@@ -53,14 +55,14 @@ export default function About() {
           </Reveal>
 
           <Reveal delay={300}>
-            <p style={{ fontSize: '.86rem', lineHeight: 1.95, color: 'var(--color-ink-dim)', marginBottom: '2rem' }}>{pro.bio}</p>
+            <p style={{ fontSize: '.93rem', lineHeight: 1.95, color: 'var(--color-ink-dim)', marginBottom: '2rem' }}>{pro.bio}</p>
           </Reveal>
 
           <Reveal delay={400}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 190px), 1fr))', gap: 1, background: 'var(--color-rim)', marginBottom: '2rem' }}>
               {pro.credentials.map(c => (
                 <div key={c.label} style={{ background: 'var(--color-bg)', padding: '1rem 1.25rem' }}>
-                  <div style={{ fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.3rem' }}>{c.label}</div>
+                  <div style={{ fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.3rem' }}>{c.label}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '.9rem', color: 'var(--color-ink)' }}>{c.value}</div>
                 </div>
               ))}
@@ -68,14 +70,14 @@ export default function About() {
           </Reveal>
 
           <Reveal delay={500}>
-            <a href="#citas"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '.65rem', padding: '.85rem 1.75rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s' }}
+            <button onClick={openBooking}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '.65rem', padding: '.85rem 1.75rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-gold-l)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-gold)')}
             >
               Agendar Consulta
               <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M7 1l3 3.5L7 8M1 4.5h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
-            </a>
+            </button>
           </Reveal>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import Reveal from '../Reveal'
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker from './CalendarPicker'
@@ -92,7 +92,7 @@ export default function BookingSection() {
         <div>
 <Reveal delay={100}><h2 className="s-title">Agenda tu<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></h2></Reveal>
         </div>
-        <Reveal delay={200}><p style={{ maxWidth: '26rem', fontSize: '.86rem', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>Selecciona tu servicio, elige fecha y hora, y completa tus datos. Confirmamos en menos de 24 horas.</p></Reveal>
+        <Reveal delay={200}><p style={{ maxWidth: '26rem', fontSize: '.93rem', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>Selecciona tu servicio, elige fecha y hora, y completa tus datos. Confirmamos en menos de 24 horas.</p></Reveal>
       </div>
 
       <Reveal>
@@ -134,10 +134,10 @@ function StepNav({ step }: { step: BookingStep }) {
           const done   = n < step
           return (
             <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '.55rem', paddingRight: '1.5rem', opacity: active ? 1 : done ? .6 : .35, transition: 'opacity .3s' }}>
-              <div style={{ width: '1.6rem', height: '1.6rem', border: `1.5px solid ${active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'var(--color-rim-l)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.65rem', flexShrink: 0, background: active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'transparent', color: (active || done) ? 'var(--color-bg)' : 'var(--color-ink-dim)', transition: 'all .3s', borderRadius: '50%' }}>
+              <div style={{ width: '1.6rem', height: '1.6rem', border: `1.5px solid ${active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'var(--color-rim-l)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.75rem', flexShrink: 0, background: active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'transparent', color: (active || done) ? 'var(--color-bg)' : 'var(--color-ink-dim)', transition: 'all .3s', borderRadius: '50%' }}>
                 {done ? '✓' : n}
               </div>
-              <span style={{ fontSize: '.65rem', letterSpacing: '.1em', textTransform: 'uppercase', color: active ? 'var(--color-ink)' : 'var(--color-ink-dim)', whiteSpace: 'nowrap' }} className="hidden sm:inline">
+              <span style={{ fontSize: '.75rem', letterSpacing: '.1em', textTransform: 'uppercase', color: active ? 'var(--color-ink)' : 'var(--color-ink-dim)', whiteSpace: 'nowrap' }} className="hidden sm:inline">
                 {label}
               </span>
             </div>
@@ -151,7 +151,7 @@ function StepNav({ step }: { step: BookingStep }) {
 function NextBtn({ children, disabled, onClick }: { children: React.ReactNode; disabled: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} disabled={disabled}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: '.7rem', padding: '.85rem 2rem', background: disabled ? 'var(--color-rim-l)' : 'var(--color-gold)', color: disabled ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'background .3s' }}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: '.7rem', padding: '.85rem 2rem', background: disabled ? 'var(--color-rim-l)' : 'var(--color-gold)', color: disabled ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'background .3s' }}
       onMouseEnter={e => { if (!disabled) e.currentTarget.style.background = 'var(--color-gold-l)' }}
       onMouseLeave={e => { if (!disabled) e.currentTarget.style.background = 'var(--color-gold)' }}
     >
@@ -164,7 +164,7 @@ function NextBtn({ children, disabled, onClick }: { children: React.ReactNode; d
 function BackBtn({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick}
-      style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.75rem 1.5rem', cursor: 'pointer', transition: 'all .3s' }}
+      style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 300, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.75rem 1.5rem', cursor: 'pointer', transition: 'all .3s' }}
       onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
       onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
     >← Atrás</button>
@@ -176,11 +176,11 @@ function SuccessState({ onReset }: { onReset: () => void }) {
     <div style={{ textAlign: 'center', padding: '4.5rem 2rem' }}>
       <div style={{ width: '4rem', height: '4rem', border: '1px solid var(--color-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--color-gold)', fontSize: '1.4rem' }}>✓</div>
       <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '2.2rem', fontWeight: 300, marginBottom: '.75rem' }}>¡Cita Solicitada!</h3>
-      <p style={{ fontSize: '.87rem', color: 'var(--color-ink-dim)', maxWidth: '28rem', margin: '0 auto 2rem', lineHeight: 1.9 }}>
+      <p style={{ fontSize: '.93rem', color: 'var(--color-ink-dim)', maxWidth: '28rem', margin: '0 auto 2rem', lineHeight: 1.9 }}>
         Hemos recibido tu solicitud. Te contactaremos pronto para confirmar.<br /><br />
         <span style={{ color: 'var(--color-gold)' }}>¡Te esperamos!</span>
       </p>
-      <button onClick={onReset} style={{ display: 'inline-flex', alignItems: 'center', gap: '.7rem', padding: '.85rem 2rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.14em', textTransform: 'uppercase', border: '1px solid var(--color-rim-l)', cursor: 'pointer', transition: 'all .3s' }}
+      <button onClick={onReset} style={{ display: 'inline-flex', alignItems: 'center', gap: '.7rem', padding: '.85rem 2rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 300, letterSpacing: '.14em', textTransform: 'uppercase', border: '1px solid var(--color-rim-l)', cursor: 'pointer', transition: 'all .3s' }}
         onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
         onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
       >Nueva Cita</button>
