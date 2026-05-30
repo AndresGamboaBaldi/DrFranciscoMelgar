@@ -20,24 +20,59 @@ export interface ProCredential {
   value: string
 }
 
+/** Color theme — solo necesitas cambiar el acento */
+export interface ProfessionalTheme {
+  accent: string        // color principal: botones, highlights, títulos em
+  accentLight?: string  // hover del acento (si no se pone, se calcula solo)
+}
+
+/** Configuración del sistema de reservas */
+export interface BookingConfig {
+  /** Duración de cada slot en minutos (15 | 30 | 45 | 60) */
+  slotDuration: number
+
+  /**
+   * Horas mínimas de anticipación para reservar.
+   * 0 = sin restricción (puede reservar hoy mismo)
+   * 24 = debe reservar con al menos 24 horas de antelación
+   */
+  minAdvanceHours: number
+
+  /**
+   * Días laborables. 0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb
+   * Ej: [1,2,3,4,5] = Lunes a Viernes
+   *     [1,2,3,4,5,6] = Lunes a Sábado
+   */
+  workDays: number[]
+
+  /** Horario general de trabajo */
+  workHours: { start: string; end: string }  // 'HH:MM'
+
+  /** Horario especial del sábado (null = cerrado ese día aunque esté en workDays) */
+  satHours?: { start: string; end: string } | null
+
+  /** Horario especial del domingo */
+  sunHours?: { start: string; end: string } | null
+}
+
 export interface Professional {
   // ── URL ─────────────────────────────────────────────────────
-  slug: string             // 'doctor_melgar'  →  pro.bo/doctor_melgar
+  slug: string
 
   // ── Identidad ───────────────────────────────────────────────
-  name: string             // 'Dr. Francisco Melgar'
-  shortName: string        // 'Dr. Melgar'  (navbar)
-  title: string            // 'Médico Estético'
-  specialty: string        // subtítulo debajo del nombre en el hero
+  name: string
+  shortName: string
+  title: string
+  specialty: string
 
   // ── Hero ────────────────────────────────────────────────────
-  location: string         // 'La Paz, Bolivia'
-  tagline: string          // frase principal
-  taglineSub: string       // segunda línea de la frase
+  location: string
+  tagline: string
+  taglineSub: string
   stats: { n: string; label: string }[]
 
   // ── Acerca de ───────────────────────────────────────────────
-  aboutTitle: string       // 'el Doctor' | 'la Barbería' | etc.
+  aboutTitle: string
   quote: string
   bio: string
   credentials: ProCredential[]
@@ -49,12 +84,18 @@ export interface Professional {
   testimonials: ProTestimonial[]
 
   // ── Contacto ────────────────────────────────────────────────
-  phone: string            // sin + ni espacios: '59172235605'
+  phone: string
   email: string
   address: string
-  schedule: string[]       // ['Lun — Vie: 9:00 — 18:00', 'Sáb: 9:00 — 14:00']
+  schedule: string[]
+
+  // ── Tema visual ─────────────────────────────────────────────
+  theme?: ProfessionalTheme
+
+  // ── Reservas ────────────────────────────────────────────────
+  bookingConfig: BookingConfig
 
   // ── Supabase / Calendario ────────────────────────────────────
-  doctorId: string         // filtra citas en la DB  →  'doctor_melgar'
-  calendarFeedUrl: string  // URL del link mágico .ics
+  doctorId: string
+  calendarFeedUrl: string
 }

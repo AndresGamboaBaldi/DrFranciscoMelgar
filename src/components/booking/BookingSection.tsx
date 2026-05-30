@@ -37,10 +37,9 @@ export default function BookingSection() {
 
   const validate = () => {
     const e: typeof errors = {}
-    if (!form.name.trim())  e.name    = 'Campo requerido'
-    if (!form.phone.trim()) e.phone   = 'Campo requerido'
-    if (!form.email.trim()) e.email   = 'Campo requerido'
-    if (!form.consent)      e.consent = 'Debes aceptar los términos'
+    if (!form.name.trim())  e.name  = 'Campo requerido'
+    if (!form.phone.trim()) e.phone = 'Campo requerido'
+    if (!form.email.trim()) e.email = 'Campo requerido'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -61,14 +60,21 @@ export default function BookingSection() {
         notes: form.notes.trim() || undefined,
         doctor_id: pro.doctorId,
       })
+      // Build the calendar sync URL dynamically (works in dev and production)
+      const calendarPageUrl = pro.calendarFeedUrl
+        ? `${window.location.origin}/${pro.slug}/calendar`
+        : undefined
+
       await notifyDoctor({
-        patientName: form.name.trim(),
-        service:     service.name,
-        date:        formatDate(date),
+        patientName:     form.name.trim(),
+        service:         service.name,
+        date:            formatDate(date),
         time,
-        phone: form.phone.trim(),
-        email: form.email.trim(),
-        doctorPhone: pro.phone,
+        phone:           form.phone.trim(),
+        email:           form.email.trim(),
+        doctorPhone:     pro.phone,
+        calendarFeedUrl: pro.calendarFeedUrl || undefined,
+        calendarPageUrl,
       })
       setSuccess(true)
     } catch (err) {
@@ -100,7 +106,7 @@ export default function BookingSection() {
             <>
               <StepNav step={step} />
               {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} />}
-              {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} doctorId={pro.doctorId} />}
+              {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} doctorId={pro.doctorId} bookingConfig={pro.bookingConfig} />}
               {step === 3 && service && date && time && <ContactForm summary={{ service, date, time }} data={form} onChange={updateForm} errors={errors} />}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid var(--color-rim)' }}>
                 {step > 1 ? <BackBtn onClick={() => setStep(s => Math.max(s-1,1) as BookingStep)} /> : <span />}

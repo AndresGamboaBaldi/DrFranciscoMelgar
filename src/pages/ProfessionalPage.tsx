@@ -14,6 +14,15 @@ const Divider = () => (
   <div style={{ width: '100%', height: 1, background: 'linear-gradient(to right, transparent, var(--color-rim), transparent)' }} />
 )
 
+/** Lightens a hex color by `amount` (0-255) */
+function lightenHex(hex: string, amount = 20): string {
+  const n = parseInt(hex.replace('#', ''), 16)
+  const r = Math.min(255, (n >> 16) + amount)
+  const g = Math.min(255, ((n >> 8) & 0xff) + amount)
+  const b = Math.min(255, (n & 0xff) + amount)
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+}
+
 export default function ProfessionalPage() {
   const { slug } = useParams<{ slug: string }>()
   const pro = getProfessional(slug ?? '')
@@ -27,24 +36,33 @@ export default function ProfessionalPage() {
     )
   }
 
+  // Build CSS variable overrides for this professional's theme
+  const themeVars = pro.theme ? {
+    '--color-gold':   pro.theme.accent,
+    '--color-gold-l': pro.theme.accentLight ?? lightenHex(pro.theme.accent, 18),
+  } as React.CSSProperties : {}
+
   const isSetup = new URLSearchParams(window.location.search).has('setup')
 
   return (
     <ProfessionalContext.Provider value={pro}>
-      <Navbar />
-      <main>
-        <Hero />
-        <Divider />
-        <Services />
-        <Divider />
-        <About />
-        <Divider />
-        <BookingSection />
-        <Divider />
-        <Testimonials />
-        {isSetup && (<><Divider /><CalendarLink /></>)}
-      </main>
-      <Footer />
+      {/* Wrap in a div that overrides CSS color variables for this professional */}
+      <div style={themeVars}>
+        <Navbar />
+        <main>
+          <Hero />
+          <Divider />
+          <Services />
+          <Divider />
+          <About />
+          <Divider />
+          <BookingSection />
+          <Divider />
+          <Testimonials />
+          {isSetup && (<><Divider /><CalendarLink /></>)}
+        </main>
+        <Footer />
+      </div>
     </ProfessionalContext.Provider>
   )
 }

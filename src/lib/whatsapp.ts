@@ -5,21 +5,35 @@ interface NotificationData {
   time: string
   phone: string
   email: string
-  doctorPhone: string   // per-professional phone from config
+  doctorPhone: string      // número del profesional
+  calendarFeedUrl?: string // si está configurado, se incluye el link de sincronización
+  calendarPageUrl?: string // URL de la página /slug/calendar (se construye en BookingSection)
 }
 
 const CALLMEBOT_KEY = import.meta.env.VITE_CALLMEBOT_KEY as string ?? ''
 
 function buildMessage(d: NotificationData): string {
-  return (
-    `*Nueva Cita*\n\n` +
-    `*Paciente:* ${d.patientName}\n` +
-    `*Servicio:* ${d.service}\n` +
-    `*Fecha:* ${d.date}\n` +
-    `*Hora:* ${d.time}\n` +
-    `*Telefono:* ${d.phone}\n` +
-    `*Email:* ${d.email}`
-  )
+  // Convierte https:// → webcal:// para que iOS abra el Calendar directo
+  const lines = [
+    `*Nueva Cita*\n`,
+    `*Paciente:* ${d.patientName}`,
+    `*Servicio:* ${d.service}`,
+    `*Fecha:* ${d.date}`,
+    `*Hora:* ${d.time}`,
+    `*Telefono:* ${d.phone}`,
+    `*Email:* ${d.email}`,
+  ]
+
+  // Incluye link de sincronización si está configurado
+  if (d.calendarPageUrl) {
+    lines.push(
+      `\n*Sincroniza tu agenda (iPhone y Google):*`,
+      `${d.calendarPageUrl}`,
+      `_Toca el link para agregar todas tus citas automaticamente_`
+    )
+  }
+
+  return lines.join('\n')
 }
 
 function openWhatsApp(data: NotificationData) {
