@@ -8,22 +8,16 @@ export interface ProService {
   description: string
 }
 
-export interface ProTestimonial {
-  initial: string
-  name: string
-  detail: string
-  text: string
-}
-
 export interface ProCredential {
   label: string
   value: string
 }
 
-/** Color theme — solo necesitas cambiar el acento */
+/** Color theme — solo necesitas cambiar el acento y el modo */
 export interface ProfessionalTheme {
-  accent: string        // color principal: botones, highlights, títulos em
-  accentLight?: string  // hover del acento (si no se pone, se calcula solo)
+  mode?: 'light' | 'dark'  // 'dark' por defecto
+  accent: string            // color principal: botones, highlights, títulos em
+  accentLight?: string      // hover del acento (si no se pone, se calcula solo)
 }
 
 /** Configuración del sistema de reservas */
@@ -79,9 +73,6 @@ export interface Professional {
 
   // ── Servicios ───────────────────────────────────────────────
   services: ProService[]
-
-  // ── Testimonios ─────────────────────────────────────────────
-  testimonials: ProTestimonial[]
 
   // ── Contacto ────────────────────────────────────────────────
   phone: string

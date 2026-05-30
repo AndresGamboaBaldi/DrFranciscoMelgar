@@ -87,13 +87,12 @@ export default function BookingSection() {
   }
 
   return (
-    <section id="citas" style={{ padding: '8rem 4.5rem', background: 'var(--color-surface)' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '5rem', flexWrap: 'wrap', gap: '2rem' }}>
+    <section id="citas" className="s-pad" style={{ background: 'var(--color-surface)' }}>
+      <div className="s-header">
         <div>
-          <Reveal><p style={{ fontSize: '.62rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', opacity: .7, marginBottom: '.7rem' }}>03 — Reservas</p></Reveal>
-          <Reveal delay={100}><h2 style={{ fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 300, letterSpacing: '-.02em', lineHeight: 1 }}>Agenda tu<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></h2></Reveal>
+<Reveal delay={100}><h2 className="s-title">Agenda tu<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></h2></Reveal>
         </div>
-        <Reveal delay={200}><p style={{ maxWidth: '28rem', fontSize: '.88rem', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>Selecciona tu servicio, elige fecha y hora, y completa tus datos. Confirmaremos en menos de 24 horas.</p></Reveal>
+        <Reveal delay={200}><p style={{ maxWidth: '26rem', fontSize: '.86rem', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>Selecciona tu servicio, elige fecha y hora, y completa tus datos. Confirmamos en menos de 24 horas.</p></Reveal>
       </div>
 
       <Reveal>
@@ -120,21 +119,31 @@ export default function BookingSection() {
 }
 
 function StepNav({ step }: { step: BookingStep }) {
+  const steps = ['Servicio', 'Fecha & Hora', 'Datos']
   return (
-    <div style={{ display: 'flex', borderBottom: '1px solid var(--color-rim)', marginBottom: '3rem' }}>
-      {['Servicio','Fecha & Hora','Tus Datos'].map((label, i) => {
-        const n = i + 1
-        const active = n === step
-        const done   = n < step
-        return (
-          <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '.7rem', padding: '1rem 2rem 1rem 0', opacity: active ? 1 : done ? .55 : .38 }}>
-            <div style={{ width: '1.65rem', height: '1.65rem', border: `1px solid ${active ? 'var(--color-gold)' : 'var(--color-rim-l)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.7rem', flexShrink: 0, background: active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'transparent', color: (active||done) ? 'var(--color-bg)' : 'var(--color-ink-dim)', transition: 'all .3s' }}>
-              {done ? '✓' : n}
+    <div style={{ marginBottom: '2rem' }}>
+      {/* Progress bar */}
+      <div style={{ height: 2, background: 'var(--color-rim)', marginBottom: '1.25rem', borderRadius: 1 }}>
+        <div style={{ height: '100%', background: 'var(--color-gold)', width: `${((step - 1) / 2) * 100}%`, transition: 'width .4s cubic-bezier(0.16,1,0.3,1)', borderRadius: 1 }} />
+      </div>
+      {/* Steps */}
+      <div style={{ display: 'flex', gap: 0 }}>
+        {steps.map((label, i) => {
+          const n      = i + 1
+          const active = n === step
+          const done   = n < step
+          return (
+            <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '.55rem', paddingRight: '1.5rem', opacity: active ? 1 : done ? .6 : .35, transition: 'opacity .3s' }}>
+              <div style={{ width: '1.6rem', height: '1.6rem', border: `1.5px solid ${active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'var(--color-rim-l)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.65rem', flexShrink: 0, background: active ? 'var(--color-gold)' : done ? 'var(--color-ink-ghost)' : 'transparent', color: (active || done) ? 'var(--color-bg)' : 'var(--color-ink-dim)', transition: 'all .3s', borderRadius: '50%' }}>
+                {done ? '✓' : n}
+              </div>
+              <span style={{ fontSize: '.65rem', letterSpacing: '.1em', textTransform: 'uppercase', color: active ? 'var(--color-ink)' : 'var(--color-ink-dim)', whiteSpace: 'nowrap' }} className="hidden sm:inline">
+                {label}
+              </span>
             </div>
-            <span style={{ fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', color: active ? 'var(--color-ink)' : 'var(--color-ink-dim)' }}>{label}</span>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }

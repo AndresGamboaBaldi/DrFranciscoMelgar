@@ -35,7 +35,7 @@ export default function SetupPage() {
   const pro = useProfessional()
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '5rem 4.5rem 6rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '5rem 4.5rem 6rem', colorScheme: 'inherit' }}>
       <div style={{ maxWidth: '52rem', margin: '0 auto' }}>
 
         {/* Header */}

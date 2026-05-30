@@ -44,21 +44,16 @@ const doctor_melgar: Professional = {
     { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.' },
   ],
 
-  testimonials: [
-    { initial: 'S', name: 'Sofía M.',   detail: 'Ácido Hialurónico · La Paz', text: '"Llevaba años con inseguridades. El Dr. Melgar me escuchó con calma y el resultado fue completamente natural. ¡Me encantó!"' },
-    { initial: 'C', name: 'Carla H.',   detail: 'Radiofrecuencia · La Paz',   text: '"Después de mi primera sesión noté la piel más firme y luminosa. El consultorio es impecable y la atención de primer nivel."' },
-    { initial: 'V', name: 'Valeria C.', detail: 'Diseño de Labios · La Paz',  text: `"Siempre tuve miedo de quedar 'rara'. El Dr. Melgar tiene un ojo artístico increíble. El resultado fue perfecto."` },
-  ],
-
   phone:   '59172235605',
   email:   'citas@drmelgar.bo',
   address: 'Av. Arce #2345, Of. 8B\nLa Paz, Bolivia',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 14:00'],
 
-  // ── Tema: dorado clásico (por defecto) ──
+  // ── Tema: luz cálida / clínica de lujo ──
   theme: {
-    accent:      '#c4995a',
-    accentLight: '#d4b078',
+    mode:        'light',
+    accent:      '#b07c35',   // dorado más profundo — mejor contraste sobre blanco
+    accentLight: '#c48c45',
   },
 
   // ── Reservas: slots de 60 min, 24h de anticipación, Lun-Sáb ──
@@ -104,16 +99,7 @@ const barber_vip: Professional = {
   services: [
     { id: 'corte',       name: 'Corte Clásico',      tag: 'Clásico',  duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.' },
     { id: 'fade',        name: 'Fade & Degradado',   tag: 'Moderno',  duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.' },
-    { id: 'barba',       name: 'Diseño de Barba',    tag: 'Grooming', duration: '30 min', price: 'Desde Bs. 50',  icon: '◇', description: 'Definición, contorno y acabado de barba con navaja y toalla caliente.' },
-    { id: 'combo',       name: 'Corte + Barba',      tag: 'Combo',    duration: '60 min', price: 'Desde Bs. 120', icon: '◫', description: 'El servicio completo: corte a elección más diseño y arreglo de barba.' },
-    { id: 'tratamiento', name: 'Tratamiento Capilar', tag: 'Premium', duration: '45 min', price: 'Desde Bs. 90',  icon: '◎', description: 'Hidratación y nutrición profunda del cabello con productos de alta gama.' },
-    { id: 'nino',        name: 'Corte Niños',        tag: 'Familiar', duration: '25 min', price: 'Desde Bs. 40',  icon: '◈', description: 'Corte especializado para niños, con paciencia y técnica adaptada.' },
-  ],
-
-  testimonials: [
-    { initial: 'R', name: 'Roberto L.', detail: 'Fade · La Paz',      text: '"El mejor fade que me han hecho en La Paz. Ambiente de primera, trato excelente y el resultado superó mis expectativas."' },
-    { initial: 'M', name: 'Miguel A.',  detail: 'Corte + Barba · LP', text: '"Vine por primera vez y ya no voy a otro lugar. El combo de corte y barba quedó perfecto, muy profesionales."' },
-    { initial: 'D', name: 'Daniel F.',  detail: 'Grooming · La Paz',  text: '"Finalmente una barbería en La Paz que cumple los estándares internacionales. Muy recomendado."' },
+   
   ],
 
   phone:   '59171234567',

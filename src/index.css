@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&display=swap');
 @import "tailwindcss";
 
-/* ── Tailwind v4 theme tokens ── */
+/* ── Tailwind v4 theme tokens (dark defaults) ── */
 @theme {
   --color-bg:           #0a0907;
   --color-surface:      #131110;
@@ -13,14 +13,12 @@
   --color-ink-ghost:    #504b44;
   --color-gold:         #c4995a;
   --color-gold-l:       #d4b078;
-
   --font-display: 'Cormorant Garamond', serif;
   --font-body:    'Jost', sans-serif;
 }
 
-/* ── Base ── */
+/* ── Base reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -43,39 +41,63 @@ h1,h2,h3,h4 { font-family: var(--font-display); font-weight: 400; line-height: 1
 body::after {
   content: '';
   position: fixed; inset: 0;
-  pointer-events: none; z-index: 9999;
-  opacity: .025;
+  pointer-events: none; z-index: 9998;
+  opacity: var(--grain-opacity, 0.025);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px;
+}
+
+/* ── Responsive section padding ── */
+.s-pad { padding: 7rem 4.5rem; }
+@media (max-width: 1024px) { .s-pad { padding: 5rem 2.5rem; } }
+@media (max-width: 640px)  { .s-pad { padding: 3.5rem 1.25rem; } }
+
+.hero-pad { padding: 0 4.5rem 7rem; min-height: 100vh; }
+@media (max-width: 1024px) { .hero-pad { padding: 0 2.5rem 5.5rem; } }
+@media (max-width: 640px)  { .hero-pad { padding: 0 1.25rem 4rem; } }
+
+/* Section header — responsive flex */
+.s-header {
+  display: flex; align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 4rem;
+  flex-wrap: wrap; gap: 1.5rem;
+}
+@media (max-width: 640px) {
+  .s-header { align-items: flex-start; margin-bottom: 2.5rem; }
+}
+
+/* Section title */
+.s-title {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 300; letter-spacing: -.02em; line-height: 1;
 }
 
 /* ── Scroll reveal ── */
 .reveal {
   opacity: 0;
-  transform: translateY(2rem);
+  transform: translateY(1.8rem);
   transition: opacity .85s cubic-bezier(0.16,1,0.3,1),
               transform .85s cubic-bezier(0.16,1,0.3,1);
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
-/* ── Hero entry animations ── */
+/* ── Hero animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(1.8rem); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes fadeIn {
-  from { opacity: 0; } to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scrollBob {
   0%,100% { transform: scaleY(1); opacity: .4; }
   50%     { transform: scaleY(.55); opacity: .9; }
 }
 
-.animate-fade-up   { animation: fadeUp 1.1s cubic-bezier(0.16,1,0.3,1) both; }
-.animate-fade-in   { animation: fadeIn 1s  cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up    { animation: fadeUp 1.1s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in    { animation: fadeIn 1s  cubic-bezier(0.16,1,0.3,1) both; }
 .animate-scroll-bob { animation: scrollBob 2.5s ease-in-out infinite; }
 
-/* ── Input / form resets ── */
+/* ── Form inputs ── */
 input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   background: var(--color-bg);
   border: 1px solid var(--color-rim);
@@ -83,19 +105,48 @@ input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   font-family: var(--font-body);
   font-size: .86rem;
   font-weight: 300;
-  padding: .7rem 1rem;
+  padding: .8rem 1rem;
   outline: none;
   width: 100%;
   appearance: none;
-  transition: border-color .3s;
+  transition: border-color .3s, box-shadow .3s;
+  border-radius: 0;
 }
-input:focus, select:focus, textarea:focus { border-color: var(--color-gold); }
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-gold) 15%, transparent);
+}
 input::placeholder, textarea::placeholder { color: var(--color-ink-ghost); }
 textarea { resize: vertical; min-height: 90px; }
 select {
+  /* Arrow adapts to theme via CSS variable */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238c8278'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   padding-right: 2.5rem;
   cursor: pointer;
+}
+
+/* Light mode: darker dropdown arrow for visibility */
+[style*="--color-bg: #fafaf8"] select,
+[style*="color-scheme: light"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6259'/%3E%3C/svg%3E");
+}
+
+/* Native time/date inputs — inherit color scheme from wrapper */
+input[type="time"], input[type="date"], input[type="number"] {
+  color-scheme: inherit;
+}
+
+/* ── Tap target minimum (solo botones, no links de nav) ── */
+@media (max-width: 640px) {
+  button { min-height: 44px; }
+}
+
+/* ── Divider ── */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-rim), transparent);
 }
