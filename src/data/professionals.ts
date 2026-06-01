@@ -14,6 +14,7 @@ import type { Professional } from '../types/professional'
 const doctor_melgar: Professional = {
   photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar.jpeg'],
   slug:      'doctor_melgar',
+  heroPhoto: '/doctor_melgar/hero.jpg',   // ← pon aquí la foto del hero
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
   title:     'Médico Estético',
@@ -26,14 +27,13 @@ const doctor_melgar: Professional = {
     { n: '15+',    label: 'Años de experiencia' },
   ],
 
-  aboutTitle: 'el Doctor',
-  quote: 'Cada rostro tiene su propia historia. Mi trabajo es escucharla y realzar su belleza natural.',
+  aboutTitle: 'del Doctor',
   finalQuote: 'La belleza no está en la perfección, sino en la armonía entre la ciencia y la sutileza.',
-  bio: 'El Dr. Francisco Melgar es especialista en Medicina Estética y Antienvejecimiento, egresado de la Universidad Mayor de San Andrés con fellowship en estética avanzada en Barcelona. Con más de 15 años de experiencia, ha atendido a más de 3.000 pacientes aplicando protocolos de clase mundial, siempre adaptados al tipo de piel y los objetivos individuales de cada persona.',
+  bio: 'Después de años de formación en España y Brasil, dos referentes mundiales en medicina estética, y con experiencia en congresos internacionales junto a los mejores especialistas del mundo, llego a Bolivia para brindarte lo último en estética y salud capilar. Mi consulta nace con la visión de que la medicina estética no debe cambiar quien eres, sino resaltar tu mejor versión con elegancia, naturalidad y confianza. Cada detalle de mi práctica esta pensada para ofrecerte una experiencia personalizada y cercana, porque la verdadera transformación se refleja no solo en tu imagen, sino en la seguridad con la que eliges presentarte al mundo.',
   credentials: [
-    { label: 'Formación',       value: 'Univ. Mayor de San Andrés' },
-    { label: 'Fellowship',      value: 'Barcelona · Est. Avanzada' },
-    { label: 'Especialización', value: 'Medicina Antienvejecimiento' },
+    { label: 'Formación',       value: 'Universidad Privada del Valle' },
+    { label: 'Fellowship',      value: 'Madrid · Medicina Estetica' },
+    { label: 'Especialización', value: 'Medicina Estetica y Tricologia' },
     { label: 'Certificaciones', value: 'ISAPS · AMAE · SEME' },
   ],
 
@@ -94,8 +94,7 @@ const barber_vip: Professional = {
     { n: '8+',   label: 'Años de experiencia' },
   ],
 
-  aboutTitle: 'la Barbería',
-  quote: 'Cada cliente merece salir con más confianza de la que entró.',
+  aboutTitle: 'de la Barbería',
   finalQuote: 'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
   bio: 'Barber VIP nació con la visión de traer a La Paz una experiencia de barbería de lujo: ambiente premium, técnicas modernas y atención personalizada. Nuestro equipo de barberos certificados se especializa en cortes clásicos, fade, diseño de barba y tratamientos capilares.',
   credentials: [
@@ -158,8 +157,7 @@ const dr_seifert: Professional = {
     { n: '12+',    label: 'Años de experiencia' },
   ],
 
-  aboutTitle: 'el Doctor',
-  quote: 'Cada sonrisa es única. Mi trabajo es revelar la mejor versión de la tuya.',
+  aboutTitle: 'del Doctor',
   finalQuote: 'Una sonrisa saludable y hermosa es la inversión más visible que puedes hacer en ti mismo.',
   bio: 'El Dr. Ivan Seifert es especialista en Odontología Estética y Restauradora, egresado de la Universidad Mayor de San Andrés con especialización en Implantología Oral en São Paulo, Brasil. Con más de 12 años de experiencia, combina tecnología de vanguardia con un enfoque artístico para crear sonrisas naturales y duraderas, siempre priorizando la salud bucal y el bienestar del paciente.',
   credentials: [

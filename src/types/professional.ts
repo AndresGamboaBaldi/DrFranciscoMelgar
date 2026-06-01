@@ -76,6 +76,10 @@ export interface Professional {
    *  If provided, the Navbar shows it alongside the text name. */
   logo?: string
 
+  /** Hero section photo — shown on the right side of the hero on desktop,
+   *  above the content on mobile. No padding/border, full bleed. */
+  heroPhoto?: string
+
   /**
    * Photos for the About section.
    * - 1 photo  → shows as static image
@@ -98,7 +102,6 @@ export interface Professional {
 
   // ── Acerca de ───────────────────────────────────────────────
   aboutTitle: string
-  quote: string
   bio: string
   credentials: ProCredential[]
 

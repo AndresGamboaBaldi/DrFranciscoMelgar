@@ -19,15 +19,6 @@ export default function About() {
           <div style={{ position: 'relative' }}>
             <PhotoArea photos={photos} />
 
-            {/* Decorative borders — desktop only */}
-            <div className="hidden md:block" style={{ position: 'absolute', bottom: '-1.5rem', right: '-1.5rem', width: '8rem', height: '8rem', border: '1px solid var(--color-rim)', zIndex: -1 }} />
-            <div className="hidden md:block" style={{ position: 'absolute', top: '-1rem', left: '-1rem', width: '4.5rem', height: '4.5rem', background: 'var(--color-gold)', opacity: .07, zIndex: -1 }} />
-
-            {/* Stats badge */}
-            <div style={{ position: 'absolute', bottom: '2rem', right: 'clamp(0px, 5vw, -3rem)', background: 'var(--color-bg)', border: '1px solid var(--color-rim-l)', padding: '1rem 1.5rem', zIndex: 2, boxShadow: '0 4px 20px rgba(0,0,0,.15)' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.2rem' }}>{pro.stats[0]?.n}</div>
-              <div style={{ fontSize: '.7rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', fontWeight: 400 }}>{pro.stats[0]?.label}</div>
-            </div>
           </div>
         </Reveal>
 
@@ -35,18 +26,12 @@ export default function About() {
         <div>
           <Reveal delay={100}>
             <h2 className="s-title" style={{ marginBottom: '1.75rem' }}>
-              Acerca de<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>{pro.aboutTitle}</em>
+              Acerca<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>{pro.aboutTitle}</em>
             </h2>
           </Reveal>
 
           <Reveal delay={200}>
-            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.15rem,2vw,1.6rem)', fontWeight: 300, lineHeight: 1.55, color: 'var(--color-ink)', marginBottom: '1.5rem' }}>
-              "{pro.quote}"
-            </p>
-          </Reveal>
-
-          <Reveal delay={300}>
-            <p style={{ fontSize: '.93rem', lineHeight: 1.95, color: 'var(--color-ink-dim)', marginBottom: '2rem' }}>{pro.bio}</p>
+            <p style={{ fontSize: '1rem', lineHeight: 1.95, color: 'var(--color-ink-dim)', marginBottom: '2rem' }}>{pro.bio}</p>
           </Reveal>
 
           <Reveal delay={400}>
@@ -66,7 +51,7 @@ export default function About() {
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-gold-l)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-gold)')}
             >
-              Agendar Consulta
+              Agendar
               <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M7 1l3 3.5L7 8M1 4.5h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
             </button>
           </Reveal>
@@ -121,8 +106,27 @@ function PhotoArea({ photos }: { photos: string[] }) {
     )
   }
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const imgs = e.currentTarget.querySelectorAll('img')
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 10
+    const y = ((e.clientY - rect.top)  / rect.height - 0.5) * 10
+    imgs.forEach(img => {
+      ;(img as HTMLElement).style.transform = `scale(1.07) translate(${x}px, ${y}px)`
+    })
+  }
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    const imgs = e.currentTarget.querySelectorAll('img')
+    imgs.forEach(img => { ;(img as HTMLElement).style.transform = 'scale(1) translate(0,0)' })
+  }
+
   return (
-    <div style={FRAME}>
+    <div>
+      <div
+        style={FRAME}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
       {/* Previous image — fades out */}
       {prev !== null && (
         <img
@@ -143,46 +147,31 @@ function PhotoArea({ photos }: { photos: string[] }) {
             width: '100%', height: '100%',
             objectFit: 'cover', objectPosition: 'center top',
             opacity: i === current ? 1 : 0,
-            transition: 'opacity .7s ease',
+            transition: 'opacity .7s ease, transform .35s cubic-bezier(0.16,1,0.3,1)',
             zIndex: i === current ? 2 : 0,
+            willChange: 'transform',
           }}
         />
       ))}
 
-      {/* Prev / Next arrows + dots — only if multiple photos */}
+      </div>
+
+      {/* ── Bar navigation below the image ── */}
       {photos.length > 1 && (
-        <>
-          {/* Prev arrow */}
-          <button
-            onClick={() => advance((current - 1 + photos.length) % photos.length)}
-            style={{ position: 'absolute', left: '.75rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: '2.25rem', height: '2.25rem', borderRadius: '50%', background: 'rgba(0,0,0,.35)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'background .2s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,.6)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,.35)')}
-            aria-label="Foto anterior"
-          >
-            <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M7.5 1L1.5 7l6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
-
-          {/* Next arrow */}
-          <button
-            onClick={() => advance((current + 1) % photos.length)}
-            style={{ position: 'absolute', right: '.75rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: '2.25rem', height: '2.25rem', borderRadius: '50%', background: 'rgba(0,0,0,.35)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'background .2s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,.6)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,.35)')}
-            aria-label="Foto siguiente"
-          >
-            <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M1.5 1l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
-
-          {/* Dot indicators */}
-          <div style={{ position: 'absolute', bottom: '1.1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '.45rem', zIndex: 10 }}>
-            {photos.map((_, i) => (
-              <button key={i} onClick={() => advance(i)}
-                style={{ width: i === current ? '1.5rem' : '.45rem', height: '.45rem', borderRadius: '999px', background: i === current ? 'var(--color-gold)' : 'rgba(255,255,255,.5)', border: 'none', cursor: 'pointer', transition: 'width .4s cubic-bezier(0.16,1,0.3,1), background .3s', padding: 0 }}
-              />
-            ))}
-          </div>
-        </>
+        <div style={{ display: 'flex', gap: '4px', marginTop: '10px' }}>
+          {photos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => advance(i)}
+              style={{
+                flex: 1, height: '2px', minHeight: '2px',
+                background: i === current ? 'var(--color-gold)' : 'var(--color-rim-l)',
+                border: 'none', cursor: 'pointer', padding: 0,
+                transition: 'background .4s',
+              }}
+            />
+          ))}
+        </div>
       )}
     </div>
   )
