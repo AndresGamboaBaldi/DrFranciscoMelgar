@@ -72,6 +72,9 @@ export interface Professional {
   // ── URL ─────────────────────────────────────────────────────
   slug: string
 
+  /** Category shown in the home page filters */
+  category?: 'medico' | 'dentista' | 'barbero' | 'psicologo' | 'estetica' | 'otro'
+
   /** Optional logo image path (e.g. '/logos/doctor_melgar.png').
    *  If provided, the Navbar shows it alongside the text name. */
   logo?: string

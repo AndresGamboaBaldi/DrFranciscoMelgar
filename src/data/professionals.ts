@@ -14,6 +14,7 @@ import type { Professional } from '../types/professional'
 const doctor_melgar: Professional = {
   photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar_ofi2.jpeg', '/doctor_melgar/photos/drmelgar_ofi3.jpeg', '/doctor_melgar/photos/drmelgar_ofi.jpeg'],
   slug:      'doctor_melgar',
+  category:  'estetica',
   heroPhoto: '/doctor_melgar/photos/drmelgar.jpeg',  // ← pon aquí la foto del hero
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
@@ -81,8 +82,9 @@ const doctor_melgar: Professional = {
 //  2. BARBER VIP — Barbería de lujo
 // ────────────────────────────────────────────────────────────────
 const barber_vip: Professional = {
-  photos: ['/barber_vip/photos/vip.jpeg'],
+  photos: ['/barber_vip/photos/vip2.avif'],
   slug:      'barber_vip',
+  category:  'barbero',
   name:      'Barber VIP',
   shortName: 'Barber VIP',
   title:     'Barbería de Lujo',
@@ -147,6 +149,7 @@ const dr_seifert: Professional = {
   photos: ['/dr_seifert/photos/drseifert.jpeg'],
   heroPhoto: '/dr_seifert/photos/drseifert.jpeg', 
   slug:      'dr_seifert',
+  category:  'dentista',
   name:      'Dr. Ivan Seifert',
   shortName: 'Dr. Seifert',
   title:     'Odontólogo Estético',
@@ -206,6 +209,7 @@ const dr_seifert: Professional = {
 // ────────────────────────────────────────────────────────────────
 const jhoel_cuts: Professional = {
   slug:      'jhoel_cuts',
+  category:  'barbero',
   name:      'Jhoel Cuts',
   shortName: 'Jhoel Cuts',
   title:     'Barbero & Estilista',
