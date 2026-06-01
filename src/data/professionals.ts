@@ -146,8 +146,8 @@ const barber_vip: Professional = {
 //  3. DR. IVAN SEIFERT — Odontología Estética
 // ────────────────────────────────────────────────────────────────
 const dr_seifert: Professional = {
-  photos: ['/dr_seifert/photos/drseifert.jpeg'],
-  heroPhoto: '/dr_seifert/photos/drseifert.jpeg', 
+  photos: ['/dr_seifert/photos/dr_seifert_3.jpeg', '/dr_seifert/photos/dr_seifert_1.jpeg'],
+  heroPhoto: '/dr_seifert/photos/dr_seifert_2.jpeg', 
   slug:      'dr_seifert',
   category:  'dentista',
   name:      'Dr. Ivan Seifert',
