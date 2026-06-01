@@ -33,11 +33,19 @@ export default function Hero() {
           }} />
         )}
 
+        {/* Mobile background image + overlay — hidden on desktop */}
+        {hasPhoto && (
+          <div className="block md:hidden" style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden' }}>
+            <img src={pro.heroPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,.90) 0%, rgba(0,0,0,.60) 55%, rgba(0,0,0,.40) 100%)' }} />
+          </div>
+        )}
+
         {/* Content */}
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '52rem' }}>
           <div className="animate-fade-up" style={{ animationDelay: '.2s', display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '1.25rem' }}>
             <div style={{ width: '2rem', height: 1, background: 'var(--color-gold)', opacity: .6, flexShrink: 0 }} />
-            <span style={{ fontSize: '.75rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
+            <span style={{ fontSize: '.75rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)', textShadow: '0 1px 8px rgba(0,0,0,.8)' }}>
               {pro.title} — {pro.location}
             </span>
           </div>
@@ -47,6 +55,7 @@ export default function Hero() {
             fontSize: 'clamp(2.75rem, 7.5vw, 6.5rem)',
             fontWeight: 300, letterSpacing: '-.025em', lineHeight: .92,
             marginBottom: '.25em',
+            color: 'var(--color-ink)',
           }}>
             {first}<br />
             <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>{last}</em>
@@ -70,11 +79,18 @@ export default function Hero() {
               Reservar Cita
               <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M7 1l3 3.5L7 8M1 4.5h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
             </button>
-            <a href="#servicios"
-              style={{ display: 'inline-flex', alignItems: 'center', padding: '.85rem 1.75rem', background: 'transparent', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', border: '1.5px solid var(--color-ink-dim)', transition: 'border-color .3s' }}
+            <a
+              href={pro.mapUrl ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pro.address.replace(/\n/g, ', '))}`}
+              target="_blank" rel="noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.85rem 1.75rem', background: 'transparent', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', border: '1.5px solid var(--color-ink-dim)', transition: 'border-color .3s' }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-ink)')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-ink-dim)')}
-            >Ver Servicios</a>
+            >
+              <svg width="11" height="14" viewBox="0 0 11 14" fill="none">
+                <path d="M5.5 0C2.74 0 .5 2.24.5 5c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="currentColor"/>
+              </svg>
+              Ubicación
+            </a>
           </div>
         </div>
 

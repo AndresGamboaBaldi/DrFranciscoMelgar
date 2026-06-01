@@ -12,9 +12,9 @@ import type { Professional } from '../types/professional'
 //  1. DR. FRANCISCO MELGAR — Medicina Estética
 // ────────────────────────────────────────────────────────────────
 const doctor_melgar: Professional = {
-  photos: ['/doctor_melgar/photos/drmelgar.jpeg', '/doctor_melgar/photos/drmelgar_ofi2.jpeg', '/doctor_melgar/photos/drmelgar_ofi3.jpeg', '/doctor_melgar/photos/drmelgar_ofi.jpeg'],
+  photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar_ofi2.jpeg', '/doctor_melgar/photos/drmelgar_ofi3.jpeg', '/doctor_melgar/photos/drmelgar_ofi.jpeg'],
   slug:      'doctor_melgar',
-  heroPhoto: '/doctor_melgar/photos/drmelgar_1.jpeg',   // ← pon aquí la foto del hero
+  heroPhoto: '/doctor_melgar/photos/drmelgar.jpeg',  // ← pon aquí la foto del hero
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
   title:     'Médico Estético',
@@ -72,6 +72,7 @@ const doctor_melgar: Professional = {
     satHours:        { start: '09:00', end: '14:00' },
   },
 
+  mapUrl: 'https://maps.app.goo.gl/eMHRUCNk4ji62wC99?g_st=ic',
   doctorId:        'doctor_melgar',
   calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=cdebf6a18fc4c3be2c64acffa23b946165c8c5c1ba50981dee6ad5d70df5c5c7',
 }
@@ -144,9 +145,9 @@ const barber_vip: Professional = {
 // ────────────────────────────────────────────────────────────────
 const dr_seifert: Professional = {
   photos: ['/dr_seifert/photos/drseifert.jpeg'],
+  heroPhoto: '/dr_seifert/photos/drseifert.jpeg', 
   slug:      'dr_seifert',
   name:      'Dr. Ivan Seifert',
-  heroPhoto: '/dr_seifert/photos/drseifert.jpeg', 
   shortName: 'Dr. Seifert',
   title:     'Odontólogo Estético',
   specialty: 'Especialista en odontología estética, restauradora e implantología',
@@ -201,12 +202,81 @@ const dr_seifert: Professional = {
 }
 
 // ────────────────────────────────────────────────────────────────
+//  4. JHOEL CUTS — Barbería & Estilismo
+// ────────────────────────────────────────────────────────────────
+const jhoel_cuts: Professional = {
+  slug:      'jhoel_cuts',
+  name:      'Jhoel Cuts',
+  shortName: 'Jhoel Cuts',
+  title:     'Barbero & Estilista',
+  specialty: 'Cortes de autor, fade artístico y estilismo personalizado',
+  location:  'Cochabamba, Bolivia',
+  tagline:   'Tu imagen,',
+  taglineSub: 'tu identidad.',
+  stats: [
+    { n: '+800', label: 'Clientes satisfechos' },
+    { n: '6+',   label: 'Años de experiencia' },
+  ],
+
+  aboutTitle: 'del Barbero',
+  finalQuote: 'No solo cortamos cabello — construimos confianza, un corte a la vez.',
+  bio: 'Jhoel es un barbero y estilista con más de 6 años de trayectoria en el arte del corte masculino. Especializado en fades de precisión, cortes de autor y diseño de barba, su enfoque combina técnica depurada con un estilo propio que lo distingue. Cada cliente recibe una atención completamente personalizada: desde la consulta inicial hasta el acabado final, porque para Jhoel cada corte es una obra única.',
+  credentials: [
+    { label: 'Especialidad',  value: 'Fade & Cortes de Autor' },
+    { label: 'Formación',     value: 'Escuela de Barbería Profesional' },
+    { label: 'Técnica',       value: 'Navaja · Tijera · Máquina' },
+    { label: 'Ambiente',      value: 'Moderno & Exclusivo' },
+  ],
+
+  services: [
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     duration: '90 min', price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
+    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
+  ],
+
+  photos: ['/jhoel_cuts/photos/jhoel.jpeg','/jhoel_cuts/photos/barberia.webp'],
+  heroPhoto: '/jhoel_cuts/photos/barberia.webp', 
+
+  phone:   '59177933737',        // ← reemplaza con el número real
+  email:   'citas@jhoelcuts.bo', // ← reemplaza con el email real
+  address: 'Av. Uyuni #567\nCochabamba, Bolivia',
+  schedule: ['Lun — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 16:00'],
+
+  // ── Tema: oscuro / verde esmeralda ──
+  theme: {
+    mode:        'dark',
+    accent:      '#2855c2',
+    accentLight: '#3d6edc',
+    fonts: {
+      display:        'Bebas Neue',
+      body:           'Inter',
+      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
+    },
+  },
+
+  // ── Reservas: slots de 30 min, sin anticipación, Lun-Dom ──
+  bookingConfig: {
+    slotDuration:    30,
+    minAdvanceHours: 0,
+    workDays:        [1, 2, 3, 4, 5, 6, 0],  // Lun a Dom
+    workHours:       { start: '09:00', end: '20:00' },
+    sunHours:        { start: '10:00', end: '16:00' },
+  },
+
+  mapUrl: 'https://maps.app.goo.gl/qcWfFwZqksNu2iFYA?g_st=ic',
+  doctorId:        'jhoel_cuts',
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',  // ← completa con el token de Supabase (ver pasos abajo)
+}
+
+// ────────────────────────────────────────────────────────────────
 //  REGISTRO
 // ────────────────────────────────────────────────────────────────
 export const PROFESSIONALS: Record<string, Professional> = {
   doctor_melgar,
   barber_vip,
   dr_seifert,
+  jhoel_cuts,
 }
 
 export function getProfessional(slug: string): Professional | null {

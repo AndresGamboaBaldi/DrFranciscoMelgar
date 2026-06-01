@@ -57,6 +57,7 @@ export default function Navbar() {
           letterSpacing: '.04em',
           color: 'var(--color-ink)',
           lineHeight: 1,
+          textShadow: !scrolled && !isLight ? '0 1px 12px rgba(0,0,0,.7)' : 'none',
         }}>
           {first}{' '}
           <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>{last}</em>

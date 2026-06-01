@@ -111,6 +111,9 @@ export interface Professional {
   // ── Servicios ───────────────────────────────────────────────
   services: ProService[]
 
+  /** Google Maps link — shown in hero as "Ubicación" button */
+  mapUrl?: string
+
   // ── Contacto ────────────────────────────────────────────────
   phone: string
   email: string

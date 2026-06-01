@@ -77,12 +77,15 @@ body::after {
     min-height: 100vh;
   }
 
-  /* Mobile WITH photo: hide photo entirely, text fills screen */
-  #inicio.hero-has-photo .hero-photo-col { display: none; }
+  /* Mobile WITH photo: hide photo column completely */
+  #inicio.hero-has-photo .hero-photo-col { display: none !important; }
   #inicio.hero-has-photo .hero-pad {
     min-height: 100vh;
-    padding: var(--nav-h) 1.25rem 2rem;
+    padding: var(--nav-h) 1.25rem 2.5rem;
     justify-content: flex-end;
+    /* Force text white for readability on dark bg — gold stays from professional's theme */
+    --color-ink:     #ffffff;
+    --color-ink-dim: rgba(255,255,255,.82);
   }
 }
 
