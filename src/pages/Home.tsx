@@ -46,7 +46,7 @@ export default function Home() {
       <div style={{ padding: '4rem 1.5rem 2.5rem', textAlign: 'center' }}>
         <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2.5rem,7vw,5rem)', fontWeight: 300, color: '#ffffff', letterSpacing: '-.02em', marginBottom: '.4rem' }}>
           Pro<span style={{
-            background: 'linear-gradient(90deg, #D52B1E 0%, #F4E400 50%, #007A33 100%)',
+            background: 'linear-gradient(90deg, #8B1515 0%, #8B1515 30%, #B89000 50%, #155520 70%, #155520 100%)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
