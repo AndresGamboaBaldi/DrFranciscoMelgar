@@ -28,6 +28,7 @@ const doctor_melgar: Professional = {
 
   aboutTitle: 'el Doctor',
   quote: 'Cada rostro tiene su propia historia. Mi trabajo es escucharla y realzar su belleza natural.',
+  finalQuote: 'La belleza no está en la perfección, sino en la armonía entre la ciencia y la sutileza.',
   bio: 'El Dr. Francisco Melgar es especialista en Medicina Estética y Antienvejecimiento, egresado de la Universidad Mayor de San Andrés con fellowship en estética avanzada en Barcelona. Con más de 15 años de experiencia, ha atendido a más de 3.000 pacientes aplicando protocolos de clase mundial, siempre adaptados al tipo de piel y los objetivos individuales de cada persona.',
   credentials: [
     { label: 'Formación',       value: 'Univ. Mayor de San Andrés' },
@@ -95,6 +96,7 @@ const barber_vip: Professional = {
 
   aboutTitle: 'la Barbería',
   quote: 'Cada cliente merece salir con más confianza de la que entró.',
+  finalQuote: 'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
   bio: 'Barber VIP nació con la visión de traer a La Paz una experiencia de barbería de lujo: ambiente premium, técnicas modernas y atención personalizada. Nuestro equipo de barberos certificados se especializa en cortes clásicos, fade, diseño de barba y tratamientos capilares.',
   credentials: [
     { label: 'Certificación', value: 'Barbería Profesional' },
@@ -158,6 +160,7 @@ const dr_seifert: Professional = {
 
   aboutTitle: 'el Doctor',
   quote: 'Cada sonrisa es única. Mi trabajo es revelar la mejor versión de la tuya.',
+  finalQuote: 'Una sonrisa saludable y hermosa es la inversión más visible que puedes hacer en ti mismo.',
   bio: 'El Dr. Ivan Seifert es especialista en Odontología Estética y Restauradora, egresado de la Universidad Mayor de San Andrés con especialización en Implantología Oral en São Paulo, Brasil. Con más de 12 años de experiencia, combina tecnología de vanguardia con un enfoque artístico para crear sonrisas naturales y duraderas, siempre priorizando la salud bucal y el bienestar del paciente.',
   credentials: [
     { label: 'Formación',       value: 'Univ. Mayor de San Simon' },

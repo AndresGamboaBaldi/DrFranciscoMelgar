@@ -8,6 +8,7 @@ import Hero          from '../components/Hero'
 import Services      from '../components/Services'
 import About         from '../components/About'
 import Footer        from '../components/Footer'
+import QuoteSection  from '../components/QuoteSection'
 import BookingDialog from '../components/booking/BookingDialog'
 import SetupPage     from './SetupPage'
 import type { Professional } from '../types/professional'
@@ -116,6 +117,7 @@ export default function ProfessionalPage() {
                 <Services />
                 <div className="divider" />
                 <About />
+                {pro.finalQuote && <><div className="divider" /><QuoteSection /></>}
               </main>
               <Footer />
               {bookingOpen && <BookingDialog onClose={() => setBookingOpen(false)} />}

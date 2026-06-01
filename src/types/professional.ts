@@ -102,6 +102,9 @@ export interface Professional {
   bio: string
   credentials: ProCredential[]
 
+  /** Frase final que aparece debajo del Acerca de — centrada y destacada */
+  finalQuote?: string
+
   // ── Servicios ───────────────────────────────────────────────
   services: ProService[]
 

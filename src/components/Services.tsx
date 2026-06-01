@@ -91,12 +91,12 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
         }} />
       )}
 
-      {/* Dark overlay — stronger on collapsed */}
+      {/* Dark overlay — always a bottom gradient + dimmer on collapsed */}
       <div style={{
         position: 'absolute', inset: 0,
         background: expanded
-          ? 'linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.15) 60%, transparent 100%)'
-          : 'rgba(0,0,0,.52)',
+          ? 'linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.18) 55%, transparent 100%)'
+          : 'linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.35) 50%, rgba(0,0,0,.25) 100%)',
         transition: 'background 0.4s',
       }} />
 
@@ -109,17 +109,6 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
         transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
       }} />
 
-      {/* Number — hidden on mobile when collapsed */}
-      <div style={{
-        position: 'absolute', top: '1rem', left: '1.25rem',
-        fontFamily: 'var(--font-display)',
-        fontSize: expanded ? '1.5rem' : '1.1rem',
-        fontWeight: 300,
-        color: expanded ? 'var(--color-gold)' : 'rgba(255,255,255,.5)',
-        lineHeight: 1,
-        transition: 'font-size 0.4s, color 0.3s, opacity 0.3s',
-        opacity: (!IS_HOVER_DEVICE && !expanded) ? 0 : 1,
-      }}>{num}</div>
 
       {/* Bottom content */}
       <div style={{
@@ -127,12 +116,15 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
         padding: expanded ? '1.75rem 1.5rem' : '1.25rem 1.25rem',
         transition: 'padding 0.4s',
       }}>
-        {/* Tag */}
+        {/* Tag — pill with backdrop */}
         <span style={{
-          display: 'block',
-          fontSize: '.62rem', letterSpacing: '.18em', textTransform: 'uppercase',
-          color: 'var(--color-gold)',
-          marginBottom: '.4rem',
+          display: 'inline-block',
+          fontSize: '.6rem', letterSpacing: '.16em', textTransform: 'uppercase',
+          color: '#111',
+          background: 'rgba(255,255,255,.88)',
+          backdropFilter: 'blur(6px)',
+          padding: '.2rem .6rem',
+          marginBottom: '.6rem',
           opacity: expanded ? 1 : 0,
           transform: expanded ? 'translateY(0)' : 'translateY(6px)',
           transition: 'opacity 0.3s 0.1s, transform 0.3s 0.1s',
@@ -150,7 +142,8 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
           textOverflow: 'ellipsis',
           marginBottom: expanded ? '.85rem' : 0,
           transition: 'font-size 0.4s, margin 0.3s, opacity 0.3s',
-            opacity: 1,
+          opacity: 1,
+          textShadow: '0 1px 8px rgba(0,0,0,.9), 0 2px 16px rgba(0,0,0,.6)',
         }}>{svc.name}</h3>
 
         {/* Description */}
@@ -158,6 +151,7 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
           fontSize: '.85rem', lineHeight: 1.75,
           color: 'rgba(255,255,255,.82)',
           fontWeight: 300,
+          textShadow: '0 1px 6px rgba(0,0,0,.8)',
           maxHeight: expanded ? '8rem' : 0,
           overflow: 'hidden',
           opacity: expanded ? 1 : 0,
@@ -166,14 +160,16 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
           marginBottom: expanded ? '.75rem' : 0,
         }}>{svc.description}</p>
 
-        {/* Price */}
+        {/* Price — pill with accent bg */}
         <span style={{
-          fontSize: '.8rem',
-          color: 'var(--color-gold)',
-          fontWeight: 400,
+          display: 'inline-block',
+          fontSize: '.78rem',
+          color: '#fff',
+          fontWeight: 500,
+          background: 'var(--color-gold)',
+          padding: '.25rem .75rem',
           opacity: expanded ? 1 : 0,
           transform: expanded ? 'translateY(0)' : 'translateY(6px)',
-          display: 'block',
           transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s',
         }}>{svc.price}</span>
       </div>
