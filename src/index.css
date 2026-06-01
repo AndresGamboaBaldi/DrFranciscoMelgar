@@ -186,6 +186,17 @@ input[type="time"], input[type="date"], input[type="number"] {
   }
 }
 
+/* ── Services accordion ── */
+.service-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-rim);
+}
+@media (min-width: 768px) {
+  .service-accordion { flex-direction: row; height: 540px; }
+}
+
 /* ── Tap target minimum (solo botones, no links de nav) ── */
 @media (max-width: 640px) {
   button { min-height: 44px; }

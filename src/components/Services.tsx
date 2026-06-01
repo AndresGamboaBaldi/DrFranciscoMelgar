@@ -8,7 +8,7 @@ const IS_HOVER_DEVICE =
 
 export default function Services() {
   const pro = useProfessional()
-  const [expandedId, setExpanded] = useState<string | null>(null)
+  const [expandedId, setExpanded] = useState<string | null>(pro.services[0]?.id ?? null)
 
   return (
     <section id="servicios" className="s-pad" style={{ background: 'var(--color-surface)', position: 'relative', overflow: 'hidden' }}>
@@ -25,129 +25,155 @@ export default function Services() {
         </Reveal>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 1, background: 'var(--color-rim)' }}>
-        {pro.services.map((svc, i) => (
-          <Reveal key={svc.id} delay={i * 60}>
-            <ServiceCard
-              svc={svc}
-              num={String(i + 1).padStart(2, '0')}
-              expanded={expandedId === svc.id}
-              onToggle={() => setExpanded(expandedId === svc.id ? null : svc.id)}
-            />
-          </Reveal>
-        ))}
-      </div>
+      <Reveal>
+        <div className="service-accordion">
+          {pro.services.map((svc, i) => {
+            const expanded = expandedId === svc.id
+            return (
+              <ServicePanel
+                key={svc.id}
+                svc={svc}
+                num={String(i + 1).padStart(2, '0')}
+                expanded={expanded}
+                onExpand={() => setExpanded(svc.id)}
+                onCollapse={() => setExpanded(null)}
+              />
+            )
+          })}
+        </div>
+      </Reveal>
     </section>
   )
 }
 
-/* ── ServiceCard ── */
+/* ── Service Panel ── */
 
 interface Svc { id: string; tag: string; name: string; description: string; duration: string; price: string; image?: string }
 
-function ServiceCard({ svc, num, expanded, onToggle }: { svc: Svc; num: string; expanded: boolean; onToggle: () => void }) {
-  const [hovered, setHovered] = useState(false)
-  const open = IS_HOVER_DEVICE ? hovered : expanded
-
-  const handleClick = () => { if (!IS_HOVER_DEVICE) onToggle() }
+function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
+  svc: Svc; num: string; expanded: boolean
+  onExpand: () => void; onCollapse: () => void
+}) {
+  const FALLBACK_COLORS = [
+    'linear-gradient(135deg, #1a1815 0%, #2d2820 100%)',
+    'linear-gradient(135deg, #181a1d 0%, #202530 100%)',
+    'linear-gradient(135deg, #1a1810 0%, #2a2418 100%)',
+    'linear-gradient(135deg, #16181a 0%, #242830 100%)',
+  ]
+  const fallback = FALLBACK_COLORS[parseInt(num) % FALLBACK_COLORS.length]
 
   return (
     <div
-      onClick={handleClick}
-      onMouseEnter={() => IS_HOVER_DEVICE && setHovered(true)}
-      onMouseLeave={() => IS_HOVER_DEVICE && setHovered(false)}
+      onMouseEnter={() => IS_HOVER_DEVICE && onExpand()}
+      onMouseLeave={() => IS_HOVER_DEVICE && onCollapse()}
+      onClick={() => !IS_HOVER_DEVICE && (expanded ? onCollapse() : onExpand())}
       style={{
-        // Without image: whole card changes on open. With image: handled per-section below.
-        background: !svc.image ? (open ? 'var(--color-surface2)' : 'var(--color-surface)') : 'var(--color-surface)',
-        position: 'relative', overflow: 'hidden',
-        cursor: IS_HOVER_DEVICE ? 'default' : 'pointer',
-        display: 'flex', flexDirection: 'column',
-        transition: 'background .3s',
+        /* Desktop: flex ratio controls width. Mobile: height ratio controls height */
+        flex: expanded ? '4 1 0' : '1 1 0',
+        minWidth: 0,
+        position: 'relative',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        transition: 'flex 0.55s cubic-bezier(0.16,1,0.3,1)',
+        background: fallback,
+        /* Mobile fixed heights */
+        minHeight: expanded ? '260px' : '80px',
       }}
     >
-      {/* ── Image area (or number area if no image) ── */}
-      {svc.image ? (
-        /* With image */
-        <div style={{ position: 'relative', overflow: 'hidden', height: '220px', flexShrink: 0 }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `url(${svc.image})`,
-            backgroundSize: 'cover', backgroundPosition: 'center',
-            transition: 'transform .6s cubic-bezier(0.16,1,0.3,1)',
-            transform: open ? 'scale(1.05)' : 'scale(1)',
-          }} />
-          {/* Gradient overlay */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.55))' }} />
-          {/* Number badge */}
-          <div style={{ position: 'absolute', top: '1rem', left: '1.25rem', fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 300, color: 'rgba(255,255,255,.75)', lineHeight: 1 }}>{num}</div>
-          {/* Top gold line on hover */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--color-gold)', transform: `scaleX(${open ? 1 : 0})`, transformOrigin: 'left', transition: 'transform .38s cubic-bezier(0.16,1,0.3,1)' }} />
-          {/* Tag overlay on image bottom */}
-          <span style={{ position: 'absolute', bottom: '.85rem', left: '1.25rem', fontSize: '.65rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,.8)', fontWeight: 400 }}>{svc.tag}</span>
-        </div>
-      ) : (
-        /* No image — content centered vertically */
-        <div style={{ position: 'relative', padding: '2rem 2rem 0', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--color-gold)', transform: `scaleX(${open ? 1 : 0})`, transformOrigin: 'left', transition: 'transform .38s cubic-bezier(0.16,1,0.3,1)' }} />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '3.5rem', fontWeight: 300, color: open ? 'var(--color-gold)' : 'var(--color-ink-ghost)', lineHeight: 1, opacity: open ? .25 : 1, transition: 'color .25s, opacity .25s' }}>{num}</div>
-          <span style={{ fontSize: '.68rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)', display: 'block', marginTop: '.75rem' }}>{svc.tag}</span>
-        </div>
+      {/* Background image */}
+      {svc.image && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url(${svc.image})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          transition: 'transform 0.6s cubic-bezier(0.16,1,0.3,1)',
+          transform: expanded ? 'scale(1.04)' : 'scale(1)',
+        }} />
       )}
 
-      {/* ── Text content ── */}
-      {/* Text content — only image cards change bg here; no-image cards change on the outer wrapper */}
-      <div style={{ padding: svc.image ? '1.5rem 1.75rem 2rem' : '1rem 2rem 2rem', flex: 1, background: svc.image ? (open ? 'var(--color-surface2)' : 'var(--color-surface)') : 'transparent', transition: 'background .3s', position: 'relative' }}>
-        {/* Tag (only shown here if has image — if no image, tag is in the number area) */}
-        {svc.image && (
-          <span style={{ fontSize: '.68rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)', display: 'block', marginBottom: '.5rem' }}>{svc.tag}</span>
-        )}
+      {/* Dark overlay — stronger on collapsed */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: expanded
+          ? 'linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.15) 60%, transparent 100%)'
+          : 'rgba(0,0,0,.52)',
+        transition: 'background 0.4s',
+      }} />
 
-        {/* Title — bigger and bolder */}
+      {/* Gold top line */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+        background: 'var(--color-gold)',
+        transform: `scaleX(${expanded ? 1 : 0})`,
+        transformOrigin: 'left',
+        transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+      }} />
+
+      {/* Number — top left */}
+      <div style={{
+        position: 'absolute', top: '1rem', left: '1.25rem',
+        fontFamily: 'var(--font-display)',
+        fontSize: expanded ? '1.5rem' : '1.1rem',
+        fontWeight: 300,
+        color: expanded ? 'var(--color-gold)' : 'rgba(255,255,255,.5)',
+        lineHeight: 1,
+        transition: 'font-size 0.4s, color 0.3s',
+      }}>{num}</div>
+
+      {/* Bottom content */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        padding: expanded ? '1.75rem 1.5rem' : '1.25rem 1.25rem',
+        transition: 'padding 0.4s',
+      }}>
+        {/* Tag */}
+        <span style={{
+          display: 'block',
+          fontSize: '.62rem', letterSpacing: '.18em', textTransform: 'uppercase',
+          color: 'var(--color-gold)',
+          marginBottom: '.4rem',
+          opacity: expanded ? 1 : 0,
+          transform: expanded ? 'translateY(0)' : 'translateY(6px)',
+          transition: 'opacity 0.3s 0.1s, transform 0.3s 0.1s',
+        }}>{svc.tag}</span>
+
+        {/* Title */}
         <h3 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(1.45rem, 2.5vw, 1.75rem)',
+          fontSize: expanded ? 'clamp(1.4rem,2.5vw,1.9rem)' : 'clamp(1rem,1.5vw,1.3rem)',
           fontWeight: 400,
-          lineHeight: 1.15,
-          color: 'var(--color-ink)',
-          paddingRight: IS_HOVER_DEVICE ? '0' : '2.5rem',
-          marginBottom: svc.image ? '.1rem' : '0',
-          minHeight: '3.5rem',  // reserva espacio para 2 líneas → títulos siempre del mismo alto
-        }}>
-          {svc.name}
-        </h3>
-
-        {/* Expandable: description + price */}
-        <div style={{
+          color: '#ffffff',
+          lineHeight: 1.1,
+          whiteSpace: expanded ? 'normal' : 'nowrap',
           overflow: 'hidden',
-          maxHeight: open ? '200px' : '0px',
-          opacity: open ? 1 : 0,
-          transform: open ? 'translateY(0)' : 'translateY(-6px)',
-          transition: open
-            ? 'max-height .38s cubic-bezier(0.16,1,0.3,1), opacity .3s .05s, transform .3s .05s'
-            : 'max-height .3s ease, opacity .2s, transform .2s',
-        }}>
-          <p style={{ fontSize: '.9rem', lineHeight: 1.85, color: 'var(--color-ink-dim)', fontWeight: 300, marginTop: '1rem' }}>
-            {svc.description}
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: '.75rem' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-gold)', fontWeight: 400 }}>{svc.price}</span>
-          </div>
-        </div>
+          textOverflow: 'ellipsis',
+          marginBottom: expanded ? '.85rem' : 0,
+          transition: 'font-size 0.4s, margin 0.3s',
+        }}>{svc.name}</h3>
 
-        {/* Toggle icon — mobile only */}
-        {!IS_HOVER_DEVICE && (
-          <div style={{
-            position: 'absolute', top: svc.image ? '1.5rem' : '1.5rem', right: '1.5rem',
-            width: '1.65rem', height: '1.65rem',
-            border: `1px solid ${open ? 'var(--color-gold)' : 'var(--color-rim-l)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: open ? 'var(--color-bg)' : 'var(--color-ink-ghost)',
-            background: open ? 'var(--color-gold)' : 'transparent',
-            fontSize: '.75rem',
-            transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
-            transition: 'all .28s cubic-bezier(0.16,1,0.3,1)',
-          }}>+</div>
-        )}
+        {/* Description */}
+        <p style={{
+          fontSize: '.85rem', lineHeight: 1.75,
+          color: 'rgba(255,255,255,.82)',
+          fontWeight: 300,
+          maxHeight: expanded ? '8rem' : 0,
+          overflow: 'hidden',
+          opacity: expanded ? 1 : 0,
+          transform: expanded ? 'translateY(0)' : 'translateY(8px)',
+          transition: 'max-height 0.4s, opacity 0.35s 0.15s, transform 0.35s 0.15s',
+          marginBottom: expanded ? '.75rem' : 0,
+        }}>{svc.description}</p>
+
+        {/* Price */}
+        <span style={{
+          fontSize: '.8rem',
+          color: 'var(--color-gold)',
+          fontWeight: 400,
+          opacity: expanded ? 1 : 0,
+          transform: expanded ? 'translateY(0)' : 'translateY(6px)',
+          display: 'block',
+          transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s',
+        }}>{svc.price}</span>
       </div>
     </div>
   )
