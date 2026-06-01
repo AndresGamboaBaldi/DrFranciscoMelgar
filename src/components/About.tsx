@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Reveal from './Reveal'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useOpenBooking }  from '../context/BookingDialogContext'
@@ -67,6 +67,8 @@ function PhotoArea({ photos }: { photos: string[] }) {
   const [current, setCurrent] = useState(0)
   const [prev,    setPrev]    = useState<number | null>(null)
   const [fading,  setFading]  = useState(false)
+  const [inView,  setInView]  = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const advance = useCallback((next: number) => {
     if (fading) return
@@ -76,14 +78,26 @@ function PhotoArea({ photos }: { photos: string[] }) {
     setTimeout(() => { setPrev(null); setFading(false) }, 700)
   }, [current, fading])
 
-  // Auto-advance only if multiple photos
+  // Start observing when component mounts
   useEffect(() => {
-    if (photos.length <= 1) return
+    const el = containerRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.3 }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  // Auto-advance ONLY when section is visible in viewport
+  useEffect(() => {
+    if (!inView || photos.length <= 1) return
     const id = setInterval(() => {
       advance((current + 1) % photos.length)
     }, CAROUSEL_INTERVAL)
     return () => clearInterval(id)
-  }, [photos.length, current, advance])
+  }, [inView, photos.length, current, advance])
 
   const FRAME: React.CSSProperties = {
     width: '100%',
@@ -121,7 +135,7 @@ function PhotoArea({ photos }: { photos: string[] }) {
   }
 
   return (
-    <div>
+    <div ref={containerRef}>
       <div
         style={FRAME}
         onMouseMove={handleMouseMove}

@@ -13,18 +13,17 @@ export default function Hero() {
   return (
     <section
       id="inicio"
+      className={hasPhoto ? 'hero-has-photo' : ''}
       style={{
         display: 'grid',
         gridTemplateColumns: hasPhoto ? 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))' : '1fr',
-        minHeight: '100vh',
         position: 'relative',
-        overflow: 'hidden',
       }}
     >
       {/* ── LEFT: content (untouched) ── */}
       <div
-        className="hero-pad flex flex-col justify-end md:justify-center"
-        style={{ position: 'relative', zIndex: 2, paddingTop: 'clamp(4rem,8vh,6rem)' }}
+        className="hero-pad hero-content-col flex flex-col justify-end md:justify-center"
+        style={{ position: 'relative', zIndex: 2 }}
       >
         {/* Vertical line — only when no photo */}
         {!hasPhoto && (
@@ -57,7 +56,8 @@ export default function Hero() {
             {pro.specialty}
           </p>
 
-          <p className="animate-fade-up" style={{ animationDelay: '.75s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.4rem,3vw,2.5rem)', fontWeight: 300, lineHeight: 1.4, maxWidth: '30rem', marginBottom: '2.5rem', color: 'var(--color-ink)' }}>
+          {/* Tagline hidden on mobile with photo to save vertical space */}
+          <p className="animate-fade-up hidden md:block" style={{ animationDelay: '.75s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.4rem,3vw,2.5rem)', fontWeight: 300, lineHeight: 1.4, maxWidth: '30rem', marginBottom: '2.5rem', color: 'var(--color-ink)' }}>
             {pro.tagline}
             <span style={{ display: 'block', color: 'var(--color-ink-dim)', fontSize: '90%' }}>{pro.taglineSub}</span>
           </p>
@@ -96,14 +96,12 @@ export default function Hero() {
       {/* ── RIGHT: photo contained + cards floating outside ── */}
       {hasPhoto && (
         <div
-          className="animate-fade-in"
+          className="animate-fade-in hero-photo-col"
           style={{
             animationDelay: '.4s',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            /* Mobile: tight padding. Desktop: generous */
-            padding: 'clamp(1.5rem,6vh,5rem) clamp(1.5rem,3vw,3rem)',
+            padding: 'clamp(1.5rem,5vh,3.5rem) clamp(1.5rem,3vw,3rem)',
             position: 'relative',
-            minHeight: 'clamp(75vw, 70vh, 100vh)',
           }}
         >
           {/* Photo container — 80% width, cards bleed outside */}
@@ -114,25 +112,25 @@ export default function Hero() {
               style={{
                 width: '100%', display: 'block',
                 objectFit: 'cover', objectPosition: 'center top',
-                maxHeight: '78vh',
+                maxHeight: '100%',
               }}
             />
 
             {/* Card 1 — bleeds LEFT, top area */}
             {pro.stats[0] && (
               <div style={{
-                position: 'absolute', top: '20%',
-                left: 'clamp(-3.5rem, -8vw, -2.25rem)',
+                position: 'absolute', top: '18%',
+                left: 'clamp(-1.25rem, -3vw, -2.25rem)',
                 background: 'var(--color-bg)',
                 border: '1px solid var(--color-rim-l)',
-                boxShadow: '0 6px 32px rgba(0,0,0,.12)',
-                padding: 'clamp(.85rem,2vw,1.1rem) clamp(1rem,2.5vw,1.4rem)',
-                minWidth: 'clamp(7rem,30vw,10rem)',
+                boxShadow: '0 4px 20px rgba(0,0,0,.12)',
+                padding: 'clamp(.5rem,1.5vw,1.1rem) clamp(.65rem,2vw,1.4rem)',
+                minWidth: 'clamp(5rem,22vw,10rem)',
               }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,6vw,2.8rem)', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.3rem' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem,4vw,2.8rem)', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.2rem' }}>
                   {pro.stats[0].n}
                 </div>
-                <div style={{ fontSize: 'clamp(.58rem,.9vw,.65rem)', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', fontWeight: 500, lineHeight: 1.4 }}>
+                <div style={{ fontSize: 'clamp(.5rem,.9vw,.65rem)', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', fontWeight: 500, lineHeight: 1.3 }}>
                   {pro.stats[0].label}
                 </div>
               </div>
@@ -141,19 +139,19 @@ export default function Hero() {
             {/* Card 2 — bleeds RIGHT, bottom area */}
             {pro.stats[1] && (
               <div style={{
-                position: 'absolute', bottom: '20%',
-                right: 'clamp(-3.5rem, -8vw, -2.25rem)',
+                position: 'absolute', bottom: '18%',
+                right: 'clamp(-1.25rem, -3vw, -2.25rem)',
                 background: 'var(--color-bg)',
                 border: '1px solid var(--color-rim-l)',
-                boxShadow: '0 6px 32px rgba(0,0,0,.12)',
-                padding: 'clamp(.85rem,2vw,1.1rem) clamp(1rem,2.5vw,1.4rem)',
+                boxShadow: '0 4px 20px rgba(0,0,0,.12)',
+                padding: 'clamp(.5rem,1.5vw,1.1rem) clamp(.65rem,2vw,1.4rem)',
                 textAlign: 'right',
-                minWidth: 'clamp(7rem,30vw,10rem)',
+                minWidth: 'clamp(5rem,22vw,10rem)',
               }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,6vw,2.8rem)', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.3rem' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.2rem,4vw,2.8rem)', fontWeight: 300, color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.2rem' }}>
                   {pro.stats[1].n}
                 </div>
-                <div style={{ fontSize: 'clamp(.58rem,.9vw,.65rem)', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', fontWeight: 500, lineHeight: 1.4 }}>
+                <div style={{ fontSize: 'clamp(.5rem,.9vw,.65rem)', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', fontWeight: 500, lineHeight: 1.3 }}>
                   {pro.stats[1].label}
                 </div>
               </div>

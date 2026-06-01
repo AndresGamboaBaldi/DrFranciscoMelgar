@@ -146,6 +146,7 @@ const dr_seifert: Professional = {
   photos: ['/dr_seifert/photos/drseifert.jpeg'],
   slug:      'dr_seifert',
   name:      'Dr. Ivan Seifert',
+  heroPhoto: '/dr_seifert/photos/drseifert.jpeg', 
   shortName: 'Dr. Seifert',
   title:     'Odontólogo Estético',
   specialty: 'Especialista en odontología estética, restauradora e implantología',

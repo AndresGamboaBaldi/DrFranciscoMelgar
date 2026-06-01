@@ -52,9 +52,52 @@ body::after {
 @media (max-width: 1024px) { .s-pad { padding: 5rem 2.5rem; } }
 @media (max-width: 640px)  { .s-pad { padding: 3.5rem 1.25rem; } }
 
-.hero-pad { padding: 0 4.5rem 7rem; min-height: 100vh; }
-@media (max-width: 1024px) { .hero-pad { padding: 0 2.5rem 5.5rem; } }
-@media (max-width: 640px)  { .hero-pad { padding: 0 1.25rem 4rem; } }
+/* Navbar heights */
+:root { --nav-h: 4.5rem; }
+@media (min-width: 768px) { :root { --nav-h: 5.5rem; } }
+
+/* ── hero-pad (desktop): padding-top = navbar so content clears it ── */
+.hero-pad {
+  padding: var(--nav-h) 4.5rem 3rem;
+  min-height: 100svh;
+}
+@media (max-width: 1024px) { .hero-pad { padding: var(--nav-h) 2.5rem 3rem; } }
+
+/* ── Desktop: section locked to 100svh ── */
+#inicio { height: auto; }
+@media (min-width: 768px) { #inicio { height: 100svh; overflow: hidden; } }
+
+/* ── Mobile: body starts below navbar — applies to ALL sections ── */
+@media (max-width: 767px) {
+  body { padding-top: var(--nav-h); }
+
+  #inicio {
+    margin-top: 0;
+    height: calc(100svh - var(--nav-h));
+    overflow: hidden;
+  }
+  /* hero-pad on mobile: no extra top padding (body padding handles it) */
+  .hero-pad {
+    padding: 1.5rem 1.25rem 2rem;
+    min-height: calc(100svh - var(--nav-h));
+  }
+
+  /* Mobile WITH photo: 42% photo / 58% text — text needs more room */
+  #inicio.hero-has-photo {
+    grid-template-columns: 1fr;
+    grid-template-rows: 42% 58%;
+  }
+  #inicio.hero-has-photo .hero-photo-col {
+    order: -1;
+    overflow: hidden;  /* clips photo to its row, never bleeds into text */
+  }
+  #inicio.hero-has-photo .hero-pad {
+    min-height: unset;
+    padding: 1rem 1.25rem 1.5rem;
+    justify-content: center;
+    overflow: hidden;  /* clips text content if screen is very small */
+  }
+}
 
 /* Section header — responsive flex */
 .s-header {
