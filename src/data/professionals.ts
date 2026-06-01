@@ -12,23 +12,23 @@ import type { Professional } from '../types/professional'
 //  1. DR. FRANCISCO MELGAR — Medicina Estética
 // ────────────────────────────────────────────────────────────────
 const doctor_melgar: Professional = {
-  photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar.jpeg'],
+  photos: ['/doctor_melgar/photos/drmelgar.jpeg', '/doctor_melgar/photos/drmelgar_ofi2.jpeg', '/doctor_melgar/photos/drmelgar_ofi3.jpeg', '/doctor_melgar/photos/drmelgar_ofi.jpeg'],
   slug:      'doctor_melgar',
-  heroPhoto: '/doctor_melgar/hero.jpg',   // ← pon aquí la foto del hero
+  heroPhoto: '/doctor_melgar/photos/drmelgar_1.jpeg',   // ← pon aquí la foto del hero
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
   title:     'Médico Estético',
-  specialty: 'Especialista en estética avanzada y medicina antienvejecimiento',
+  specialty: 'Especialista en Medicina Estetica y Tricologia',
   location:  'Cochabamba, Bolivia',
-  tagline:    'La belleza no se crea,',
-  taglineSub: 'se revela con precisión.',
+  tagline:    'La confianza',
+  taglineSub: 'comienza aquí.',
   stats: [
-    { n: '+3.000', label: 'Pacientes atendidos' },
-    { n: '15+',    label: 'Años de experiencia' },
+    { n: '+1.000', label: 'Pacientes atendidos' },
+    { n: '5+',    label: 'Años de experiencia' },
   ],
 
   aboutTitle: 'del Doctor',
-  finalQuote: 'La belleza no está en la perfección, sino en la armonía entre la ciencia y la sutileza.',
+  finalQuote: 'La mejor inversión es en ti mismo.',
   bio: 'Después de años de formación en España y Brasil, dos referentes mundiales en medicina estética, y con experiencia en congresos internacionales junto a los mejores especialistas del mundo, llego a Bolivia para brindarte lo último en estética y salud capilar. Mi consulta nace con la visión de que la medicina estética no debe cambiar quien eres, sino resaltar tu mejor versión con elegancia, naturalidad y confianza. Cada detalle de mi práctica esta pensada para ofrecerte una experiencia personalizada y cercana, porque la verdadera transformación se refleja no solo en tu imagen, sino en la seguridad con la que eliges presentarte al mundo.',
   credentials: [
     { label: 'Formación',       value: 'Universidad Privada del Valle' },
