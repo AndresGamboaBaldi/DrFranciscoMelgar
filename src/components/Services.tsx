@@ -109,7 +109,7 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
         transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
       }} />
 
-      {/* Number — top left */}
+      {/* Number — hidden on mobile when collapsed */}
       <div style={{
         position: 'absolute', top: '1rem', left: '1.25rem',
         fontFamily: 'var(--font-display)',
@@ -117,7 +117,8 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
         fontWeight: 300,
         color: expanded ? 'var(--color-gold)' : 'rgba(255,255,255,.5)',
         lineHeight: 1,
-        transition: 'font-size 0.4s, color 0.3s',
+        transition: 'font-size 0.4s, color 0.3s, opacity 0.3s',
+        opacity: (!IS_HOVER_DEVICE && !expanded) ? 0 : 1,
       }}>{num}</div>
 
       {/* Bottom content */}
@@ -137,7 +138,7 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
           transition: 'opacity 0.3s 0.1s, transform 0.3s 0.1s',
         }}>{svc.tag}</span>
 
-        {/* Title */}
+        {/* Title — hidden on mobile when collapsed (no space in 80px strip) */}
         <h3 style={{
           fontFamily: 'var(--font-display)',
           fontSize: expanded ? 'clamp(1.4rem,2.5vw,1.9rem)' : 'clamp(1rem,1.5vw,1.3rem)',
@@ -148,7 +149,8 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           marginBottom: expanded ? '.85rem' : 0,
-          transition: 'font-size 0.4s, margin 0.3s',
+          transition: 'font-size 0.4s, margin 0.3s, opacity 0.3s',
+            opacity: 1,
         }}>{svc.name}</h3>
 
         {/* Description */}
