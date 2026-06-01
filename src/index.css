@@ -67,35 +67,22 @@ body::after {
 #inicio { height: auto; }
 @media (min-width: 768px) { #inicio { height: 100svh; overflow: hidden; } }
 
-/* ── Mobile: body starts below navbar — applies to ALL sections ── */
+/* ── Mobile ── */
 @media (max-width: 767px) {
-  body { padding-top: var(--nav-h); }
+  #inicio { height: auto; overflow: visible; }
 
-  #inicio {
-    margin-top: 0;
-    height: calc(100svh - var(--nav-h));
-    overflow: hidden;
-  }
-  /* hero-pad on mobile: no extra top padding (body padding handles it) */
+  /* hero-pad: padding-top = navbar height, min-height = full screen */
   .hero-pad {
-    padding: 1.5rem 1.25rem 2rem;
-    min-height: calc(100svh - var(--nav-h));
+    padding: var(--nav-h) 1.25rem 2rem;
+    min-height: 100vh;
   }
 
-  /* Mobile WITH photo: 42% photo / 58% text — text needs more room */
-  #inicio.hero-has-photo {
-    grid-template-columns: 1fr;
-    grid-template-rows: 42% 58%;
-  }
-  #inicio.hero-has-photo .hero-photo-col {
-    order: -1;
-    overflow: hidden;  /* clips photo to its row, never bleeds into text */
-  }
+  /* Mobile WITH photo: hide photo entirely, text fills screen */
+  #inicio.hero-has-photo .hero-photo-col { display: none; }
   #inicio.hero-has-photo .hero-pad {
-    min-height: unset;
-    padding: 1rem 1.25rem 1.5rem;
-    justify-content: center;
-    overflow: hidden;  /* clips text content if screen is very small */
+    min-height: 100vh;
+    padding: var(--nav-h) 1.25rem 2rem;
+    justify-content: flex-end;
   }
 }
 
