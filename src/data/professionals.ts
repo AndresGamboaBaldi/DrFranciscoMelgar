@@ -45,8 +45,8 @@ const doctor_melgar: Professional = {
     { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    duration: '60 min', price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
   ],
 
-  phone:   '59172235605',
-  email:   'citas@drmelgar.bo',
+  phone:   '59172235604',
+  email:   'melgarbaldi.hf@gmail.com',
   address: 'Parque Fidel Anze #2345, Of. 8B\nCochabamba, Bolivia',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 14:00'],
 
