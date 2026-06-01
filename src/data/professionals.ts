@@ -53,8 +53,13 @@ const doctor_melgar: Professional = {
   // ── Tema: luz cálida / clínica de lujo ──
   theme: {
     mode:        'light',
-    accent:      '#b07c35',   // dorado más profundo — mejor contraste sobre blanco
+    accent:      '#b07c35',
     accentLight: '#c48c45',
+    fonts: {
+      display:        'Playfair Display',
+      body:           'DM Sans',
+      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
+    },
   },
 
   // ── Reservas: slots de 60 min, 24h de anticipación, Lun-Sáb ──
@@ -108,10 +113,16 @@ const barber_vip: Professional = {
   address: 'Av Uyuni #1234\nCochabamba, Bolivia',
   schedule: ['Mar — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 15:00'],
 
-  // ── Tema: azul acero (diferente al médico) ──
+  // ── Tema: oscuro + Bebas Neue / Inter ──
   theme: {
-    accent:      '#b07c35',   // dorado más profundo — mejor contraste sobre blanco
-    accentLight: '#c48c45',
+    mode:        'dark',
+    accent:      '#4a8fa8',
+    accentLight: '#5ca3bf',
+    fonts: {
+      display:        'Bebas Neue',
+      body:           'Inter',
+      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
+    },
   },
 
   // ── Reservas: slots de 30 min, sin anticipación mínima, Mar-Dom ──
@@ -131,7 +142,7 @@ const barber_vip: Professional = {
 //  3. DR. IVAN SEIFERT — Odontología Estética
 // ────────────────────────────────────────────────────────────────
 const dr_seifert: Professional = {
-  photos: ['/photos/drseifert.jpeg'],
+  photos: ['/dr_seifert/photos/drseifert.jpeg'],
   slug:      'dr_seifert',
   name:      'Dr. Ivan Seifert',
   shortName: 'Dr. Seifert',
@@ -156,9 +167,9 @@ const dr_seifert: Professional = {
   ],
 
   services: [
-    { id: 'limpieza',      name: 'Limpieza & Profilaxis',  tag: 'Preventivo',   duration: '60 min', price: 'Desde Bs. 180', icon: '◈', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/services/limpieza.jpg'  },
-    { id: 'blanqueamiento',name: 'Blanqueamiento Dental',  tag: 'Estético',     duration: '90 min', price: 'Desde Bs. 450', icon: '◉', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/services/blanqueamiento.jpg'  },
-    { id: 'carillas',      name: 'Carillas de Porcelana',  tag: 'Diseño',       duration: 'Variable', price: 'Desde Bs. 650', icon: '◇', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/services/carillas.jpg'  },
+    { id: 'limpieza',      name: 'Limpieza & Profilaxis',  tag: 'Preventivo',   duration: '60 min', price: 'Desde Bs. 180', icon: '◈', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/dr_seifert//services/limpieza.jpg'  },
+    { id: 'blanqueamiento',name: 'Blanqueamiento Dental',  tag: 'Estético',     duration: '90 min', price: 'Desde Bs. 450', icon: '◉', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/dr_seifert//services/blanqueamiento.jpg'  },
+    { id: 'carillas',      name: 'Carillas de Porcelana',  tag: 'Diseño',       duration: 'Variable', price: 'Desde Bs. 650', icon: '◇', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/dr_seifert//services/carillas.jpg'  },
   ],
 
 
@@ -184,7 +195,7 @@ const dr_seifert: Professional = {
   },
 
   doctorId:        'dr_seifert',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=bd94b90f5a0d0e6669314ee25b1ef27fdbc439ea787935a4afd150fd37fc6fb6',  // ← completa después del paso 2 abajo
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',  // ← completa después del paso 2 abajo
 }
 
 // ────────────────────────────────────────────────────────────────

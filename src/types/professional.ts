@@ -20,6 +20,23 @@ export interface ProfessionalTheme {
   mode?: 'light' | 'dark'  // 'dark' por defecto
   accent: string            // color principal: botones, highlights, títulos em
   accentLight?: string      // hover del acento (si no se pone, se calcula solo)
+  /**
+   * Tipografías personalizadas. Si no se especifica, usa Cormorant Garamond + Jost.
+   *
+   * display → títulos grandes (h1, h2, h3, quotes)
+   * body    → texto corriente, botones, labels
+   * googleFontsUrl → URL de Google Fonts para cargar las fuentes (opcional si ya están instaladas)
+   *
+   * Ejemplo:
+   *   display: 'Playfair Display'
+   *   body: 'DM Sans'
+   *   googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap'
+   */
+  fonts?: {
+    display: string
+    body: string
+    googleFontsUrl?: string
+  }
 }
 
 /** Configuración del sistema de reservas */

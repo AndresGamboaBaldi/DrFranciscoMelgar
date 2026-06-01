@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../data/professionals'
 import { ProfessionalContext } from '../context/ProfessionalContext'
@@ -29,11 +29,18 @@ function buildThemeVars(pro: Professional): React.CSSProperties {
   const accent  = pro.theme?.accent      ?? '#c4995a'
   const accentL = pro.theme?.accentLight ?? lightenHex(accent, 18)
   const mode    = pro.theme?.mode        ?? 'dark'
+  const fonts   = pro.theme?.fonts
 
-  const shared = {
+  const shared: Record<string, string> = {
     '--color-gold':      accent,
     '--color-gold-l':    accentL,
     '--color-gold-glow': hexToRgba(accent, 0.1),
+  }
+
+  // Override font variables if custom fonts are specified
+  if (fonts) {
+    shared['--font-display'] = `'${fonts.display}', serif`
+    shared['--font-body']    = `'${fonts.body}', sans-serif`
   }
 
   if (mode === 'light') {
@@ -77,6 +84,20 @@ export default function ProfessionalPage() {
 
   const isLight   = pro.theme?.mode === 'light'
   const themeVars = buildThemeVars(pro)
+
+  // Dynamically load Google Fonts if the professional has custom fonts
+  useEffect(() => {
+    const url = pro.theme?.fonts?.googleFontsUrl
+    if (!url) return
+    const existing = document.getElementById(`gf-${pro.slug}`)
+    if (existing) return  // already loaded
+    const link = document.createElement('link')
+    link.id   = `gf-${pro.slug}`
+    link.rel  = 'stylesheet'
+    link.href = url
+    document.head.appendChild(link)
+    // No cleanup — fonts stay cached for performance
+  }, [pro.slug, pro.theme?.fonts?.googleFontsUrl])
   const isSetup   = new URLSearchParams(window.location.search).has('setup')
 
   return (
