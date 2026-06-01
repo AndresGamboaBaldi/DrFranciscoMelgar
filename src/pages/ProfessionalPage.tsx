@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { getProfessional } from '../data/professionals'
 import { ProfessionalContext } from '../context/ProfessionalContext'
 import { BookingDialogContext } from '../context/BookingDialogContext'
+import { ProSEOHead } from '../components/SEOHead'
 import Navbar        from '../components/Navbar'
 import Hero          from '../components/Hero'
 import Services      from '../components/Services'
@@ -104,6 +105,7 @@ export default function ProfessionalPage() {
   return (
     <ProfessionalContext.Provider value={pro}>
       <BookingDialogContext.Provider value={{ openBooking: () => setBookingOpen(true) }}>
+        <ProSEOHead pro={pro} />
         {/* background + color use the INLINE var overrides, not the :root dark defaults */}
         <div style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark', background: 'var(--color-bg)', color: 'var(--color-ink)', minHeight: '100vh' }}>
           {isSetup ? (

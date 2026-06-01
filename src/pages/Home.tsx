@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PROFESSIONALS } from '../data/professionals'
 import type { Professional } from '../types/professional'
+import { HomeSEOHead } from '../components/SEOHead'
 
 const CATEGORY_LABELS: Record<string, string> = {
   all: 'Todos', medico: 'Médico', dentista: 'Dentista',
@@ -41,6 +42,7 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df' }}>
+      <HomeSEOHead />
 
       {/* ── Header ── */}
       <div style={{ padding: '4rem 1.5rem 2.5rem', textAlign: 'center' }}>
