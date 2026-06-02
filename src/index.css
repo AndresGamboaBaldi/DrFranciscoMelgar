@@ -153,6 +153,14 @@ textarea:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-gold) 15%, transparent);
 }
 input::placeholder, textarea::placeholder { color: var(--color-ink-ghost); }
+/* Home search bar placeholder override */
+.home-search::placeholder { color: rgba(255,255,255,.55) !important; }
+/* Home cards: same padding as filters on mobile, more on desktop */
+@media (min-width: 768px) { .home-cards-wrap { padding-left: clamp(1.5rem,3vw,2.5rem) !important; padding-right: clamp(1.5rem,3vw,2.5rem) !important; } }
+/* Mobile: card wrappers fill full container width (no maxWidth cap) */
+@media (max-width: 767px) {
+  .home-cards-wrap > div > div { max-width: 100% !important; flex: 1 1 100% !important; }
+}
 textarea { resize: vertical; min-height: 90px; }
 select {
   /* Arrow adapts to theme via CSS variable */

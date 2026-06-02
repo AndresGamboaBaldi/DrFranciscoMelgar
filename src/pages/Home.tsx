@@ -8,9 +8,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   all: 'Todos', medico: 'Médico', dentista: 'Dentista',
   barbero: 'Barbero', estetica: 'Estética', psicologo: 'Psicólogo', otro: 'Otro',
 }
+// Consistent single-color symbols — no multi-color emojis
 const CATEGORY_ICONS: Record<string, string> = {
-  all: '✦', medico: '🩺', dentista: '🦷',
-  barbero: '✂️', estetica: '✨', psicologo: '🧠', otro: '◇',
+  all: '◈', medico: '◉', dentista: '◎',
+  barbero: '◇', estetica: '◆', psicologo: '○', otro: '◌',
 }
 const GOLD = '#c4995a'
 const GOLD_L = '#d4b078'
@@ -47,15 +48,9 @@ export default function Home() {
       {/* ── Header ── */}
       <div style={{ padding: '4rem 1.5rem 2.5rem', textAlign: 'center' }}>
         <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2.5rem,7vw,5rem)', fontWeight: 300, color: '#ffffff', letterSpacing: '-.02em', marginBottom: '.4rem' }}>
-          Pro<span style={{
-            background: 'linear-gradient(90deg, #8B1515 0%, #8B1515 30%, #B89000 50%, #155520 70%, #155520 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            color: 'transparent',
-          }}>bo</span><em style={{ color: GOLD, WebkitTextFillColor: GOLD }}>.pro</em>
+          Probo<em style={{ color: GOLD }}>.pro</em>
         </p>
-        <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,.6)', maxWidth: '28rem', margin: '0 auto' }}>
+        <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,.75)', maxWidth: '28rem', margin: '0 auto' }}>
           Encuentra tu profesional y agenda en segundos
         </p>
       </div>
@@ -64,12 +59,13 @@ export default function Home() {
       <div style={{ padding: '0 1.5rem 2rem', width: '100%', maxWidth: '560px', margin: '0 auto' }}>
         {/* Search */}
         <div style={{ position: 'relative', marginBottom: '1.1rem' }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.35)', pointerEvents: 'none' }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', pointerEvents: 'none' }}>
             <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
             <path d="M11 11l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
           <input type="text" placeholder="Buscar profesional..." value={search} onChange={e => setSearch(e.target.value)}
-            style={{ paddingLeft: '2.75rem', background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.2)', color: '#ffffff', fontSize: '1rem', padding: '.85rem 1rem .85rem 2.75rem' }} />
+            className="home-search"
+            style={{ paddingLeft: '2.75rem', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.28)', color: '#ffffff', fontSize: '1rem', padding: '.85rem 1rem .85rem 2.75rem' }} />
         </div>
 
         {/* Category chips */}
@@ -78,11 +74,11 @@ export default function Home() {
             const active = category === cat
             return (
               <button key={cat} onClick={() => setCategory(cat)}
-                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.3rem', padding: '.4rem .5rem', background: active ? GOLD : 'transparent', color: active ? '#0a0907' : 'rgba(255,255,255,.5)', border: `1px solid ${active ? GOLD : 'rgba(255,255,255,.16)'}`, fontFamily: 'var(--font-body)', fontSize: '.73rem', fontWeight: active ? 500 : 300, letterSpacing: '.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.color = '#ffffff' }}}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'rgba(255,255,255,.16)'; e.currentTarget.style.color = 'rgba(255,255,255,.5)' }}}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.3rem', padding: '.42rem .5rem', background: active ? GOLD : 'rgba(255,255,255,.08)', color: active ? '#0a0907' : '#ffffff', border: `1px solid ${active ? GOLD : 'rgba(255,255,255,.22)'}`, fontFamily: 'var(--font-body)', fontSize: '.73rem', fontWeight: active ? 500 : 400, letterSpacing: '.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.background = 'rgba(255,255,255,.14)' }}}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'rgba(255,255,255,.22)'; e.currentTarget.style.background = 'rgba(255,255,255,.08)' }}}
               >
-                <span style={{ fontSize: '.9rem' }}>{CATEGORY_ICONS[cat] ?? '◇'}</span>
+                <span style={{ fontSize: '.9rem', color: active ? '#0a0907' : GOLD }}>{CATEGORY_ICONS[cat] ?? '◇'}</span>
                 {CATEGORY_LABELS[cat] ?? cat}
               </button>
             )
@@ -92,12 +88,12 @@ export default function Home() {
         {/* City chips */}
         {cities.length > 2 && (
           <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginRight: '.2rem' }}>Ciudad:</span>
+            <span style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginRight: '.2rem' }}>Ciudad:</span>
             {cities.map(c => {
               const active = city === c
               return (
                 <button key={c} onClick={() => setCity(c)}
-                  style={{ padding: '.3rem .7rem', background: active ? 'rgba(255,255,255,.14)' : 'transparent', color: active ? '#ffffff' : 'rgba(255,255,255,.38)', border: `1px solid ${active ? 'rgba(255,255,255,.35)' : 'rgba(255,255,255,.12)'}`, fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 300, letterSpacing: '.06em', cursor: 'pointer', transition: 'all .2s' }}
+                  style={{ padding: '.3rem .75rem', background: active ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.07)', color: active ? '#ffffff' : 'rgba(255,255,255,.7)', border: `1px solid ${active ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.2)'}`, fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: active ? 400 : 300, letterSpacing: '.06em', cursor: 'pointer', transition: 'all .2s' }}
                 >
                   {c === 'all' ? 'Todas' : c}
                 </button>
@@ -107,7 +103,7 @@ export default function Home() {
         )}
 
         {/* Count */}
-        <p style={{ fontSize: '.82rem', color: 'rgba(255,255,255,.35)', textAlign: 'center', marginBottom: '2rem' }}>
+        <p style={{ fontSize: 'clamp(1.25rem,3vw,1.75rem)', color: 'rgba(255,255,255,.85)', textAlign: 'center', marginBottom: '2rem', fontFamily: 'var(--font-display)', fontWeight: 300 }}>
           <span style={{ color: '#ffffff', fontWeight: 400 }}>{filtered.length}</span> profesional{filtered.length !== 1 ? 'es' : ''}
           {(search || category !== 'all' || city !== 'all') && (
             <button onClick={() => { setSearch(''); setCategory('all'); setCity('all') }}
@@ -118,8 +114,8 @@ export default function Home() {
         </p>
       </div>
 
-      {/* ── Cards — centered, max 4 per row on desktop ── */}
-      <div style={{ padding: '0 clamp(1rem,3vw,2.5rem) 5rem', maxWidth: '1320px', margin: '0 auto' }}>
+      {/* ── Cards — same horizontal padding as filters on mobile ── */}
+      <div style={{ padding: '0 1.5rem 5rem', maxWidth: '1320px', margin: '0 auto' }} className="home-cards-wrap">
         {filtered.length === 0 ? (
           <p style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.3rem', color: 'rgba(255,255,255,.35)', padding: '4rem 0' }}>
             Sin resultados para esos filtros.
@@ -167,8 +163,8 @@ function ProCard({ pro }: { pro: Professional }) {
       {/* Content */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 'clamp(1rem,3vw,1.75rem) clamp(.9rem,2.5vw,1.5rem)' }}>
         {/* Category badge */}
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.3rem', fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: '#000', background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(4px)', padding: '.2rem .55rem', marginBottom: '.55rem', fontWeight:'500'}}>
-          {CATEGORY_ICONS[cat]} {CATEGORY_LABELS[cat]}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.3rem', fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: '#000', background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(4px)', padding: '.2rem .55rem', marginBottom: '.55rem', fontWeight: '500' }}>
+          <span style={{ color: GOLD }}>{CATEGORY_ICONS[cat]}</span> {CATEGORY_LABELS[cat]}
         </span>
 
         {/* Name */}
