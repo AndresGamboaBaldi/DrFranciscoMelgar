@@ -8,13 +8,14 @@ import type { BookingFormData, Service, SelectedDate } from '../../types/booking
 
 const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
 
-function buildWhatsAppMessage({ patientName, service, date, time, phone }: {
-  patientName: string; service: string; date: string; time: string; phone: string
+function buildWhatsAppMessage({ patientName, service, duration, date, time, phone }: {
+  patientName: string; service: string; duration: string; date: string; time: string; phone: string
 }): string {
   const lines = [
     `*Nueva Cita*\n`,
     `*Paciente:* ${patientName}`,
     `*Servicio:* ${service}`,
+    `*Duración:* ${duration}`,
     `*Fecha:* ${date}`,
     `*Hora:* ${time}`,
     `*Telefono:* ${phone}`,
@@ -89,8 +90,9 @@ export default function BookingDialog({ onClose }: Props) {
         age:   form.age ? parseInt(form.age) : null,
         notes: form.notes.trim() || undefined,
         doctor_id: pro.doctorId,
+        duration_mins: service.durationMins ?? pro.bookingConfig.slotDuration,
       })
-      const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, date: formatDate(date), time, phone: form.phone.trim() })
+      const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, duration: service.duration, date: formatDate(date), time, phone: form.phone.trim() })
       const waFinalUrl = `https://wa.me/${pro.phone}?text=${encodeURIComponent(waMessage)}`
       setWaUrl(waFinalUrl)
       setSuccess(true)
@@ -192,6 +194,7 @@ export default function BookingDialog({ onClose }: Props) {
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
                   doctorId={pro.doctorId} bookingConfig={pro.bookingConfig}
+                  serviceDurationMins={service?.durationMins}
                   view="calendar"
                 />
               )}
@@ -202,6 +205,7 @@ export default function BookingDialog({ onClose }: Props) {
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
                   doctorId={pro.doctorId} bookingConfig={pro.bookingConfig}
+                  serviceDurationMins={service?.durationMins}
                   view="times"
                 />
               )}

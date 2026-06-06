@@ -3,7 +3,7 @@ import type { Service } from '../../types/booking'
 import type { ProService } from '../../types/professional'
 
 export function toBookingService(ps: ProService): Service {
-  return { id: ps.id, name: ps.name, tag: ps.tag, duration: ps.duration, price: ps.price, icon: ps.icon }
+  return { id: ps.id, name: ps.name, tag: ps.tag, duration: ps.duration, durationMins: ps.durationMins, price: ps.price, icon: ps.icon }
 }
 
 interface Props {
@@ -52,6 +52,7 @@ function ServiceCard({ svc, isSelected, onSelect }: { svc: Service; isSelected: 
       <div style={{ fontSize: '1.2rem', marginBottom: '.65rem', color: active ? 'var(--color-gold)' : 'var(--color-ink-ghost)', transition: 'color .2s' }}>{svc.icon}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, marginBottom: '.3rem', color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)', transition: 'color .2s', lineHeight: 1.15 }}>{svc.name}</div>
       <div style={{ fontSize: '.76rem', color: 'var(--color-gold)', fontWeight: 400 }}>{svc.price}</div>
+      <div style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', marginTop: '.25rem' }}>⏱ {svc.duration}</div>
     </div>
   )
 }

@@ -3,6 +3,8 @@ export interface ProService {
   name: string
   tag: string
   duration: string
+  /** Actual duration in minutes. If set, overrides bookingConfig.slotDuration for this service. */
+  durationMins?: number
   price: string
   icon: string
   description: string
@@ -66,6 +68,9 @@ export interface BookingConfig {
 
   /** Horario especial del domingo */
   sunHours?: { start: string; end: string } | null
+
+  /** Pausa del mediodía u otro break (null = sin pausa) */
+  breakHours?: { start: string; end: string } | null
 }
 
 export interface Professional {

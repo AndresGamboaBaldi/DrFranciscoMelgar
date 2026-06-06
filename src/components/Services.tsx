@@ -160,18 +160,11 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
           marginBottom: expanded ? '.75rem' : 0,
         }}>{svc.description}</p>
 
-        {/* Price — pill with accent bg */}
-        <span style={{
-          display: 'inline-block',
-          fontSize: '.78rem',
-          color: '#fff',
-          fontWeight: 500,
-          background: 'var(--color-gold)',
-          padding: '.25rem .75rem',
-          opacity: expanded ? 1 : 0,
-          transform: expanded ? 'translateY(0)' : 'translateY(6px)',
-          transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s',
-        }}>{svc.price}</span>
+        {/* Price + duration row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s' }}>
+          <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'var(--color-gold)', padding: '.25rem .75rem' }}>{svc.price}</span>
+          <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.7)', fontWeight: 300 }}>⏱ {svc.duration}</span>
+        </div>
       </div>
     </div>
   )

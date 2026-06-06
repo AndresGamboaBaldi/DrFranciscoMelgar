@@ -44,7 +44,7 @@ const doctor_melgar: Professional = {
     { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
     { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', duration: '75 min', price: 'Desde Bs. 480', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
     { id: 'peeling',     name: 'Peeling Médico',    tag: 'Renovación',      duration: '50 min', price: 'Desde Bs. 280', icon: '◫', description: 'Renueva la textura y luminosidad de la piel. Trata manchas, poros y marcas desde la primera sesión.' },
-    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    duration: '60 min', price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
+    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    duration: '60 min', durationMins: 60, price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
   ],
 
   phone:   '59172235604',
@@ -143,17 +143,17 @@ const barber_vip: Professional = {
 }
 
 // ────────────────────────────────────────────────────────────────
-//  3. DR. IVAN SEIFERT — Odontología Estética
+//  3. DR. IVAN SEIFERT — Endodoncia
 // ────────────────────────────────────────────────────────────────
 const dr_seifert: Professional = {
   photos: ['/dr_seifert/photos/dr_seifert_3.jpeg', '/dr_seifert/photos/dr_seifert_1.jpeg'],
-  heroPhoto: '/dr_seifert/photos/dr_seifert_2.jpeg', 
+  heroPhoto: '/dr_seifert/photos/dr_seifert_2.jpeg',
   slug:      'dr_seifert',
   category:  'dentista',
   name:      'Dr. Ivan Seifert',
   shortName: 'Dr. Seifert',
-  title:     'Odontólogo Estético',
-  specialty: 'Especialista en odontología estética, restauradora e implantología',
+  title:     'Especialista en Endodoncia',
+  specialty: 'Especialista en endodoncia y tratamiento de conductos',
   location:  'Cochabamba, Bolivia',
   tagline:   'Una sonrisa perfecta no es suerte,',
   taglineSub: 'es diseño.',
@@ -164,11 +164,11 @@ const dr_seifert: Professional = {
 
   aboutTitle: 'del Doctor',
   finalQuote: 'Una sonrisa saludable y hermosa es la inversión más visible que puedes hacer en ti mismo.',
-  bio: 'El Dr. Ivan Seifert es especialista en Odontología Estética y Restauradora, egresado de la Universidad Mayor de San Andrés con especialización en Implantología Oral en São Paulo, Brasil. Con más de 12 años de experiencia, combina tecnología de vanguardia con un enfoque artístico para crear sonrisas naturales y duraderas, siempre priorizando la salud bucal y el bienestar del paciente.',
+  bio: 'El Dr. Ivan Seifert es especialista en Endodoncia, egresado de la Universidad Mayor de San Andrés con especialización en tratamiento de conductos y patología pulpar. Con más de 12 años de experiencia, combina tecnología de vanguardia con precisión clínica para preservar la salud dental de sus pacientes, siempre priorizando el bienestar y la comodidad durante cada procedimiento.',
   credentials: [
     { label: 'Formación',       value: 'Univ. Mayor de San Simon' },
-    { label: 'Especialización', value: 'Implantología · São Paulo' },
-    { label: 'Área principal',  value: 'Odontología Estética' },
+    { label: 'Especialización', value: 'Endodoncia' },
+    { label: 'Área principal',  value: 'Tratamiento de Conductos' },
     { label: 'Certificaciones', value: 'ADA · LAOBO · SOB' },
   ],
 
@@ -238,7 +238,7 @@ const jhoel_cuts: Professional = {
   ],
 
   services: [
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     duration: '90 min', price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     duration: '120 min', durationMins: 120,price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
     { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
     { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
     { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },

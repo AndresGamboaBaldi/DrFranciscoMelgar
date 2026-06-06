@@ -25,9 +25,10 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
           Resumen de tu Cita
         </p>
         {[
-          { k: 'Servicio', v: summary.service.name },
-          { k: 'Fecha',    v: formatDate(summary.date) },
-          { k: 'Hora',     v: summary.time },
+          { k: 'Servicio',  v: summary.service.name },
+          { k: 'Duración',  v: summary.service.duration },
+          { k: 'Fecha',     v: formatDate(summary.date) },
+          { k: 'Hora',      v: summary.time },
         ].map((row, i, arr) => (
           <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '.6rem 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-rim)' : 'none', gap: '1rem' }}>
             <span style={{ fontSize: '.88rem', fontWeight: 400, letterSpacing: '.05em', color: 'var(--color-ink-dim)', flexShrink: 0 }}>{row.k}</span>

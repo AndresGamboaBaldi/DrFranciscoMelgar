@@ -20,8 +20,12 @@ export default function ScheduleEditor() {
   // Form state — initialized from professionals.ts, overridden by DB if present
   const def = pro.bookingConfig
   const [workDays,   setWorkDays]   = useState<number[]>(def.workDays)
-  const [workStart,  setWorkStart]  = useState(def.workHours.start)
-  const [workEnd,    setWorkEnd]    = useState(def.workHours.end)
+  // corrido = sin pausa; split = mañana + tarde
+  const [corrido,    setCorrido]    = useState(def.breakHours == null)
+  const [amStart,    setAmStart]    = useState(def.workHours.start)
+  const [amEnd,      setAmEnd]      = useState(def.breakHours?.start ?? '13:00')
+  const [pmStart,    setPmStart]    = useState(def.breakHours?.end   ?? '14:00')
+  const [pmEnd,      setPmEnd]      = useState(def.workHours.end)
   const [satActive,  setSatActive]  = useState(def.satHours !== undefined && def.satHours !== null)
   const [satStart,   setSatStart]   = useState(def.satHours?.start ?? '09:00')
   const [satEnd,     setSatEnd]     = useState(def.satHours?.end   ?? '14:00')
@@ -38,8 +42,11 @@ export default function ScheduleEditor() {
 
   const applySettings = useCallback((s: ScheduleSettings) => {
     setWorkDays(s.work_days)
-    setWorkStart(s.work_start)
-    setWorkEnd(s.work_end)
+    setCorrido(!s.break_start)
+    setAmStart(s.work_start)
+    setAmEnd(s.break_start ?? '13:00')
+    setPmStart(s.break_end ?? '14:00')
+    setPmEnd(s.work_end)
     setSatActive(!!s.sat_start)
     setSatStart(s.sat_start ?? '09:00')
     setSatEnd(s.sat_end   ?? '14:00')
@@ -62,8 +69,14 @@ export default function ScheduleEditor() {
 
   const handleSave = async () => {
     setError(''); setSaved(false)
-    if (workDays.length === 0)       { setError('Selecciona al menos un día de atención'); return }
-    if (workStart >= workEnd)        { setError('La hora de inicio debe ser anterior a la de cierre'); return }
+    if (workDays.length === 0) { setError('Selecciona al menos un día de atención'); return }
+    if (corrido) {
+      if (amStart >= pmEnd) { setError('La hora de inicio debe ser anterior a la de cierre'); return }
+    } else {
+      if (amStart >= amEnd)  { setError('Horario mañana inválido'); return }
+      if (pmStart >= pmEnd)  { setError('Horario tarde inválido'); return }
+      if (amEnd >= pmStart)  { setError('El horario de tarde debe comenzar después del horario de mañana'); return }
+    }
     if (satActive && satStart >= satEnd) { setError('Horario de sábado inválido'); return }
     if (sunActive && sunStart >= sunEnd) { setError('Horario de domingo inválido'); return }
 
@@ -72,12 +85,14 @@ export default function ScheduleEditor() {
       await saveScheduleSettings({
         doctor_id:     pro.doctorId,
         work_days:     workDays,
-        work_start:    workStart,
-        work_end:      workEnd,
+        work_start:    amStart,
+        work_end:      corrido ? pmEnd : pmEnd,
         sat_start:     satActive ? satStart : null,
         sat_end:       satActive ? satEnd   : null,
         sun_start:     sunActive ? sunStart : null,
         sun_end:       sunActive ? sunEnd   : null,
+        break_start:   corrido ? null : amEnd,
+        break_end:     corrido ? null : pmStart,
         slot_duration: slotDur,
         min_advance:   minAdv,
       })
@@ -114,14 +129,46 @@ export default function ScheduleEditor() {
         </div>
       </div>
 
-      {/* ── Work hours ── */}
-      <div>
-        <Label>Horario general</Label>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '.6rem', flexWrap: 'wrap' }}>
-          <TimeField label="Desde" value={workStart} onChange={setWorkStart} />
-          <span style={{ color: 'var(--color-ink-dim)', fontSize: '.8rem' }}>→</span>
-          <TimeField label="Hasta" value={workEnd}  onChange={setWorkEnd}  />
+      {/* ── Horario ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {/* Toggle corrido / partido */}
+        <div style={{ display: 'flex', gap: '.5rem' }}>
+          {(['corrido', 'partido'] as const).map(opt => {
+            const active = opt === 'corrido' ? corrido : !corrido
+            return (
+              <button key={opt} onClick={() => setCorrido(opt === 'corrido')}
+                style={{ padding: '.45rem 1.1rem', border: `1px solid ${active ? 'var(--color-gold)' : 'var(--color-rim-l)'}`, background: active ? 'rgba(196,153,90,.1)' : 'transparent', color: active ? 'var(--color-gold)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.73rem', fontWeight: active ? 400 : 300, letterSpacing: '.07em', cursor: 'pointer', transition: 'all .2s', textTransform: 'capitalize' }}
+              >{opt === 'corrido' ? 'Horario corrido' : 'Mañana y tarde'}</button>
+            )
+          })}
         </div>
+
+        {corrido ? (
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <TimeField label="Desde" value={amStart} onChange={setAmStart} />
+            <span style={{ color: 'var(--color-ink-dim)', fontSize: '.8rem' }}>→</span>
+            <TimeField label="Hasta" value={pmEnd}   onChange={setPmEnd}   />
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+            <div>
+              <Label>Mañana</Label>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <TimeField label="Desde" value={amStart} onChange={setAmStart} />
+                <span style={{ color: 'var(--color-ink-dim)', fontSize: '.8rem' }}>→</span>
+                <TimeField label="Hasta" value={amEnd}   onChange={setAmEnd}   />
+              </div>
+            </div>
+            <div>
+              <Label>Tarde</Label>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <TimeField label="Desde" value={pmStart} onChange={setPmStart} />
+                <span style={{ color: 'var(--color-ink-dim)', fontSize: '.8rem' }}>→</span>
+                <TimeField label="Hasta" value={pmEnd}   onChange={setPmEnd}   />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Saturday ── */}

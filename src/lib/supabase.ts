@@ -12,22 +12,47 @@ export const supabase = supabaseUrl && supabaseKey
 //  APPOINTMENTS
 // ─────────────────────────────────────────────────────────────
 
-export async function createAppointment(data: Omit<Appointment, 'id' | 'created_at' | 'status'>) {
+export async function createAppointment(data: Omit<Appointment, 'id' | 'created_at' | 'status'> & { duration_mins?: number }) {
   if (!supabase) { console.warn('[Supabase] not configured'); return null }
   const { error } = await supabase.from('appointments').insert([{ ...data, status: 'pending' }])
   if (error) throw error
   return null
 }
 
-export async function getBookedSlots(date: string, doctorId: string): Promise<string[]> {
+function expandBookedSlots(rows: { appointment_time: string; duration_mins: number | null }[], slotDuration: number): string[] {
+  const blocked = new Set<string>()
+  for (const r of rows) {
+    // Normalize "HH:MM:SS" → "HH:MM"
+    const [h, m] = r.appointment_time.substring(0, 5).split(':').map(Number)
+    const startMins = h * 60 + m
+    const totalMins = r.duration_mins ?? slotDuration
+    for (let offset = 0; offset < totalMins; offset += slotDuration) {
+      const t = startMins + offset
+      blocked.add(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`)
+    }
+  }
+  return [...blocked]
+}
+
+export async function getBookedSlots(date: string, doctorId: string, slotDuration = 30): Promise<string[]> {
   if (!supabase) return []
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('appointments')
-    .select('appointment_time')
+    .select('appointment_time, duration_mins')
     .eq('appointment_date', date)
     .eq('doctor_id', doctorId)
     .in('status', ['pending', 'confirmed'])
-  return (data ?? []).map((r: { appointment_time: string }) => r.appointment_time)
+  if (error) {
+    // duration_mins column may not exist yet — fall back to blocking only start time
+    const { data: fallback } = await supabase
+      .from('appointments')
+      .select('appointment_time')
+      .eq('appointment_date', date)
+      .eq('doctor_id', doctorId)
+      .in('status', ['pending', 'confirmed'])
+    return (fallback ?? []).map((r: { appointment_time: string }) => r.appointment_time.substring(0, 5))
+  }
+  return expandBookedSlots(data ?? [], slotDuration)
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -95,6 +120,8 @@ export interface ScheduleSettings {
   sat_end:       string | null
   sun_start:     string | null
   sun_end:       string | null
+  break_start:   string | null
+  break_end:     string | null
   slot_duration: number
   min_advance:   number
 }

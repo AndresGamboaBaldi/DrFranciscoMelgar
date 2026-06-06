@@ -12,6 +12,7 @@ function settingsToConfig(s: ScheduleSettings): BookingConfig {
     workHours:       { start: s.work_start, end: s.work_end },
     satHours:        s.sat_start ? { start: s.sat_start, end: s.sat_end! } : null,
     sunHours:        s.sun_start ? { start: s.sun_start, end: s.sun_end! } : null,
+    breakHours:      s.break_start ? { start: s.break_start, end: s.break_end! } : null,
   }
 }
 
@@ -25,6 +26,7 @@ interface Props {
   onTimeChange: (t: string) => void
   bookingConfig: BookingConfig
   doctorId: string
+  serviceDurationMins?: number  // overrides slotDuration for availability check
   view?: 'calendar' | 'times' | 'both'  // default: 'both'
 }
 
@@ -115,13 +117,14 @@ function findFirstAvailableMonth(cfg: BookingConfig): Date {
   return new Date(y, m, 1)
 }
 
-export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, bookingConfig: cfgProp, doctorId, view = 'both' }: Props) {
+export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, bookingConfig: cfgProp, doctorId, serviceDurationMins, view = 'both' }: Props) {
   const [calMonth, setCalMonth]     = useState(() => findFirstAvailableMonth(cfgProp))
-  const [bookedSlots, setBooked]    = useState<string[]>([])
-  const [monthBlocks, setBlocks]    = useState<BlockedSlot[]>([])
-  const [dayBlocks, setDayBlocks]   = useState<BlockedSlot[]>([])
-  const [dbCfg, setDbCfg]           = useState<BookingConfig | null>(null)
-  const [cfgLoading, setCfgLoading] = useState(true)
+  const [bookedSlots, setBooked]      = useState<string[]>([])
+  const [bookedSlotsDate, setBookedSlotsDate] = useState<string | null>(null)
+  const [monthBlocks, setBlocks]      = useState<BlockedSlot[]>([])
+  const [dayBlocks, setDayBlocks]     = useState<BlockedSlot[]>([])
+  const [dbCfg, setDbCfg]             = useState<BookingConfig | null>(null)
+  const [cfgLoading, setCfgLoading]   = useState(true)
 
   // Active config: DB settings take priority over professionals.ts defaults
   const cfg = dbCfg ?? cfgProp
@@ -156,9 +159,13 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
   useEffect(() => {
     if (!selectedDate) return
     const iso = `${selectedDate.y}-${String(selectedDate.m+1).padStart(2,'0')}-${String(selectedDate.d).padStart(2,'0')}`
-    getBookedSlots(iso, doctorId).then(setBooked)
+    setBookedSlotsDate(null)
+    getBookedSlots(iso, doctorId, cfg.slotDuration).then(slots => {
+      setBooked(slots)
+      setBookedSlotsDate(iso)
+    })
     setDayBlocks(monthBlocks.filter(b => b.date === iso))
-  }, [selectedDate, doctorId, monthBlocks])
+  }, [selectedDate, doctorId, monthBlocks, cfg.slotDuration])
 
   const firstDow    = (() => { const d = new Date(y,m,1).getDay(); return d===0?6:d-1 })()
   const daysInMonth = new Date(y, m+1, 0).getDate()
@@ -178,7 +185,29 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
     const hrs = dow===6 && cfg.satHours!==undefined ? cfg.satHours
               : dow===0 && cfg.sunHours!==undefined ? cfg.sunHours
               : cfg.workHours
-    return hrs ? generateSlots(hrs.start, hrs.end, cfg.slotDuration) : []
+    if (!hrs) return []
+    const slots = generateSlots(hrs.start, hrs.end, cfg.slotDuration)
+    if (!cfg.breakHours) return slots
+    const bStart = timeToMins(cfg.breakHours.start)
+    const bEnd   = timeToMins(cfg.breakHours.end)
+    return slots.filter(s => {
+      const m = timeToMins(s)
+      return m < bStart || m >= bEnd
+    })
+  }
+
+  // Returns true if a slot doesn't have enough consecutive free space for the service duration
+  const lacksSpace = (slot: string, allSlots: string[], blocked: string[], adminBlocks: BlockedSlot[]) => {
+    const svcMins = serviceDurationMins ?? cfg.slotDuration
+    if (svcMins <= cfg.slotDuration) return false  // single slot — no extra check needed
+    const slotsNeeded = Math.ceil(svcMins / cfg.slotDuration)
+    const idx = allSlots.indexOf(slot)
+    for (let i = 0; i < slotsNeeded; i++) {
+      const s = allSlots[idx + i]
+      if (!s) return true  // not enough slots left in the day
+      if (blocked.includes(s) || isSlotBlocked(s, adminBlocks)) return true
+    }
+    return false
   }
 
   // Check if a day has partial blocks (shows a small indicator)
@@ -200,15 +229,20 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
             {formatSelectedDate(selectedDate)}
           </p>
         </div>
-        {slots.length === 0
+        {cfgLoading || (selectedDate && `${selectedDate.y}-${String(selectedDate.m+1).padStart(2,'0')}-${String(selectedDate.d).padStart(2,'0')}` !== bookedSlotsDate)
+          ? <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '.5rem' }}>
+              {Array.from({ length: 8 }, (_, i) => <div key={i} style={{ height: '2.5rem', borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 20%, transparent)', animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${i * 60}ms` }} />)}
+            </div>
+          : slots.length === 0
           ? <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.93rem', color: 'var(--color-ink-ghost)' }}>Sin horarios disponibles este día.</p>
           : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '.5rem' }}>
               {slots.map(slot => {
-                const busy    = bookedSlots.includes(slot)
+                const busy     = bookedSlots.includes(slot)
                 const adminOff = isSlotBlocked(slot, dayBlocks)
                 const tooSoon  = isTooSoon(selectedDate.y, selectedDate.m, selectedDate.d, slot, cfg.minAdvanceHours)
-                const off      = busy || adminOff || tooSoon
+                const noSpace  = lacksSpace(slot, slots, bookedSlots, dayBlocks)
+                const off      = busy || adminOff || tooSoon || noSpace
                 const sel      = selectedTime === slot
                 return (
                   <button key={slot} onClick={() => !off && onTimeChange(slot)} disabled={off}
@@ -307,6 +341,10 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
         <h4 style={{ fontFamily:'var(--font-display)', fontSize:'1.05rem', fontWeight:400, marginBottom:'1.2rem' }}>Horarios disponibles</h4>
         {!selectedDate
           ? <p style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontSize:'.88rem', color:'var(--color-ink-ghost)' }}>Selecciona una fecha para ver los horarios.</p>
+          : cfgLoading || (selectedDate && `${selectedDate.y}-${String(selectedDate.m+1).padStart(2,'0')}-${String(selectedDate.d).padStart(2,'0')}` !== bookedSlotsDate)
+          ? <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'.45rem' }}>
+              {Array.from({ length: 6 }, (_, i) => <div key={i} style={{ height: '2rem', borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 20%, transparent)', animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${i * 60}ms` }} />)}
+            </div>
           : (() => {
               const slots = getSlots(selectedDate)
               if (!slots.length) return <p style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontSize:'.88rem', color:'var(--color-ink-ghost)' }}>Sin horarios este día.</p>
@@ -316,7 +354,8 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
                     const booked    = bookedSlots.includes(slot)
                     const adminOff  = isSlotBlocked(slot, dayBlocks)
                     const tooSoon   = isTooSoon(selectedDate.y, selectedDate.m, selectedDate.d, slot, cfg.minAdvanceHours)
-                    const off       = booked || adminOff || tooSoon
+                    const noSpace   = lacksSpace(slot, slots, bookedSlots, dayBlocks)
+                    const off       = booked || adminOff || tooSoon || noSpace
                     const sel       = selectedTime === slot
                     return (
                       <div key={slot} onClick={() => !off && onTimeChange(slot)}
