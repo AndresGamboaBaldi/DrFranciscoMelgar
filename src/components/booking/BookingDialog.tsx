@@ -80,10 +80,6 @@ export default function BookingDialog({ onClose }: Props) {
   const submit = async () => {
     if (!validate() || !service || !date || !time) return
 
-    // Open blank window SYNCHRONOUSLY while still in the user gesture
-    // then update its URL after the async work — avoids popup blocker
-    const waWindow = window.open('', '_blank')
-
     setLoading(true)
     try {
       const isoDate = `${date.y}-${String(date.m + 1).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`
@@ -96,18 +92,11 @@ export default function BookingDialog({ onClose }: Props) {
       })
       const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, date: formatDate(date), time, phone: form.phone.trim() })
       const waFinalUrl = `https://wa.me/${pro.phone}?text=${encodeURIComponent(waMessage)}`
-
-      // Navigate the already-open window to WhatsApp
-      if (waWindow) {
-        waWindow.location.href = waFinalUrl
-      }
-
-      // Also store as fallback button in case window was blocked
       setWaUrl(waFinalUrl)
       setSuccess(true)
+      window.open(waFinalUrl, '_blank')
     } catch (err) {
       console.error(err)
-      waWindow?.close()
       alert('Ocurrió un error. Por favor intenta de nuevo o contáctanos directamente.')
     } finally {
       setLoading(false)

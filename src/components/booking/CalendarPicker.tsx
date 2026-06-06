@@ -121,16 +121,17 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
   const [monthBlocks, setBlocks]    = useState<BlockedSlot[]>([])
   const [dayBlocks, setDayBlocks]   = useState<BlockedSlot[]>([])
   const [dbCfg, setDbCfg]           = useState<BookingConfig | null>(null)
+  const [cfgLoading, setCfgLoading] = useState(true)
 
   // Active config: DB settings take priority over professionals.ts defaults
   const cfg = dbCfg ?? cfgProp
 
   useEffect(() => {
+    setCfgLoading(true)
     getScheduleSettings(doctorId).then(s => {
       if (s) {
         const resolved = settingsToConfig(s)
         setDbCfg(resolved)
-        // Re-evaluate start month with DB config (in case it differs from defaults)
         setCalMonth(prev => {
           const y = prev.getFullYear(), m = prev.getMonth()
           const days = new Date(y, m + 1, 0).getDate()
@@ -139,6 +140,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
           return stillHasDay ? prev : findFirstAvailableMonth(resolved)
         })
       }
+      setCfgLoading(false)
     })
   }, [doctorId])
 
@@ -246,6 +248,11 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+          {cfgLoading
+            ? Array.from({ length: 35 }, (_,i) => (
+                <div key={i} style={{ aspectRatio: '1', borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 20%, transparent)', animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${(i % 7) * 60}ms` }} />
+              ))
+            : <>
           {Array.from({ length: firstDow }, (_,i) => <div key={`e${i}`} />)}
           {Array.from({ length: daysInMonth }, (_,i) => {
             const d        = i + 1
@@ -280,6 +287,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
               </div>
             )
           })}
+          </>}
         </div>
 
         <div style={{ display:'flex', gap:'1rem', marginTop:'1rem', flexWrap:'wrap' }}>

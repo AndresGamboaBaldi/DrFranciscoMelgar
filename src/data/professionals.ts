@@ -189,6 +189,11 @@ const dr_seifert: Professional = {
     mode:        'light',
     accent:      '#2b7a9e',   // azul teal médico — buen contraste sobre blanco
     accentLight: '#3a8fb5',
+    fonts: {
+      display:        'Playfair Display',
+      body:           'DM Sans',
+      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
+    },
   },
 
   // ── Reservas: 60 min, 24h anticipación, Lun-Sáb ──
