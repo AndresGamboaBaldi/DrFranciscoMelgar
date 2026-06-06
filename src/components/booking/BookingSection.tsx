@@ -1,9 +1,9 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import Reveal from '../Reveal'
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker from './CalendarPicker'
 import ContactForm from './ContactForm'
-import { createAppointment } from '../../lib/supabase'
+import { createAppointment, getScheduleSettings } from '../../lib/supabase'
 import { notifyDoctor } from '../../lib/whatsapp'
 import { useProfessional } from '../../context/ProfessionalContext'
 import type { BookingStep, BookingFormData, Service, SelectedDate } from '../../types/booking'
@@ -16,7 +16,7 @@ function formatDate(d: SelectedDate) {
   return `${days[dt.getDay()]}, ${d.d} de ${MONTHS_ES[d.m]} de ${d.y}`
 }
 
-const EMPTY_FORM: BookingFormData = { name: '', phone: '', age: '', notes: '', consent: false }
+const EMPTY_FORM: BookingFormData = { name: '', phone: '', notes: '', consent: false }
 
 export default function BookingSection() {
   const pro = useProfessional()
@@ -27,8 +27,13 @@ export default function BookingSection() {
   const [time, setTime]       = useState('')
   const [form, setForm]       = useState<BookingFormData>(EMPTY_FORM)
   const [errors, setErrors]   = useState<Partial<Record<keyof BookingFormData, string>>>({})
+  const [slotDuration, setSlotDuration] = useState(30)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    getScheduleSettings(pro.doctorId).then(s => { if (s) setSlotDuration(s.slot_duration) })
+  }, [pro.doctorId])
 
   const updateForm = (field: keyof BookingFormData, value: string | boolean) => {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -54,8 +59,8 @@ export default function BookingSection() {
         appointment_time: time,
         name:  form.name.trim(),
         phone: form.phone.trim(),
-        age:   form.age ? parseInt(form.age) : null,
-        notes: form.notes.trim() || undefined,
+        notes: form.notes.trim() || 'Sin comentarios especiales',
+        duration_mins: service?.durationMins ?? slotDuration,
         doctor_id: pro.doctorId,
       })
       // Build the calendar sync URL dynamically (works in dev and production)
@@ -100,9 +105,9 @@ export default function BookingSection() {
           {success ? <SuccessState onReset={reset} /> : (
             <>
               <StepNav step={step} />
-              {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} />}
+              {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} slotDuration={slotDuration} />}
               {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} doctorId={pro.doctorId} />}
-              {step === 3 && service && date && time && <ContactForm summary={{ service, date, time }} data={form} onChange={updateForm} errors={errors} />}
+              {step === 3 && service && date && time && <ContactForm summary={{ service, date, time, slotDuration }} data={form} onChange={updateForm} errors={errors} />}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid var(--color-rim)' }}>
                 {step > 1 ? <BackBtn onClick={() => setStep(s => Math.max(s-1,1) as BookingStep)} /> : <span />}
                 {step < 3
