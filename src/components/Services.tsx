@@ -168,9 +168,9 @@ function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }
         }}>{svc.description}</p>
 
         {/* Price + duration row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s' }}>
           <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'var(--color-gold)', padding: '.25rem .75rem' }}>{svc.price}</span>
-          <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.7)', fontWeight: 300 }}>⏱ {svc.durationMins ?? slotDuration} min</span>
+          <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'rgba(255,255,255,.15)', padding: '.25rem .75rem' }}>⏱ {svc.durationMins ?? slotDuration} min</span>
         </div>
       </div>
     </div>

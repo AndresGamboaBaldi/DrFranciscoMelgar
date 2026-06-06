@@ -269,9 +269,11 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
           )
         }
         {cfg.minAdvanceHours > 0 && (
-          <p style={{ fontSize: '.76rem', color: 'var(--color-ink-ghost)', marginTop: '1.25rem', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-            Mínimo {cfg.minAdvanceHours}h de anticipación requerida.
-          </p>
+          <div style={{ marginTop: '1.1rem' }}>
+            <span style={{ display:'inline-flex', alignItems:'center', gap:'.35rem', fontSize:'.75rem', color:'var(--color-ink-dim)', background:'var(--color-surface)', border:'1px solid var(--color-rim)', padding:'.3rem .7rem', lineHeight:1 }}>
+              🕐 Reserva con {cfg.minAdvanceHours}h de anticipación
+            </span>
+          </div>
         )}
       </div>
     )
@@ -333,15 +335,15 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
           </>
         </div>
 
-        <div style={{ display:'flex', gap:'1rem', marginTop:'1rem', flexWrap:'wrap' }}>
+        <div style={{ display:'flex', gap:'.75rem', marginTop:'1.1rem', flexWrap:'wrap' }}>
           {cfg.minAdvanceHours > 0 && (
-            <p style={{ fontSize:'.65rem', color:'var(--color-ink-ghost)', fontStyle:'italic', fontFamily:'var(--font-display)', lineHeight:1.5 }}>
-              Mínimo {cfg.minAdvanceHours}h de anticipación
-            </p>
+            <span style={{ display:'inline-flex', alignItems:'center', gap:'.35rem', fontSize:'.75rem', color:'var(--color-ink-dim)', background:'var(--color-surface)', border:'1px solid var(--color-rim)', padding:'.3rem .7rem', lineHeight:1 }}>
+              🕐 Reserva con {cfg.minAdvanceHours}h de anticipación
+            </span>
           )}
-          <p style={{ fontSize:'.65rem', color:'var(--color-ink-ghost)', fontStyle:'italic', fontFamily:'var(--font-display)', lineHeight:1.5 }}>
-            🔴 día con horarios parciales
-          </p>
+          <span style={{ display:'inline-flex', alignItems:'center', gap:'.35rem', fontSize:'.75rem', color:'var(--color-ink-dim)', background:'var(--color-surface)', border:'1px solid var(--color-rim)', padding:'.3rem .7rem', lineHeight:1 }}>
+            🔴 Día con horarios parcialmente ocupados
+          </span>
         </div>
       </div>
 

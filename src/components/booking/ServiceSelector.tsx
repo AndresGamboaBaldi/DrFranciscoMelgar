@@ -54,7 +54,7 @@ function ServiceCard({ svc, slotDuration, isSelected, onSelect }: { svc: Service
       <div style={{ fontSize: '1.2rem', marginBottom: '.65rem', color: active ? 'var(--color-gold)' : 'var(--color-ink-ghost)', transition: 'color .2s' }}>{svc.icon}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, marginBottom: '.3rem', color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)', transition: 'color .2s', lineHeight: 1.15 }}>{svc.name}</div>
       <div style={{ fontSize: '.76rem', color: 'var(--color-gold)', fontWeight: 400 }}>{svc.price}</div>
-      <div style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', marginTop: '.25rem' }}>⏱ {displayMins} min</div>
+      <div style={{ fontSize: '.8rem', color: 'var(--color-ink-dim)', fontWeight: 500, marginTop: '.4rem' }}>⏱ {displayMins} min</div>
     </div>
   )
 }
