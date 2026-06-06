@@ -1,6 +1,6 @@
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
 
-interface SummaryProps { service: Service; date: SelectedDate; time: string }
+interface SummaryProps { service: Service; date: SelectedDate; time: string; slotDuration: number }
 interface Props {
   summary: SummaryProps
   data: BookingFormData
@@ -26,7 +26,7 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
         </p>
         {[
           { k: 'Servicio',  v: summary.service.name },
-          { k: 'Duración',  v: summary.service.duration },
+          { k: 'Duración',  v: `${summary.service.durationMins ?? summary.slotDuration} min` },
           { k: 'Fecha',     v: formatDate(summary.date) },
           { k: 'Hora',      v: summary.time },
         ].map((row, i, arr) => (
@@ -41,21 +41,15 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
 
       {/* ── Fields ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem', marginBottom: '1.5rem' }}>
-        <Field label="Nombre Completo *" error={errors.name}>
+        <Field label="Nombre Completo" required error={errors.name}>
           <input type="text" placeholder="Ej: María González" value={data.name} onChange={e => onChange('name', e.target.value)}
             style={{ borderColor: errors.name ? '#c47070' : undefined, fontSize: '1rem' }} />
         </Field>
-        <Field label="Teléfono / WhatsApp *" error={errors.phone}>
-          <input type="tel" placeholder="+591 700 00000" value={data.phone} onChange={e => onChange('phone', e.target.value)}
+        <Field label="Teléfono / WhatsApp" required error={errors.phone}>
+          <input type="tel" value={data.phone} onChange={e => onChange('phone', e.target.value)}
             style={{ borderColor: errors.phone ? '#c47070' : undefined, fontSize: '1rem' }} />
         </Field>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <Field label="Edad">
-            <input type="number" placeholder="35" min={18} max={90} value={data.age} onChange={e => onChange('age', e.target.value)}
-              style={{ fontSize: '1rem' }} />
-          </Field>
-        </div>
-        <Field label="Comentarios (opcional)">
+        <Field label="Comentarios" optional>
           <textarea placeholder="Cuéntanos sobre tus objetivos, alergias o cualquier información relevante..." value={data.notes} onChange={e => onChange('notes', e.target.value)}
             style={{ fontSize: '.95rem', minHeight: '80px' }} />
         </Field>
@@ -64,11 +58,13 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
   )
 }
 
-function Field({ label, children, error }: { label: string; children: React.ReactNode; error?: string }) {
+function Field({ label, children, error, required, optional }: { label: string; children: React.ReactNode; error?: string; required?: boolean; optional?: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '.45rem' }}>
       <label style={{ fontSize: '.76rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink)', fontWeight: 500 }}>
         {label}
+        {required && <span style={{ color: 'var(--color-gold)', marginLeft: '.2rem' }}>*</span>}
+        {optional && <span style={{ color: 'var(--color-ink-ghost)', fontWeight: 300, marginLeft: '.3rem', textTransform: 'none', letterSpacing: 0, fontSize: '.72rem' }}>(opcional)</span>}
       </label>
       {children}
       {error && <span style={{ fontSize: '.78rem', color: '#c47070', fontWeight: 400 }}>{error}</span>}

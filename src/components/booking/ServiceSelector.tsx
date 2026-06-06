@@ -1,18 +1,19 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import type { Service } from '../../types/booking'
 import type { ProService } from '../../types/professional'
 
 export function toBookingService(ps: ProService): Service {
-  return { id: ps.id, name: ps.name, tag: ps.tag, duration: ps.duration, durationMins: ps.durationMins, price: ps.price, icon: ps.icon }
+  return { id: ps.id, name: ps.name, tag: ps.tag, durationMins: ps.durationMins, price: ps.price, icon: ps.icon }
 }
 
 interface Props {
   services: ProService[]
   selected: Service | null
   onSelect: (svc: Service) => void
+  slotDuration: number
 }
 
-export default function ServiceSelector({ services, selected, onSelect }: Props) {
+export default function ServiceSelector({ services, selected, onSelect, slotDuration }: Props) {
   return (
     <div>
       <p style={{ fontSize: '1rem', color: 'var(--color-ink)', marginBottom: '1.25rem', lineHeight: 1.7, fontWeight: 400 }}>
@@ -21,16 +22,17 @@ export default function ServiceSelector({ services, selected, onSelect }: Props)
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 160px), 1fr))', gap: 1, background: 'var(--color-rim)', marginBottom: '2rem' }}>
         {services.map(svc => {
           const bs = toBookingService(svc)
-          return <ServiceCard key={svc.id} svc={bs} isSelected={selected?.id === svc.id} onSelect={onSelect} />
+          return <ServiceCard key={svc.id} svc={bs} slotDuration={slotDuration} isSelected={selected?.id === svc.id} onSelect={onSelect} />
         })}
       </div>
     </div>
   )
 }
 
-function ServiceCard({ svc, isSelected, onSelect }: { svc: Service; isSelected: boolean; onSelect: (s: Service) => void }) {
+function ServiceCard({ svc, slotDuration, isSelected, onSelect }: { svc: Service; slotDuration: number; isSelected: boolean; onSelect: (s: Service) => void }) {
   const [hovered, setHovered] = useState(false)
   const active = isSelected || hovered
+  const displayMins = svc.durationMins ?? slotDuration
 
   return (
     <div
@@ -52,7 +54,7 @@ function ServiceCard({ svc, isSelected, onSelect }: { svc: Service; isSelected: 
       <div style={{ fontSize: '1.2rem', marginBottom: '.65rem', color: active ? 'var(--color-gold)' : 'var(--color-ink-ghost)', transition: 'color .2s' }}>{svc.icon}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, marginBottom: '.3rem', color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)', transition: 'color .2s', lineHeight: 1.15 }}>{svc.name}</div>
       <div style={{ fontSize: '.76rem', color: 'var(--color-gold)', fontWeight: 400 }}>{svc.price}</div>
-      <div style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', marginTop: '.25rem' }}>⏱ {svc.duration}</div>
+      <div style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', marginTop: '.25rem' }}>⏱ {displayMins} min</div>
     </div>
   )
 }

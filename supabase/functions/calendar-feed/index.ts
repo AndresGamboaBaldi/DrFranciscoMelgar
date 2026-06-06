@@ -17,15 +17,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPABASE_URL         = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-// Duration in minutes per service type
-const SERVICE_DURATIONS: Record<string, number> = {
-  'Toxina Botulínica': 45,
-  'Ácido Hialurónico': 60,
-  'Colágeno & PRP':    75,
-  'Peeling Médico':    50,
-  'Radiofrecuencia':   60,
-  'Diseño de Labios':  45,
-}
 
 // ────────────────────────────────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
@@ -103,8 +94,8 @@ interface Appointment {
   appointment_date: string // YYYY-MM-DD
   appointment_time: string // HH:MM
   phone: string
-  email: string
-  notes?: string
+  notes?: string | null
+  duration_mins?: number | null
   status: string
   created_at: string
 }
@@ -134,7 +125,7 @@ function generateICS(appointments: Appointment[], calName: string, timezone: str
 }
 
 function buildVEvent(apt: Appointment, timezone: string, now: string): string {
-  const duration = SERVICE_DURATIONS[apt.service] ?? 60
+  const duration = apt.duration_mins ?? 60
   const dtStart  = localDatetime(apt.appointment_date, apt.appointment_time)
   const dtEnd    = addMinutes(apt.appointment_date, apt.appointment_time, duration)
   const created  = formatUtcStamp(new Date(apt.created_at))
@@ -143,9 +134,8 @@ function buildVEvent(apt: Appointment, timezone: string, now: string): string {
   const descParts = [
     `🧑 ${apt.name}`,
     `📱 ${apt.phone}`,
-    `📧 ${apt.email}`,
   ]
-  if (apt.notes) descParts.push(`📝 ${apt.notes}`)
+  if (apt.notes && apt.notes !== 'Sin comentarios especiales') descParts.push(`📝 ${apt.notes}`)
 
   const lines = [
     'BEGIN:VEVENT',

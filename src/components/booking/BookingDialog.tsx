@@ -2,7 +2,7 @@
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker  from './CalendarPicker'
 import ContactForm     from './ContactForm'
-import { createAppointment } from '../../lib/supabase'
+import { createAppointment, getScheduleSettings } from '../../lib/supabase'
 import { useProfessional }   from '../../context/ProfessionalContext'
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
 
@@ -29,7 +29,7 @@ function formatDate(d: SelectedDate) {
   return `${days[dt.getDay()]}, ${d.d} de ${MONTHS_ES[d.m]} de ${d.y}`
 }
 
-const EMPTY_FORM: BookingFormData = { name: '', phone: '', age: '', notes: '', consent: false }
+const EMPTY_FORM: BookingFormData = { name: '', phone: '', notes: '', consent: false }
 
 // 4 steps: service → date → time → contact
 type Step = 1 | 2 | 3 | 4
@@ -47,7 +47,14 @@ export default function BookingDialog({ onClose }: Props) {
   const [time, setTime]       = useState('')
   const [form, setForm]       = useState<BookingFormData>(EMPTY_FORM)
   const [errors, setErrors]   = useState<Partial<Record<keyof BookingFormData, string>>>({})
+  const [slotDuration, setSlotDuration] = useState(30)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    getScheduleSettings(pro.doctorId).then(s => {
+      if (s) setSlotDuration(s.slot_duration)
+    })
+  }, [pro.doctorId])
   const [success, setSuccess] = useState(false)
   const [waUrl,   setWaUrl]   = useState('')   // WhatsApp URL shown after success
 
@@ -87,12 +94,11 @@ export default function BookingDialog({ onClose }: Props) {
       await createAppointment({
         service: service.name, appointment_date: isoDate, appointment_time: time,
         name:  form.name.trim(), phone: form.phone.trim(),
-        age:   form.age ? parseInt(form.age) : null,
-        notes: form.notes.trim() || undefined,
+        notes: form.notes.trim() || 'Sin comentarios especiales',
         doctor_id: pro.doctorId,
-        duration_mins: service.durationMins ?? pro.bookingConfig.slotDuration,
+        duration_mins: service.durationMins ?? slotDuration,
       })
-      const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, duration: service.duration, date: formatDate(date), time, phone: form.phone.trim() })
+      const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, duration: `${service.durationMins ?? slotDuration} min`, date: formatDate(date), time, phone: form.phone.trim() })
       const waFinalUrl = `https://wa.me/${pro.phone}?text=${encodeURIComponent(waMessage)}`
       setWaUrl(waFinalUrl)
       setSuccess(true)
@@ -186,14 +192,14 @@ export default function BookingDialog({ onClose }: Props) {
             <SuccessState name={form.name} waUrl={waUrl} onClose={onClose} onReset={reset} />
           ) : (
             <>
-              {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} />}
+              {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} slotDuration={slotDuration} />}
 
               {step === 2 && (
                 <CalendarPicker
                   selectedDate={date} selectedTime={time}
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
-                  doctorId={pro.doctorId} bookingConfig={pro.bookingConfig}
+                  doctorId={pro.doctorId}
                   serviceDurationMins={service?.durationMins}
                   view="calendar"
                 />
@@ -204,14 +210,14 @@ export default function BookingDialog({ onClose }: Props) {
                   selectedDate={date} selectedTime={time}
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
-                  doctorId={pro.doctorId} bookingConfig={pro.bookingConfig}
+                  doctorId={pro.doctorId}
                   serviceDurationMins={service?.durationMins}
                   view="times"
                 />
               )}
 
               {step === 4 && service && date && time && (
-                <ContactForm summary={{ service, date, time }} data={form} onChange={updateForm} errors={errors} />
+                <ContactForm summary={{ service, date, time, slotDuration }} data={form} onChange={updateForm} errors={errors} />
               )}
             </>
           )}

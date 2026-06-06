@@ -2,8 +2,7 @@ export interface ProService {
   id: string
   name: string
   tag: string
-  duration: string
-  /** Actual duration in minutes. If set, overrides bookingConfig.slotDuration for this service. */
+  /** Only set for services with a non-default duration (e.g. tinte=120). Otherwise derived from DB slotDuration. */
   durationMins?: number
   price: string
   icon: string
@@ -130,9 +129,6 @@ export interface Professional {
 
   // ── Tema visual ─────────────────────────────────────────────
   theme?: ProfessionalTheme
-
-  // ── Reservas ────────────────────────────────────────────────
-  bookingConfig: BookingConfig
 
   // ── Supabase / Calendario ────────────────────────────────────
   doctorId: string

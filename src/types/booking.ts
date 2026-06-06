@@ -2,7 +2,6 @@ export interface Service {
   id: string
   name: string
   tag: string
-  duration: string
   durationMins?: number
   price: string
   icon: string
@@ -26,7 +25,6 @@ export interface BookingState {
 export interface BookingFormData {
   name: string
   phone: string
-  age: string
   notes: string
   consent: boolean
 }
@@ -38,8 +36,7 @@ export interface Appointment {
   appointment_time: string   // '09:00'
   name: string
   phone: string
-  age?: number | null
-  notes?: string
+  notes?: string | null
   doctor_id?: string
   status?: 'pending' | 'confirmed' | 'cancelled'
   created_at?: string

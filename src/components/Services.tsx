@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Reveal from './Reveal'
 import { useProfessional } from '../context/ProfessionalContext'
+import { getScheduleSettings } from '../lib/supabase'
 
 const IS_HOVER_DEVICE =
   typeof window !== 'undefined' &&
@@ -9,6 +10,11 @@ const IS_HOVER_DEVICE =
 export default function Services() {
   const pro = useProfessional()
   const [expandedId, setExpanded] = useState<string | null>(pro.services[0]?.id ?? null)
+  const [slotDuration, setSlotDuration] = useState(30)
+
+  useEffect(() => {
+    getScheduleSettings(pro.doctorId).then(s => { if (s) setSlotDuration(s.slot_duration) })
+  }, [pro.doctorId])
 
   return (
     <section id="servicios" className="s-pad" style={{ background: 'var(--color-surface)', position: 'relative', overflow: 'hidden' }}>
@@ -33,6 +39,7 @@ export default function Services() {
               <ServicePanel
                 key={svc.id}
                 svc={svc}
+                slotDuration={slotDuration}
                 num={String(i + 1).padStart(2, '0')}
                 expanded={expanded}
                 onExpand={() => setExpanded(svc.id)}
@@ -48,10 +55,10 @@ export default function Services() {
 
 /* ── Service Panel ── */
 
-interface Svc { id: string; tag: string; name: string; description: string; duration: string; price: string; image?: string }
+interface Svc { id: string; tag: string; name: string; description: string; durationMins?: number; price: string; image?: string }
 
-function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
-  svc: Svc; num: string; expanded: boolean
+function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }: {
+  svc: Svc; slotDuration: number; num: string; expanded: boolean
   onExpand: () => void; onCollapse: () => void
 }) {
   const FALLBACK_COLORS = [
@@ -163,7 +170,7 @@ function ServicePanel({ svc, num, expanded, onExpand, onCollapse }: {
         {/* Price + duration row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s' }}>
           <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'var(--color-gold)', padding: '.25rem .75rem' }}>{svc.price}</span>
-          <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.7)', fontWeight: 300 }}>⏱ {svc.duration}</span>
+          <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.7)', fontWeight: 300 }}>⏱ {svc.durationMins ?? slotDuration} min</span>
         </div>
       </div>
     </div>

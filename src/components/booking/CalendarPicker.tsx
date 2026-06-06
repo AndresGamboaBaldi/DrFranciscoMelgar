@@ -24,10 +24,9 @@ interface Props {
   selectedTime: string | null
   onDateChange: (d: SelectedDate) => void
   onTimeChange: (t: string) => void
-  bookingConfig: BookingConfig
   doctorId: string
-  serviceDurationMins?: number  // overrides slotDuration for availability check
-  view?: 'calendar' | 'times' | 'both'  // default: 'both'
+  serviceDurationMins?: number
+  view?: 'calendar' | 'times' | 'both'
 }
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -117,8 +116,8 @@ function findFirstAvailableMonth(cfg: BookingConfig): Date {
   return new Date(y, m, 1)
 }
 
-export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, bookingConfig: cfgProp, doctorId, serviceDurationMins, view = 'both' }: Props) {
-  const [calMonth, setCalMonth]     = useState(() => findFirstAvailableMonth(cfgProp))
+export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, doctorId, serviceDurationMins, view = 'both' }: Props) {
+  const [calMonth, setCalMonth]     = useState(() => new Date())
   const [bookedSlots, setBooked]      = useState<string[]>([])
   const [bookedSlotsDate, setBookedSlotsDate] = useState<string | null>(null)
   const [monthBlocks, setBlocks]      = useState<BlockedSlot[]>([])
@@ -126,8 +125,8 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
   const [dbCfg, setDbCfg]             = useState<BookingConfig | null>(null)
   const [cfgLoading, setCfgLoading]   = useState(true)
 
-  // Active config: DB settings take priority over professionals.ts defaults
-  const cfg = dbCfg ?? cfgProp
+  // cfg is only non-null after DB settings load
+  const cfg = dbCfg
 
   useEffect(() => {
     setCfgLoading(true)
@@ -157,7 +156,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
 
   // Fetch booked appointments + day-specific blocks when date changes
   useEffect(() => {
-    if (!selectedDate) return
+    if (!selectedDate || !cfg) return
     const iso = `${selectedDate.y}-${String(selectedDate.m+1).padStart(2,'0')}-${String(selectedDate.d).padStart(2,'0')}`
     setBookedSlotsDate(null)
     getBookedSlots(iso, doctorId, cfg.slotDuration).then(slots => {
@@ -165,7 +164,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
       setBookedSlotsDate(iso)
     })
     setDayBlocks(monthBlocks.filter(b => b.date === iso))
-  }, [selectedDate, doctorId, monthBlocks, cfg.slotDuration])
+  }, [selectedDate, doctorId, monthBlocks, cfg])
 
   const firstDow    = (() => { const d = new Date(y,m,1).getDay(); return d===0?6:d-1 })()
   const daysInMonth = new Date(y, m+1, 0).getDate()
@@ -180,6 +179,22 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
   const isToday  = (d: number) => new Date(y,m,d).toDateString() === TODAY.toDateString()
   const isSel    = (d: number) => selectedDate?.y===y && selectedDate?.m===m && selectedDate?.d===d
 
+  // ── Early returns (all hooks are above) ──
+  if (cfgLoading) {
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, padding: '1.5rem', border: '1px solid var(--color-rim)' }}>
+        {Array.from({ length: 35 }, (_,i) => (
+          <div key={i} style={{ aspectRatio: '1', borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 20%, transparent)', animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${(i % 7) * 60}ms` }} />
+        ))}
+      </div>
+    )
+  }
+
+  if (!cfg) {
+    return <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--color-ink-ghost)', fontSize: '.9rem' }}>Horarios aún no configurados. Configura el calendario en el panel de administración.</p>
+  }
+
+  // From here cfg is guaranteed non-null
   const getSlots = (sd: SelectedDate) => {
     const dow = new Date(sd.y,sd.m,sd.d).getDay()
     const hrs = dow===6 && cfg.satHours!==undefined ? cfg.satHours
@@ -191,26 +206,24 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
     const bStart = timeToMins(cfg.breakHours.start)
     const bEnd   = timeToMins(cfg.breakHours.end)
     return slots.filter(s => {
-      const m = timeToMins(s)
-      return m < bStart || m >= bEnd
+      const sm = timeToMins(s)
+      return sm < bStart || sm >= bEnd
     })
   }
 
-  // Returns true if a slot doesn't have enough consecutive free space for the service duration
   const lacksSpace = (slot: string, allSlots: string[], blocked: string[], adminBlocks: BlockedSlot[]) => {
     const svcMins = serviceDurationMins ?? cfg.slotDuration
-    if (svcMins <= cfg.slotDuration) return false  // single slot — no extra check needed
+    if (svcMins <= cfg.slotDuration) return false
     const slotsNeeded = Math.ceil(svcMins / cfg.slotDuration)
     const idx = allSlots.indexOf(slot)
     for (let i = 0; i < slotsNeeded; i++) {
       const s = allSlots[idx + i]
-      if (!s) return true  // not enough slots left in the day
+      if (!s) return true
       if (blocked.includes(s) || isSlotBlocked(s, adminBlocks)) return true
     }
     return false
   }
 
-  // Check if a day has partial blocks (shows a small indicator)
   const hasPartialBlock = (d: number) => {
     const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
     return monthBlocks.some(b => b.date === dateStr && b.start_time)
@@ -282,11 +295,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
-          {cfgLoading
-            ? Array.from({ length: 35 }, (_,i) => (
-                <div key={i} style={{ aspectRatio: '1', borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 20%, transparent)', animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${(i % 7) * 60}ms` }} />
-              ))
-            : <>
+          <>
           {Array.from({ length: firstDow }, (_,i) => <div key={`e${i}`} />)}
           {Array.from({ length: daysInMonth }, (_,i) => {
             const d        = i + 1
@@ -321,7 +330,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
               </div>
             )
           })}
-          </>}
+          </>
         </div>
 
         <div style={{ display:'flex', gap:'1rem', marginTop:'1rem', flexWrap:'wrap' }}>

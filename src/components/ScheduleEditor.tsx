@@ -17,23 +17,21 @@ const ADVANCE_OPTIONS = [
 export default function ScheduleEditor() {
   const pro = useProfessional()
 
-  // Form state — initialized from professionals.ts, overridden by DB if present
-  const def = pro.bookingConfig
-  const [workDays,   setWorkDays]   = useState<number[]>(def.workDays)
   // corrido = sin pausa; split = mañana + tarde
-  const [corrido,    setCorrido]    = useState(def.breakHours == null)
-  const [amStart,    setAmStart]    = useState(def.workHours.start)
-  const [amEnd,      setAmEnd]      = useState(def.breakHours?.start ?? '13:00')
-  const [pmStart,    setPmStart]    = useState(def.breakHours?.end   ?? '14:00')
-  const [pmEnd,      setPmEnd]      = useState(def.workHours.end)
-  const [satActive,  setSatActive]  = useState(def.satHours !== undefined && def.satHours !== null)
-  const [satStart,   setSatStart]   = useState(def.satHours?.start ?? '09:00')
-  const [satEnd,     setSatEnd]     = useState(def.satHours?.end   ?? '14:00')
-  const [sunActive,  setSunActive]  = useState(def.sunHours !== undefined && def.sunHours !== null)
-  const [sunStart,   setSunStart]   = useState(def.sunHours?.start ?? '10:00')
-  const [sunEnd,     setSunEnd]     = useState(def.sunHours?.end   ?? '15:00')
-  const [slotDur,    setSlotDur]    = useState(def.slotDuration)
-  const [minAdv,     setMinAdv]     = useState(def.minAdvanceHours)
+  const [workDays,   setWorkDays]   = useState<number[]>([1,2,3,4,5])
+  const [corrido,    setCorrido]    = useState(true)
+  const [amStart,    setAmStart]    = useState('08:00')
+  const [amEnd,      setAmEnd]      = useState('13:00')
+  const [pmStart,    setPmStart]    = useState('14:00')
+  const [pmEnd,      setPmEnd]      = useState('18:00')
+  const [satActive,  setSatActive]  = useState(false)
+  const [satStart,   setSatStart]   = useState('09:00')
+  const [satEnd,     setSatEnd]     = useState('14:00')
+  const [sunActive,  setSunActive]  = useState(false)
+  const [sunStart,   setSunStart]   = useState('10:00')
+  const [sunEnd,     setSunEnd]     = useState('15:00')
+  const [slotDur,    setSlotDur]    = useState(30)
+  const [minAdv,     setMinAdv]     = useState(0)
 
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)

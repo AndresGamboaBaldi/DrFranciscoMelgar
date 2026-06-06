@@ -15,7 +15,7 @@ const doctor_melgar: Professional = {
   photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar_ofi2.jpeg', '/doctor_melgar/photos/drmelgar_ofi3.jpeg', '/doctor_melgar/photos/drmelgar_ofi.jpeg'],
   slug:      'doctor_melgar',
   category:  'estetica',
-  heroPhoto: '/doctor_melgar/photos/drmelgar.jpeg',  // ← pon aquí la foto del hero
+  heroPhoto: '/doctor_melgar/photos/drmelgar.jpeg',
   name:      'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
   title:     'Médico Estético',
@@ -39,12 +39,12 @@ const doctor_melgar: Professional = {
   ],
 
   services: [
-    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  duration: '45 min', price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
-    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   duration: '60 min', price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
-    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          duration: '45 min', price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
-    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', duration: '75 min', price: 'Desde Bs. 480', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
-    { id: 'peeling',     name: 'Peeling Médico',    tag: 'Renovación',      duration: '50 min', price: 'Desde Bs. 280', icon: '◫', description: 'Renueva la textura y luminosidad de la piel. Trata manchas, poros y marcas desde la primera sesión.' },
-    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    duration: '60 min', durationMins: 60, price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
+    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  durationMins: 120, price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
+    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
+    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
+    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', price: 'Desde Bs. 480', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
+    { id: 'peeling',     name: 'Peeling Médico',    tag: 'Renovación',      price: 'Desde Bs. 280', icon: '◫', description: 'Renueva la textura y luminosidad de la piel. Trata manchas, poros y marcas desde la primera sesión.' },
+    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
   ],
 
   phone:   '59172235604',
@@ -52,7 +52,6 @@ const doctor_melgar: Professional = {
   address: 'Parque Fidel Anze #2345, Of. 8B\nCochabamba, Bolivia',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 14:00'],
 
-  // ── Tema: luz cálida / clínica de lujo ──
   theme: {
     mode:        'light',
     accent:      '#b07c35',
@@ -62,15 +61,6 @@ const doctor_melgar: Professional = {
       body:           'DM Sans',
       googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
     },
-  },
-
-  // ── Reservas: slots de 60 min, 24h de anticipación, Lun-Sáb ──
-  bookingConfig: {
-    slotDuration:    60,
-    minAdvanceHours: 24,
-    workDays:        [1, 2, 3, 4, 5, 6],          // Lun a Sáb
-    workHours:       { start: '08:00', end: '18:00' },
-    satHours:        { start: '09:00', end: '14:00' },
   },
 
   mapUrl: 'https://maps.app.goo.gl/eMHRUCNk4ji62wC99?g_st=ic',
@@ -106,10 +96,10 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
-    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     duration: '90 min', price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
+    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
   ],
 
   phone:   '59171234567',
@@ -117,7 +107,6 @@ const barber_vip: Professional = {
   address: 'Av Uyuni #1234\nCochabamba, Bolivia',
   schedule: ['Mar — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 15:00'],
 
-  // ── Tema: oscuro + Bebas Neue / Inter ──
   theme: {
     mode:        'dark',
     accent:      '#4a8fa8',
@@ -127,15 +116,6 @@ const barber_vip: Professional = {
       body:           'Inter',
       googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
     },
-  },
-
-  // ── Reservas: slots de 30 min, sin anticipación mínima, Mar-Dom ──
-  bookingConfig: {
-    slotDuration:    30,
-    minAdvanceHours: 0,
-    workDays:        [2, 3, 4, 5, 6, 0],           // Mar a Dom
-    workHours:       { start: '09:00', end: '20:00' },
-    sunHours:        { start: '10:00', end: '15:00' },
   },
 
   doctorId:        'barber_vip',
@@ -173,21 +153,19 @@ const dr_seifert: Professional = {
   ],
 
   services: [
-    { id: 'limpieza',      name: 'Limpieza & Profilaxis',  tag: 'Preventivo',   duration: '60 min', price: 'Desde Bs. 180', icon: '◈', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/dr_seifert//services/limpieza.jpg'  },
-    { id: 'blanqueamiento',name: 'Blanqueamiento Dental',  tag: 'Estético',     duration: '90 min', price: 'Desde Bs. 450', icon: '◉', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/dr_seifert//services/blanqueamiento.jpg'  },
-    { id: 'carillas',      name: 'Carillas de Porcelana',  tag: 'Diseño',       duration: 'Variable', price: 'Desde Bs. 650', icon: '◇', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/dr_seifert//services/carillas.jpg'  },
+    { id: 'limpieza',       name: 'Limpieza & Profilaxis',  tag: 'Preventivo', price: 'Desde Bs. 180', icon: '◈', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/dr_seifert//services/limpieza.jpg'  },
+    { id: 'blanqueamiento', name: 'Blanqueamiento Dental',  tag: 'Estético',   price: 'Desde Bs. 450', icon: '◉', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/dr_seifert//services/blanqueamiento.jpg'  },
+    { id: 'carillas',       name: 'Carillas de Porcelana',  tag: 'Diseño',     price: 'Desde Bs. 650', icon: '◇', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/dr_seifert//services/carillas.jpg'  },
   ],
 
-
-  phone:   '59170788218',          // ← reemplaza con el número real
-  email:   'citas@drseifert.bo',   // ← reemplaza con el email real
+  phone:   '59170788218',
+  email:   'citas@drseifert.bo',
   address: 'Av. Salamanca #1234\nCochabamba, Bolivia',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 13:00'],
 
-  // ── Tema: azul dental / clínico ──
   theme: {
     mode:        'light',
-    accent:      '#2b7a9e',   // azul teal médico — buen contraste sobre blanco
+    accent:      '#2b7a9e',
     accentLight: '#3a8fb5',
     fonts: {
       display:        'Playfair Display',
@@ -196,17 +174,8 @@ const dr_seifert: Professional = {
     },
   },
 
-  // ── Reservas: 60 min, 24h anticipación, Lun-Sáb ──
-  bookingConfig: {
-    slotDuration:    60,
-    minAdvanceHours: 24,
-    workDays:        [1, 2, 3, 4, 5, 6],
-    workHours:       { start: '08:00', end: '18:00' },
-    satHours:        { start: '09:00', end: '13:00' },
-  },
-
   doctorId:        'dr_seifert',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',  // ← completa después del paso 2 abajo
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -238,21 +207,20 @@ const jhoel_cuts: Professional = {
   ],
 
   services: [
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     duration: '120 min', durationMins: 120,price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
-    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   duration: '30 min', price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   duration: '45 min', price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
-    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', duration: '30 min', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
+    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
+    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150', icon: '◎', durationMins: 120, description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
   ],
 
   photos: ['/jhoel_cuts/photos/jhoel.jpeg','/jhoel_cuts/photos/barberia.webp'],
-  heroPhoto: '/jhoel_cuts/photos/barberia.webp', 
+  heroPhoto: '/jhoel_cuts/photos/barberia.webp',
 
-  phone:   '59177933737',        // ← reemplaza con el número real
-  email:   'citas@jhoelcuts.bo', // ← reemplaza con el email real
+  phone:   '59177933737',
+  email:   'citas@jhoelcuts.bo',
   address: 'Av. Uyuni #567\nCochabamba, Bolivia',
   schedule: ['Lun — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 16:00'],
 
-  // ── Tema: oscuro / verde esmeralda ──
   theme: {
     mode:        'dark',
     accent:      '#2855c2',
@@ -264,18 +232,9 @@ const jhoel_cuts: Professional = {
     },
   },
 
-  // ── Reservas: slots de 30 min, sin anticipación, Lun-Dom ──
-  bookingConfig: {
-    slotDuration:    30,
-    minAdvanceHours: 0,
-    workDays:        [1, 2, 3, 4, 5, 6, 0],  // Lun a Dom
-    workHours:       { start: '09:00', end: '20:00' },
-    sunHours:        { start: '10:00', end: '16:00' },
-  },
-
   mapUrl: 'https://maps.app.goo.gl/qcWfFwZqksNu2iFYA?g_st=ic',
   doctorId:        'jhoel_cuts',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',  // ← completa con el token de Supabase (ver pasos abajo)
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
 }
 
 // ────────────────────────────────────────────────────────────────
