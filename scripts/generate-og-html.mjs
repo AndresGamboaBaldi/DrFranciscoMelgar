@@ -54,25 +54,20 @@ const baseHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8')
 for (const [slug, pro] of Object.entries(PROFESSIONALS)) {
   const pageUrl    = `${SITE_URL}/${slug}`
   const imageUrl   = `${SITE_URL}${pro.heroPhoto}`
-  const title      = `${pro.name} — ${pro.title} en ${pro.city} | ${SITE_NAME}`
-  const description = `${pro.name}, ${pro.specialty} en ${pro.city}. Reserva tu cita online: ${pro.services.join(', ')} y más.`
+  const title = `${pro.name} — ${pro.title} en ${pro.city} | ${SITE_NAME}`
 
   const ogTags = `
-    <meta property="og:type"         content="website" />
-    <meta property="og:url"          content="${pageUrl}" />
-    <meta property="og:title"        content="${title}" />
-    <meta property="og:description"  content="${description}" />
-    <meta property="og:image"        content="${imageUrl}" />
-    <meta property="og:image:width"  content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:site_name"    content="${SITE_NAME}" />
-    <meta property="og:locale"       content="es_BO" />
-    <meta name="twitter:card"        content="summary_large_image" />
-    <meta name="twitter:title"       content="${title}" />
-    <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image"       content="${imageUrl}" />
-    <title>${title}</title>
-    <meta name="description"         content="${description}" />`
+    <meta property="og:type"        content="website" />
+    <meta property="og:url"         content="${pageUrl}" />
+    <meta property="og:title"       content="${title}" />
+    <meta property="og:image"       content="${imageUrl}" />
+    <meta property="og:image:width"  content="300" />
+    <meta property="og:image:height" content="300" />
+    <meta property="og:site_name"   content="${SITE_NAME}" />
+    <meta name="twitter:card"       content="summary" />
+    <meta name="twitter:title"      content="${title}" />
+    <meta name="twitter:image"      content="${imageUrl}" />
+    <title>${title}</title>`
 
   // Inject OG tags right after <head> and replace the default <title>
   const html = baseHtml
