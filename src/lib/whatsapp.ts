@@ -13,8 +13,8 @@ const CALLMEBOT_KEY = import.meta.env.VITE_CALLMEBOT_KEY as string ?? ''
 function buildMessage(d: NotificationData): string {
   // Convierte https:// → webcal:// para que iOS abra el Calendar directo
   const lines = [
-    `*Nueva Cita*\n`,
-    `*Paciente:* ${d.patientName}`,
+    `*Cita Confirmada*\n`,
+    `*Cliente:* ${d.patientName}`,
     `*Servicio:* ${d.service}`,
     `*Fecha:* ${d.date}`,
     `*Hora:* ${d.time}`,
