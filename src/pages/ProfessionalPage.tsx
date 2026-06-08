@@ -100,7 +100,8 @@ export default function ProfessionalPage() {
     document.head.appendChild(link)
     // No cleanup — fonts stay cached for performance
   }, [pro.slug, pro.theme?.fonts?.googleFontsUrl])
-  const isSetup   = new URLSearchParams(window.location.search).has('setup')
+  const isSetup    = new URLSearchParams(window.location.search).has('setup')
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
 
   return (
     <ProfessionalContext.Provider value={pro}>
@@ -123,6 +124,15 @@ export default function ProfessionalPage() {
               </main>
               <Footer />
               {bookingOpen && <BookingDialog onClose={() => setBookingOpen(false)} />}
+              {/* Admin button — only visible when installed as PWA */}
+              {isStandalone && (
+                <a href="?setup"
+                  style={{ position: 'fixed', bottom: '1.25rem', right: '1.25rem', width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-ink-ghost)', fontSize: '1rem', textDecoration: 'none', zIndex: 40, boxShadow: '0 2px 8px rgba(0,0,0,.3)', transition: 'all .2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-gold)'; e.currentTarget.style.borderColor = 'var(--color-gold)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-ghost)'; e.currentTarget.style.borderColor = 'var(--color-rim)' }}
+                  title="Panel de administración"
+                >⚙</a>
+              )}
             </>
           )}
         </div>
