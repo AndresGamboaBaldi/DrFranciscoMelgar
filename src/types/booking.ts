@@ -3,7 +3,7 @@ export interface Service {
   name: string
   tag: string
   durationMins?: number
-  price: string
+  price?: string
   icon: string
 }
 

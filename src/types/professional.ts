@@ -133,4 +133,10 @@ export interface Professional {
   // ── Supabase / Calendario ────────────────────────────────────
   doctorId: string
   calendarFeedUrl: string
+
+  // ── Acceso al panel ?setup ───────────────────────────────────
+  /** Email de Google autorizado a entrar al panel de administración (opcional) */
+  ownerEmail?: string
+  /** Contraseña simple para entrar al panel sin Google (opcional, modo rápido) */
+  setupPassword?: string
 }
