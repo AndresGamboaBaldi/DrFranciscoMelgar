@@ -171,7 +171,7 @@ export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 
 
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
   })
 
   await supabase.from('push_subscriptions').upsert([{
@@ -182,7 +182,7 @@ export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 
   return 'subscribed'
 }
 
-export async function getPushStatus(doctorId: string): Promise<'active' | 'inactive' | 'unsupported'> {
+export async function getPushStatus(_doctorId: string): Promise<'active' | 'inactive' | 'unsupported'> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
   const reg = await navigator.serviceWorker.getRegistration('/sw.js')
   if (!reg) return 'inactive'
