@@ -95,7 +95,6 @@ export default function ScheduleEditor() {
         min_advance:   minAdv,
       })
       setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Error al guardar')
     } finally {
@@ -232,8 +231,29 @@ export default function ScheduleEditor() {
         >
           {saving ? 'Guardando…' : 'Guardar cambios'}
         </button>
-        {saved && <span style={{ fontSize: '.78rem', color: 'var(--color-gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>✓ Cambios guardados</span>}
       </div>
+
+      {saved && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1.5rem' }}
+          onClick={() => setSaved(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', maxWidth: '380px', width: '100%', padding: '2rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '1.5rem', color: 'var(--color-gold)', marginBottom: '.75rem' }}>✓</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontStyle: 'italic', color: 'var(--color-ink)', marginBottom: '.5rem' }}>Cambios guardados</div>
+            <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              Tu horario se actualizó y ya está disponible para tus pacientes.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
+              <a href={`/${pro.slug}`} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-block', padding: '.8rem 1.5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none' }}>
+                Ver mi página
+              </a>
+              <button onClick={() => setSaved(false)}
+                style={{ padding: '.8rem 1.5rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: '1px solid var(--color-rim)', cursor: 'pointer' }}>
+                Seguir en configuración
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', lineHeight: 1.7 }}>
         Los cambios aplican inmediatamente al calendario de reservas de los pacientes.

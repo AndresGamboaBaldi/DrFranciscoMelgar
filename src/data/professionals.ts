@@ -39,12 +39,11 @@ const doctor_melgar: Professional = {
   ],
 
   services: [
-    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  durationMins: 120, price: 'Desde Bs. 350', icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
-    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',   price: 'Desde Bs. 550', icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
-    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',          price: 'Desde Bs. 450', icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
-    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', price: 'Desde Bs. 480', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
-    { id: 'peeling',     name: 'Peeling Médico',    tag: 'Renovación',      price: 'Desde Bs. 280', icon: '◫', description: 'Renueva la textura y luminosidad de la piel. Trata manchas, poros y marcas desde la primera sesión.' },
-    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',    price: 'Desde Bs. 320', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
+    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  durationMins: 120,  icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
+    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',    icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
+    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',           icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
+    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
+    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
   ],
 
   phone:   '59172235604',

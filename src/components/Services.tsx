@@ -55,7 +55,7 @@ export default function Services() {
 
 /* ── Service Panel ── */
 
-interface Svc { id: string; tag: string; name: string; description: string; durationMins?: number; price: string; image?: string }
+interface Svc { id: string; tag: string; name: string; description: string; durationMins?: number; price?: string; image?: string }
 
 function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }: {
   svc: Svc; slotDuration: number; num: string; expanded: boolean
@@ -169,7 +169,7 @@ function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }
 
         {/* Price + duration row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s' }}>
-          <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'var(--color-gold)', padding: '.25rem .75rem' }}>{svc.price}</span>
+          {svc.price && <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'var(--color-gold)', padding: '.25rem .75rem' }}>{svc.price}</span>}
           <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'rgba(255,255,255,.15)', padding: '.25rem .75rem' }}>⏱ {svc.durationMins ?? slotDuration} min</span>
         </div>
       </div>

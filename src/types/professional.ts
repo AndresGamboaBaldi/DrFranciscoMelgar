@@ -4,7 +4,7 @@ export interface ProService {
   tag: string
   /** Only set for services with a non-default duration (e.g. tinte=120). Otherwise derived from DB slotDuration. */
   durationMins?: number
-  price: string
+  price?: string
   icon: string
   description: string
   /** Optional image URL shown at the top of the card (e.g. '/services/botox.jpg') */

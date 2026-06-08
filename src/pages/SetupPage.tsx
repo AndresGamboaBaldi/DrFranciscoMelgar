@@ -164,7 +164,7 @@ export default function SetupPage() {
                 {/* Status */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '1rem 1.25rem', background: 'var(--color-surface)', border: `1px solid ${pushStatus === 'active' ? 'var(--color-gold)' : 'var(--color-rim)'}` }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: pushStatus === 'active' ? '#4caf50' : pushStatus === 'loading' ? 'var(--color-ink-ghost)' : '#888', flexShrink: 0 }} />
-                  <span style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)' }}>
+                  <span style={{ fontSize: '.95rem', color: 'var(--color-ink-dim)' }}>
                     {pushStatus === 'loading'      && 'Verificando…'}
                     {pushStatus === 'active'       && 'Notificaciones activas en este dispositivo'}
                     {pushStatus === 'inactive'     && 'Notificaciones no activadas en este dispositivo'}
@@ -194,16 +194,17 @@ export default function SetupPage() {
 
                 {/* iOS instructions */}
                 <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1rem 1.25rem' }}>
-                  <p style={{ fontSize: '.78rem', fontWeight: 500, color: 'var(--color-ink-dim)', marginBottom: '.6rem' }}>📱 ¿Usas iPhone?</p>
-                  <ol style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', lineHeight: 2, paddingLeft: '1.2rem', margin: 0 }}>
+                  <p style={{ fontSize: '.92rem', fontWeight: 500, color: 'var(--color-ink-dim)', marginBottom: '.6rem' }}>📱 ¿Usas iPhone?</p>
+                  <ol style={{ fontSize: '.88rem', color: 'var(--color-ink-ghost)', lineHeight: 2.1, paddingLeft: '1.2rem', margin: 0 }}>
                     <li>Abre esta página en <strong style={{ color: 'var(--color-ink-dim)' }}>Safari</strong></li>
-                    <li>Toca el botón <strong style={{ color: 'var(--color-ink-dim)' }}>Compartir</strong> (cuadrado con flecha)</li>
-                    <li>Toca <strong style={{ color: 'var(--color-ink-dim)' }}>Agregar a pantalla de inicio</strong></li>
-                    <li>Abre la app desde tu home y vuelve aquí</li>
+                    <li>Toca el botón <strong style={{ color: 'var(--color-ink-dim)' }}>Compartir</strong> (cuadrado con flecha hacia arriba)</li>
+                    <li>Toca <strong style={{ color: 'var(--color-ink-dim)' }}>Ver más</strong> y luego <strong style={{ color: 'var(--color-ink-dim)' }}>Agregar a inicio</strong></li>
+                    <li>Abre la app desde la pantalla de inicio de tu celular</li>
+                    <li>Vuelve aquí y toca <strong style={{ color: 'var(--color-ink-dim)' }}>Activar notificaciones</strong></li>
                   </ol>
                 </div>
 
-                <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', lineHeight: 1.7 }}>
+                <p style={{ fontSize: '.85rem', color: 'var(--color-ink-ghost)', lineHeight: 1.7 }}>
                   Las notificaciones se activan por dispositivo. Si usas varios, actívalas en cada uno.
                 </p>
               </div>
@@ -224,9 +225,27 @@ function Panel({ title, desc, children }: { title: string; desc: string; childre
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)', marginBottom: '.45rem' }}>
           {title}
         </h2>
-        <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>
+        <p style={{ fontSize: '1rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>
       </div>
       {children}
+      <SupportFooter />
+    </div>
+  )
+}
+
+/* ── Support footer (shown at bottom of every tab) ── */
+function SupportFooter() {
+  const phone = '59172235605'
+  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent('Hola, tengo una consulta sobre mi configuración en Probo.pro')}`
+  return (
+    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-rim)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+      <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7, margin: 0 }}>
+        ¿Tienes algún problema o no encuentras lo que buscas?<br />Contáctanos por WhatsApp y te ayudamos.
+      </p>
+      <a href={waUrl} target="_blank" rel="noopener noreferrer"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.75rem 1.5rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+        💬 Escribir por WhatsApp
+      </a>
     </div>
   )
 }
@@ -313,8 +332,8 @@ function MagicLinkPanel() {
                     {i===steps.length-1?'✓':step.n}
                   </div>
                   <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '.95rem', fontWeight: 400, color: 'var(--color-ink)', marginBottom: '.15rem' }}>{step.title}</div>
-                    <div style={{ fontSize: '.82rem', color: 'var(--color-ink-dim)', lineHeight: 1.6 }}>{step.desc}</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 400, color: 'var(--color-ink)', marginBottom: '.15rem' }}>{step.title}</div>
+                    <div style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.6 }}>{step.desc}</div>
                   </div>
                 </div>
               ))}
