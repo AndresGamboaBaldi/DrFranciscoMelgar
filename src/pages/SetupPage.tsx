@@ -101,7 +101,7 @@ export default function SetupPage() {
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
           >
             <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
-            Ver sitio
+            Ver página
           </a>
         </div>
       </header>
