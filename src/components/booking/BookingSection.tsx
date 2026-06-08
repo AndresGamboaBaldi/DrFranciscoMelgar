@@ -32,8 +32,8 @@ export default function BookingSection() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    getScheduleSettings(pro.doctorId).then(s => { if (s) setSlotDuration(s.slot_duration) })
-  }, [pro.doctorId])
+    getScheduleSettings(pro.businessId).then(s => { if (s) setSlotDuration(s.slot_duration) })
+  }, [pro.businessId])
 
   const updateForm = (field: keyof BookingFormData, value: string | boolean) => {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -61,7 +61,7 @@ export default function BookingSection() {
         phone: form.phone.trim(),
         notes: form.notes.trim() || 'Sin comentarios especiales',
         duration_mins: service?.durationMins ?? slotDuration,
-        doctor_id: pro.doctorId,
+        business_id: pro.businessId,
       })
       // Build the calendar sync URL dynamically (works in dev and production)
       const calendarPageUrl = pro.calendarFeedUrl
@@ -106,7 +106,7 @@ export default function BookingSection() {
             <>
               <StepNav step={step} />
               {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} slotDuration={slotDuration} />}
-              {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} doctorId={pro.doctorId} />}
+              {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} businessId={pro.businessId} />}
               {step === 3 && service && date && time && <ContactForm summary={{ service, date, time, slotDuration }} data={form} onChange={updateForm} errors={errors} />}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid var(--color-rim)' }}>
                 {step > 1 ? <BackBtn onClick={() => setStep(s => Math.max(s-1,1) as BookingStep)} /> : <span />}

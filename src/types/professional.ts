@@ -131,7 +131,7 @@ export interface Professional {
   theme?: ProfessionalTheme
 
   // ── Supabase / Calendario ────────────────────────────────────
-  doctorId: string
+  businessId: string
   calendarFeedUrl: string
 
   // ── Acceso al panel ?setup ───────────────────────────────────

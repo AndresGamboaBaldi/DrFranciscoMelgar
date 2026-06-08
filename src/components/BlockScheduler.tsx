@@ -34,10 +34,10 @@ export default function BlockScheduler() {
 
   const loadBlocks = useCallback(async () => {
     setLoading(true)
-    const data = await getUpcomingBlocks(pro.doctorId)
+    const data = await getUpcomingBlocks(pro.businessId)
     setBlocks(data)
     setLoading(false)
-  }, [pro.doctorId])
+  }, [pro.businessId])
 
   useEffect(() => { loadBlocks() }, [loadBlocks])
 
@@ -50,7 +50,7 @@ export default function BlockScheduler() {
     setSaving(true)
     try {
       await addBlock({
-        doctor_id:  pro.doctorId,
+        business_id:  pro.businessId,
         date,
         start_time: fullDay ? null : startTime,
         end_time:   fullDay ? null : endTime,

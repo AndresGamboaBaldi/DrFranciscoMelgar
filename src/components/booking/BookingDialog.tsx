@@ -51,10 +51,10 @@ export default function BookingDialog({ onClose }: Props) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    getScheduleSettings(pro.doctorId).then(s => {
+    getScheduleSettings(pro.businessId).then(s => {
       if (s) setSlotDuration(s.slot_duration)
     })
-  }, [pro.doctorId])
+  }, [pro.businessId])
   const [success, setSuccess] = useState(false)
   const [waUrl,   setWaUrl]   = useState('')   // WhatsApp URL shown after success
 
@@ -95,7 +95,7 @@ export default function BookingDialog({ onClose }: Props) {
         service: service.name, appointment_date: isoDate, appointment_time: time,
         name:  form.name.trim(), phone: form.phone.trim(),
         notes: form.notes.trim() || 'Sin comentarios especiales',
-        doctor_id: pro.doctorId,
+        business_id: pro.businessId,
         duration_mins: service.durationMins ?? slotDuration,
       })
       const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, duration: `${service.durationMins ?? slotDuration} min`, date: formatDate(date), time, phone: form.phone.trim() })
@@ -198,7 +198,7 @@ export default function BookingDialog({ onClose }: Props) {
                   selectedDate={date} selectedTime={time}
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
-                  doctorId={pro.doctorId}
+                  businessId={pro.businessId}
                   serviceDurationMins={service?.durationMins}
                   view="calendar"
                 />
@@ -209,7 +209,7 @@ export default function BookingDialog({ onClose }: Props) {
                   selectedDate={date} selectedTime={time}
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
-                  doctorId={pro.doctorId}
+                  businessId={pro.businessId}
                   serviceDurationMins={service?.durationMins}
                   view="times"
                 />

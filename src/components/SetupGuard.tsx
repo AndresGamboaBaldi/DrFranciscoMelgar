@@ -15,7 +15,7 @@ const SESSION_KEY_PREFIX = 'probo_setup_unlocked_'
 
 export default function SetupGuard({ children }: { children: React.ReactNode }) {
   const pro = useProfessional()
-  const sessionKey = SESSION_KEY_PREFIX + pro.doctorId
+  const sessionKey = SESSION_KEY_PREFIX + pro.businessId
 
   const [checking, setChecking]   = useState(true)
   const [unlocked, setUnlocked]   = useState(false)

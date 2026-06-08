@@ -24,7 +24,7 @@ interface Props {
   selectedTime: string | null
   onDateChange: (d: SelectedDate) => void
   onTimeChange: (t: string) => void
-  doctorId: string
+  businessId: string
   serviceDurationMins?: number
   view?: 'calendar' | 'times' | 'both'
 }
@@ -121,7 +121,7 @@ function findFirstAvailableMonth(cfg: BookingConfig): Date {
   return new Date(y, m, 1)
 }
 
-export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, doctorId, serviceDurationMins, view = 'both' }: Props) {
+export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, businessId, serviceDurationMins, view = 'both' }: Props) {
   const [calMonth, setCalMonth]     = useState(() => new Date())
   const [bookedSlots, setBooked]      = useState<string[]>([])
   const [bookedSlotsDate, setBookedSlotsDate] = useState<string | null>(null)
@@ -135,7 +135,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
 
   useEffect(() => {
     setCfgLoading(true)
-    getScheduleSettings(doctorId).then(s => {
+    getScheduleSettings(businessId).then(s => {
       if (s) {
         const resolved = settingsToConfig(s)
         setDbCfg(resolved)
@@ -149,27 +149,27 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
       }
       setCfgLoading(false)
     })
-  }, [doctorId])
+  }, [businessId])
 
   const y = calMonth.getFullYear()
   const m = calMonth.getMonth()
 
   // Fetch blocks for the visible month
   useEffect(() => {
-    getMonthBlocks(doctorId, y, m).then(setBlocks)
-  }, [doctorId, y, m])
+    getMonthBlocks(businessId, y, m).then(setBlocks)
+  }, [businessId, y, m])
 
   // Fetch booked appointments + day-specific blocks when date changes
   useEffect(() => {
     if (!selectedDate || !cfg) return
     const iso = `${selectedDate.y}-${String(selectedDate.m+1).padStart(2,'0')}-${String(selectedDate.d).padStart(2,'0')}`
     setBookedSlotsDate(null)
-    getBookedSlots(iso, doctorId, cfg.slotDuration).then(slots => {
+    getBookedSlots(iso, businessId, cfg.slotDuration).then(slots => {
       setBooked(slots)
       setBookedSlotsDate(iso)
     })
     setDayBlocks(monthBlocks.filter(b => b.date === iso))
-  }, [selectedDate, doctorId, monthBlocks, cfg])
+  }, [selectedDate, businessId, monthBlocks, cfg])
 
   const firstDow    = (() => { const d = new Date(y,m,1).getDay(); return d===0?6:d-1 })()
   const daysInMonth = new Date(y, m+1, 0).getDate()

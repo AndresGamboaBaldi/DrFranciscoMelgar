@@ -56,11 +56,11 @@ export default function ScheduleEditor() {
   }, [])
 
   useEffect(() => {
-    getScheduleSettings(pro.doctorId).then(s => {
+    getScheduleSettings(pro.businessId).then(s => {
       if (s) applySettings(s)
       setLoading(false)
     })
-  }, [pro.doctorId, applySettings])
+  }, [pro.businessId, applySettings])
 
   const toggleDay = (d: number) =>
     setWorkDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort())
@@ -81,7 +81,7 @@ export default function ScheduleEditor() {
     setSaving(true)
     try {
       await saveScheduleSettings({
-        doctor_id:     pro.doctorId,
+        business_id:     pro.businessId,
         work_days:     workDays,
         work_start:    amStart,
         work_end:      corrido ? pmEnd : pmEnd,

@@ -45,12 +45,12 @@ export default function SetupPage() {
   const [pushWorking, setPushWorking] = useState(false)
 
   useEffect(() => {
-    getPushStatus(pro.doctorId).then(setPushStatus)
-  }, [pro.doctorId])
+    getPushStatus(pro.businessId).then(setPushStatus)
+  }, [pro.businessId])
 
   const handleSubscribe = async () => {
     setPushWorking(true)
-    const result = await subscribeToPush(pro.doctorId)
+    const result = await subscribeToPush(pro.businessId)
     if (result === 'subscribed' || result === 'already') setPushStatus('active')
     else if (result === 'denied') alert('Permisos de notificación denegados. Actívalos en la configuración del navegador.')
     else if (result === 'unsupported') alert('Tu navegador no soporta notificaciones push.')

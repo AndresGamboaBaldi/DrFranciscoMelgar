@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
   const { data: appointments, error: aptErr } = await supabase
     .from('appointments')
     .select('*')
-    .eq('doctor_id', tokenRow.doctor_id)
+    .eq('business_id', tokenRow.business_id)
     .neq('status', 'cancelled')
     .gte('appointment_date', sinceStr)
     .order('appointment_date', { ascending: true })
@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
 
   // ── 3. Generate ICS ──────────────────────────────────────────────────────
   const ics = generateICS(appointments ?? [], tokenRow.doctor_name, tokenRow.timezone ?? 'America/La_Paz')
-  const filename = `citas-${tokenRow.doctor_id}.ics`
+  const filename = `citas-${tokenRow.business_id}.ics`
 
   return new Response(ics, {
     headers: {

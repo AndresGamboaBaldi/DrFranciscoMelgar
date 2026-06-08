@@ -13,8 +13,8 @@ export default function Services() {
   const [slotDuration, setSlotDuration] = useState(30)
 
   useEffect(() => {
-    getScheduleSettings(pro.doctorId).then(s => { if (s) setSlotDuration(s.slot_duration) })
-  }, [pro.doctorId])
+    getScheduleSettings(pro.businessId).then(s => { if (s) setSlotDuration(s.slot_duration) })
+  }, [pro.businessId])
 
   return (
     <section id="servicios" className="s-pad" style={{ background: 'var(--color-surface)', position: 'relative', overflow: 'hidden' }}>

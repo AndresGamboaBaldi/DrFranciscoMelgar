@@ -37,7 +37,7 @@ export interface Appointment {
   name: string
   phone: string
   notes?: string | null
-  doctor_id?: string
+  business_id?: string
   status?: 'pending' | 'confirmed' | 'cancelled'
   created_at?: string
 }

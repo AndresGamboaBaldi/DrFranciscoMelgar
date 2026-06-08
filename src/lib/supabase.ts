@@ -18,7 +18,7 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
   if (error) throw error
 
   // Fire-and-forget push notification — non-blocking
-  if (data.doctor_id) {
+  if (data.business_id) {
     const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
     const FUNCTIONS_URL = import.meta.env.DEV
       ? 'http://127.0.0.1:54321/functions/v1'
@@ -31,7 +31,7 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
     fetch(`${FUNCTIONS_URL}/send-push`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doctor_id: data.doctor_id, title: '📅 Nueva Cita', body }),
+      body: JSON.stringify({ business_id: data.business_id, title: '📅 Nueva Cita', body }),
     }).catch(() => {}) // silently ignore errors
   }
 
@@ -53,13 +53,13 @@ function expandBookedSlots(rows: { appointment_time: string; duration_mins: numb
   return [...blocked]
 }
 
-export async function getBookedSlots(date: string, doctorId: string, slotDuration = 30): Promise<string[]> {
+export async function getBookedSlots(date: string, businessId: string, slotDuration = 30): Promise<string[]> {
   if (!supabase) return []
   const { data, error } = await supabase
     .from('appointments')
     .select('appointment_time, duration_mins')
     .eq('appointment_date', date)
-    .eq('doctor_id', doctorId)
+    .eq('business_id', businessId)
     .in('status', ['pending', 'confirmed'])
   if (error) {
     // duration_mins column may not exist yet — fall back to blocking only start time
@@ -67,7 +67,7 @@ export async function getBookedSlots(date: string, doctorId: string, slotDuratio
       .from('appointments')
       .select('appointment_time')
       .eq('appointment_date', date)
-      .eq('doctor_id', doctorId)
+      .eq('business_id', businessId)
       .in('status', ['pending', 'confirmed'])
     return (fallback ?? []).map((r: { appointment_time: string }) => r.appointment_time.substring(0, 5))
   }
@@ -80,7 +80,7 @@ export async function getBookedSlots(date: string, doctorId: string, slotDuratio
 
 export interface BlockedSlot {
   id: string
-  doctor_id: string
+  business_id: string
   date: string
   start_time: string | null
   end_time:   string | null
@@ -88,14 +88,14 @@ export interface BlockedSlot {
   created_at?: string
 }
 
-export async function getMonthBlocks(doctorId: string, year: number, month: number): Promise<BlockedSlot[]> {
+export async function getMonthBlocks(businessId: string, year: number, month: number): Promise<BlockedSlot[]> {
   if (!supabase) return []
   const from = `${year}-${String(month+1).padStart(2,'0')}-01`
   const to   = `${year}-${String(month+1).padStart(2,'0')}-${new Date(year, month+1, 0).getDate()}`
   const { data } = await supabase
     .from('blocked_slots')
     .select('*')
-    .eq('doctor_id', doctorId)
+    .eq('business_id', businessId)
     .gte('date', from)
     .lte('date', to)
   return (data ?? []) as BlockedSlot[]
@@ -113,13 +113,13 @@ export async function deleteBlock(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
-export async function getUpcomingBlocks(doctorId: string): Promise<BlockedSlot[]> {
+export async function getUpcomingBlocks(businessId: string): Promise<BlockedSlot[]> {
   if (!supabase) return []
   const today = new Date().toISOString().split('T')[0]
   const { data } = await supabase
     .from('blocked_slots')
     .select('*')
-    .eq('doctor_id', doctorId)
+    .eq('business_id', businessId)
     .gte('date', today)
     .order('date', { ascending: true })
     .order('start_time', { ascending: true, nullsFirst: true })
@@ -131,7 +131,7 @@ export async function getUpcomingBlocks(doctorId: string): Promise<BlockedSlot[]
 // ─────────────────────────────────────────────────────────────
 
 export interface ScheduleSettings {
-  doctor_id:     string
+  business_id:     string
   work_days:     number[]
   work_start:    string
   work_end:      string
@@ -145,12 +145,12 @@ export interface ScheduleSettings {
   min_advance:   number
 }
 
-export async function getScheduleSettings(doctorId: string): Promise<ScheduleSettings | null> {
+export async function getScheduleSettings(businessId: string): Promise<ScheduleSettings | null> {
   if (!supabase) return null
   const { data } = await supabase
     .from('schedule_settings')
     .select('*')
-    .eq('doctor_id', doctorId)
+    .eq('business_id', businessId)
     .maybeSingle()
   return data as ScheduleSettings | null
 }
@@ -161,7 +161,7 @@ export async function getScheduleSettings(doctorId: string): Promise<ScheduleSet
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
 
-export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 'already' | 'denied' | 'unsupported'> {
+export async function subscribeToPush(businessId: string): Promise<'subscribed' | 'already' | 'denied' | 'unsupported'> {
   if (!supabase || !('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.warn('[Push] unsupported — supabase:', !!supabase, 'sw:', 'serviceWorker' in navigator, 'push:', 'PushManager' in window)
     return 'unsupported'
@@ -198,7 +198,7 @@ export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 
   }
 
   const { error } = await supabase.from('push_subscriptions').insert([{
-    doctor_id: doctorId,
+    business_id: businessId,
     subscription: sub.toJSON(),
   }])
 
@@ -211,7 +211,7 @@ export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 
   return 'subscribed'
 }
 
-export async function getPushStatus(_doctorId: string): Promise<'active' | 'inactive' | 'unsupported'> {
+export async function getPushStatus(_businessId: string): Promise<'active' | 'inactive' | 'unsupported'> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
   const reg = await navigator.serviceWorker.getRegistration('/sw.js')
   if (!reg) return 'inactive'
@@ -230,6 +230,6 @@ export async function saveScheduleSettings(settings: ScheduleSettings): Promise<
   if (!supabase) throw new Error('Supabase no configurado')
   const { error } = await supabase
     .from('schedule_settings')
-    .upsert([{ ...settings, updated_at: new Date().toISOString() }], { onConflict: 'doctor_id' })
+    .upsert([{ ...settings, updated_at: new Date().toISOString() }], { onConflict: 'business_id' })
   if (error) throw new Error(error.message)
 }

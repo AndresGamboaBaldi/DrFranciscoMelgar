@@ -32,11 +32,11 @@ Deno.serve(async (req: Request) => {
     })
   }
 
-  const { doctor_id, title, body } = await req.json() as {
-    doctor_id: string; title: string; body: string
+  const { business_id, title, body } = await req.json() as {
+    business_id: string; title: string; body: string
   }
 
-  if (!doctor_id || !title) {
+  if (!business_id || !title) {
     return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 })
   }
 
@@ -45,7 +45,7 @@ Deno.serve(async (req: Request) => {
   const { data: subs } = await supabase
     .from('push_subscriptions')
     .select('id, subscription')
-    .eq('doctor_id', doctor_id)
+    .eq('business_id', business_id)
 
   if (!subs || subs.length === 0) {
     return new Response(JSON.stringify({ sent: 0 }), { status: 200 })
