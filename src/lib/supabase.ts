@@ -158,27 +158,52 @@ export async function getScheduleSettings(doctorId: string): Promise<ScheduleSet
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
 
 export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 'already' | 'denied' | 'unsupported'> {
-  if (!supabase || !('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
+  if (!supabase || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('[Push] unsupported — supabase:', !!supabase, 'sw:', 'serviceWorker' in navigator, 'push:', 'PushManager' in window)
+    return 'unsupported'
+  }
+  if (!VAPID_PUBLIC_KEY) {
+    console.error('[Push] VITE_VAPID_PUBLIC_KEY is not set')
+    return 'unsupported'
+  }
 
   const permission = await Notification.requestPermission()
+  console.log('[Push] permission:', permission)
   if (permission !== 'granted') return 'denied'
 
   const reg = await navigator.serviceWorker.register('/sw.js')
   await navigator.serviceWorker.ready
+  console.log('[Push] service worker ready')
 
   const existing = await reg.pushManager.getSubscription()
-  if (existing) return 'already'
+  if (existing) {
+    console.log('[Push] already subscribed, endpoint:', existing.endpoint.slice(0, 50))
+    return 'already'
+  }
 
-  const sub = await reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
-  })
+  let sub: PushSubscription
+  try {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
+    })
+    console.log('[Push] subscribed, endpoint:', sub.endpoint.slice(0, 50))
+  } catch (e) {
+    console.error('[Push] subscribe failed:', e)
+    return 'unsupported'
+  }
 
-  await supabase.from('push_subscriptions').upsert([{
+  const { error } = await supabase.from('push_subscriptions').insert([{
     doctor_id: doctorId,
     subscription: sub.toJSON(),
-  }], { onConflict: 'doctor_id' })
+  }])
 
+  if (error) {
+    console.error('[Push] failed to save subscription:', error)
+    return 'unsupported'
+  }
+
+  console.log('[Push] subscription saved to DB ✓')
   return 'subscribed'
 }
 

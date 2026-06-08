@@ -78,7 +78,23 @@ for (const [slug, pro] of Object.entries(PROFESSIONALS)) {
   fs.mkdirSync(outDir, { recursive: true })
   fs.writeFileSync(path.join(outDir, 'index.html'), html)
 
-  console.log(`✓ Generated dist/${slug}/index.html`)
+  // Per-professional manifest for Android home screen name
+  const manifest = {
+    name:             pro.name,
+    short_name:       pro.name.split(' ').slice(0, 2).join(' '),
+    description:      `${pro.specialty} en ${pro.city}`,
+    start_url:        `/${slug}`,
+    display:          'standalone',
+    background_color: '#111111',
+    theme_color:      '#111111',
+    icons: [
+      { src: pro.heroPhoto, sizes: '192x192', type: 'image/jpeg' },
+      { src: pro.heroPhoto, sizes: '512x512', type: 'image/jpeg' },
+    ],
+  }
+  fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2))
+
+  console.log(`✓ Generated dist/${slug}/index.html + manifest.json`)
 }
 
 console.log('\n✅ OG HTML pages generated successfully')

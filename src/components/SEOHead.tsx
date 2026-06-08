@@ -106,6 +106,11 @@ export function ProSEOHead({ pro }: ProSEOProps) {
       <meta name="description" content={description} />
       <link rel="canonical" href={pageUrl} />
 
+      {/* PWA — per-professional name for home screen icon */}
+      <meta name="apple-mobile-web-app-capable"      content="yes" />
+      <meta name="apple-mobile-web-app-title"         content={pro.shortName} />
+      <link rel="manifest"                            href={`/${pro.slug}/manifest.json`} />
+
       {/* Open Graph */}
       <meta property="og:type"        content="website" />
       <meta property="og:url"         content={pageUrl} />

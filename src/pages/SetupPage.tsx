@@ -57,6 +57,19 @@ export default function SetupPage() {
     setPushWorking(false)
   }
 
+  const handleUnsubscribe = async () => {
+    setPushWorking(true)
+    try {
+      const reg = await navigator.serviceWorker.getRegistration('/sw.js')
+      const sub = reg ? await reg.pushManager.getSubscription() : null
+      if (sub) await sub.unsubscribe()
+      setPushStatus('inactive')
+    } catch (e) {
+      console.error('[Push] unsubscribe failed:', e)
+    }
+    setPushWorking(false)
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', colorScheme: 'inherit' }}>
 
@@ -166,6 +179,16 @@ export default function SetupPage() {
                     onMouseLeave={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold)' }}
                   >
                     🔔 {pushWorking ? 'Activando…' : 'Activar notificaciones'}
+                  </button>
+                )}
+
+                {pushStatus === 'active' && (
+                  <button onClick={handleUnsubscribe} disabled={pushWorking}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.8rem 2rem', background: 'none', border: '1px solid var(--color-rim-l)', color: pushWorking ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.12em', textTransform: 'uppercase', cursor: pushWorking ? 'not-allowed' : 'pointer', transition: 'all .3s', alignSelf: 'flex-start' }}
+                    onMouseEnter={e => { if (!pushWorking) { e.currentTarget.style.color = '#c47070'; e.currentTarget.style.borderColor = '#c47070' } }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
+                  >
+                    🔕 {pushWorking ? 'Desactivando…' : 'Desactivar notificaciones'}
                   </button>
                 )}
 
