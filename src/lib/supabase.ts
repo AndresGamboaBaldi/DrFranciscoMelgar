@@ -16,6 +16,21 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
   if (!supabase) { console.warn('[Supabase] not configured'); return null }
   const { error } = await supabase.from('appointments').insert([{ ...data, status: 'pending' }])
   if (error) throw error
+
+  // Fire-and-forget push notification — non-blocking
+  if (data.doctor_id) {
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+    const FUNCTIONS_URL = import.meta.env.DEV
+      ? 'http://127.0.0.1:54321/functions/v1'
+      : `${SUPABASE_URL}/functions/v1`
+    const body = `${data.name} reservó ${data.service} el ${data.appointment_date} a las ${data.appointment_time}`
+    fetch(`${FUNCTIONS_URL}/send-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctor_id: data.doctor_id, title: '📅 Nueva Cita', body }),
+    }).catch(() => {}) // silently ignore errors
+  }
+
   return null
 }
 
@@ -134,6 +149,52 @@ export async function getScheduleSettings(doctorId: string): Promise<ScheduleSet
     .eq('doctor_id', doctorId)
     .maybeSingle()
   return data as ScheduleSettings | null
+}
+
+// ─────────────────────────────────────────────────────────────
+//  PUSH NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────
+
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
+
+export async function subscribeToPush(doctorId: string): Promise<'subscribed' | 'already' | 'denied' | 'unsupported'> {
+  if (!supabase || !('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
+
+  const permission = await Notification.requestPermission()
+  if (permission !== 'granted') return 'denied'
+
+  const reg = await navigator.serviceWorker.register('/sw.js')
+  await navigator.serviceWorker.ready
+
+  const existing = await reg.pushManager.getSubscription()
+  if (existing) return 'already'
+
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+  })
+
+  await supabase.from('push_subscriptions').upsert([{
+    doctor_id: doctorId,
+    subscription: sub.toJSON(),
+  }], { onConflict: 'doctor_id' })
+
+  return 'subscribed'
+}
+
+export async function getPushStatus(doctorId: string): Promise<'active' | 'inactive' | 'unsupported'> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
+  const reg = await navigator.serviceWorker.getRegistration('/sw.js')
+  if (!reg) return 'inactive'
+  const sub = await reg.pushManager.getSubscription()
+  return sub ? 'active' : 'inactive'
+}
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const raw     = atob(base64)
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
 }
 
 export async function saveScheduleSettings(settings: ScheduleSettings): Promise<void> {

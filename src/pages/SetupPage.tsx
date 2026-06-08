@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
 import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
+import { subscribeToPush, getPushStatus } from '../lib/supabase'
 
-type Section = 'schedule' | 'blocks' | 'calendar'
+type Section = 'schedule' | 'blocks' | 'calendar' | 'notificaciones'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
 
 const NAV: { id: Section; label: string; desc: string }[] = [
-  { id: 'schedule', label: 'Horarios',   desc: 'Días y horas de atención' },
-  { id: 'blocks',   label: 'Bloqueos',   desc: 'Días no disponibles'      },
-  { id: 'calendar', label: 'Calendario', desc: 'Link mágico de sincronización' },
+  { id: 'schedule',       label: 'Horarios',        desc: 'Días y horas de atención' },
+  { id: 'blocks',         label: 'Bloqueos',        desc: 'Días no disponibles' },
+  { id: 'calendar',       label: 'Calendario',      desc: 'Link mágico de sincronización' },
+  { id: 'notificaciones', label: 'Notificaciones',  desc: 'Avisos de nuevas citas' },
 ]
 
 const STEPS_IPHONE = [
@@ -38,7 +40,22 @@ const STEPS_OUTLOOK = [
 
 export default function SetupPage() {
   const pro = useProfessional()
-  const [section, setSection] = useState<Section>('schedule')
+  const [section, setSection]       = useState<Section>('schedule')
+  const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
+  const [pushWorking, setPushWorking] = useState(false)
+
+  useEffect(() => {
+    getPushStatus(pro.doctorId).then(setPushStatus)
+  }, [pro.doctorId])
+
+  const handleSubscribe = async () => {
+    setPushWorking(true)
+    const result = await subscribeToPush(pro.doctorId)
+    if (result === 'subscribed' || result === 'already') setPushStatus('active')
+    else if (result === 'denied') alert('Permisos de notificación denegados. Actívalos en la configuración del navegador.')
+    else if (result === 'unsupported') alert('Tu navegador no soporta notificaciones push.')
+    setPushWorking(false)
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', colorScheme: 'inherit' }}>
@@ -124,6 +141,49 @@ export default function SetupPage() {
           {section === 'calendar' && (
             <Panel title="Link Mágico" desc="Agrega este link una sola vez y todas las citas aparecen automáticamente en tu calendario.">
               <MagicLinkPanel />
+            </Panel>
+          )}
+
+          {section === 'notificaciones' && (
+            <Panel title="Notificaciones push" desc="Recibe una notificación en este dispositivo cada vez que un paciente reserve una cita — sin WhatsApp.">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                {/* Status */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '1rem 1.25rem', background: 'var(--color-surface)', border: `1px solid ${pushStatus === 'active' ? 'var(--color-gold)' : 'var(--color-rim)'}` }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: pushStatus === 'active' ? '#4caf50' : pushStatus === 'loading' ? 'var(--color-ink-ghost)' : '#888', flexShrink: 0 }} />
+                  <span style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)' }}>
+                    {pushStatus === 'loading'      && 'Verificando…'}
+                    {pushStatus === 'active'       && 'Notificaciones activas en este dispositivo'}
+                    {pushStatus === 'inactive'     && 'Notificaciones no activadas en este dispositivo'}
+                    {pushStatus === 'unsupported'  && 'Tu navegador no soporta notificaciones push'}
+                  </span>
+                </div>
+
+                {pushStatus !== 'active' && pushStatus !== 'unsupported' && (
+                  <button onClick={handleSubscribe} disabled={pushWorking}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.8rem 2rem', background: pushWorking ? 'var(--color-rim-l)' : 'var(--color-gold)', color: pushWorking ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: pushWorking ? 'not-allowed' : 'pointer', transition: 'background .3s', alignSelf: 'flex-start' }}
+                    onMouseEnter={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold-l)' }}
+                    onMouseLeave={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold)' }}
+                  >
+                    🔔 {pushWorking ? 'Activando…' : 'Activar notificaciones'}
+                  </button>
+                )}
+
+                {/* iOS instructions */}
+                <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1rem 1.25rem' }}>
+                  <p style={{ fontSize: '.78rem', fontWeight: 500, color: 'var(--color-ink-dim)', marginBottom: '.6rem' }}>📱 ¿Usas iPhone?</p>
+                  <ol style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', lineHeight: 2, paddingLeft: '1.2rem', margin: 0 }}>
+                    <li>Abre esta página en <strong style={{ color: 'var(--color-ink-dim)' }}>Safari</strong></li>
+                    <li>Toca el botón <strong style={{ color: 'var(--color-ink-dim)' }}>Compartir</strong> (cuadrado con flecha)</li>
+                    <li>Toca <strong style={{ color: 'var(--color-ink-dim)' }}>Agregar a pantalla de inicio</strong></li>
+                    <li>Abre la app desde tu home y vuelve aquí</li>
+                  </ol>
+                </div>
+
+                <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', lineHeight: 1.7 }}>
+                  Las notificaciones se activan por dispositivo. Si usas varios, actívalas en cada uno.
+                </p>
+              </div>
             </Panel>
           )}
 
