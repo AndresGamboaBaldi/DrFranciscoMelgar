@@ -85,12 +85,17 @@ function isDayUnavailable(y: number, m: number, d: number, cfg: BookingConfig, b
               : cfg.workHours
   if (!hours) return true
 
-  // Past / advance restriction
-  if (cfg.minAdvanceHours > 0) {
-    const [eh, em] = hours.end.split(':').map(Number)
-    if (new Date(y, m, d, eh, em).getTime() <= Date.now() + cfg.minAdvanceHours * 3600000) return true
-  } else {
+  // Past days (no advance restriction)
+  if (cfg.minAdvanceHours === 0) {
     if (dt < new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate())) return true
+  } else {
+    // With advance restriction: block day if ALL its slots are too soon
+    const slots = generateSlots(hours.start, hours.end, cfg.slotDuration)
+    const allTooSoon = slots.every(slot => {
+      const [sh, sm] = slot.split(':').map(Number)
+      return new Date(y, m, d, sh, sm).getTime() < Date.now() + cfg.minAdvanceHours * 3600000
+    })
+    if (allTooSoon) return true
   }
 
   // Full-day block
