@@ -67,7 +67,9 @@ for (const [slug, pro] of Object.entries(PROFESSIONALS)) {
     <meta name="twitter:card"       content="summary" />
     <meta name="twitter:title"      content="${title}" />
     <meta name="twitter:image"      content="${imageUrl}" />
-    <title>${title}</title>`
+    <title>${title}</title>
+    <link rel="manifest" href="/${slug}/manifest.json" />
+    <meta name="apple-mobile-web-app-title" content="${pro.name.split(' ').slice(0,2).join(' ')}" />`
 
   // Inject OG tags right after <head> and replace the default <title>
   const html = baseHtml
