@@ -23,7 +23,11 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
     const FUNCTIONS_URL = import.meta.env.DEV
       ? 'http://127.0.0.1:54321/functions/v1'
       : `${SUPABASE_URL}/functions/v1`
-    const body = `${data.name} reservó ${data.service} el ${data.appointment_date} a las ${data.appointment_time}`
+    const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+    const [y, mo, d] = data.appointment_date.split('-').map(Number)
+    const currentYear = new Date().getFullYear()
+    const dateLabel = `${d} de ${MONTHS[mo - 1]}${y !== currentYear ? ` de ${y}` : ''}`
+    const body = `${data.name} reservó ${data.service} el ${dateLabel} a las ${data.appointment_time}`
     fetch(`${FUNCTIONS_URL}/send-push`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -310,7 +310,7 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
         Gracias{name ? `, ${name.split(' ')[0]}` : ''}.{' '}
         <span style={{ color: 'var(--color-ink)' }}>Te esperamos el {dayLabel} a las {time}.</span>
       </p>
-      <p style={{ fontSize: '1rem', color: 'var(--color-gold)', marginBottom: '2rem', letterSpacing: '.04em' }}>
+      <p style={{ fontSize: '1.2rem', color: 'var(--color-gold)', marginBottom: '1rem', letterSpacing: '.04em' }}>
         Guarda tu cita para no olvidarla
       </p>
 
