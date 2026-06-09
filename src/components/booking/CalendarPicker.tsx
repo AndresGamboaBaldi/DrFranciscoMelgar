@@ -58,11 +58,12 @@ function isSlotBlocked(slot: string, blocks: BlockedSlot[]): boolean {
   })
 }
 
-/** Is a slot too soon (minAdvanceHours restriction)? */
+/** Is a slot too soon (past or within minAdvanceHours)? */
 function isTooSoon(y: number, m: number, d: number, slot: string, minHrs: number): boolean {
-  if (minHrs === 0) return false
   const [h, min] = slot.split(':').map(Number)
-  return new Date(y, m, d, h, min).getTime() < Date.now() + minHrs * 3600000
+  const slotTime = new Date(y, m, d, h, min).getTime()
+  // Always block slots that are already in the past (even with 0 advance restriction)
+  return slotTime < Date.now() + minHrs * 3600000
 }
 
 /** Is an entire day blocked or unavailable? */
@@ -85,18 +86,13 @@ function isDayUnavailable(y: number, m: number, d: number, cfg: BookingConfig, b
               : cfg.workHours
   if (!hours) return true
 
-  // Past days (no advance restriction)
-  if (cfg.minAdvanceHours === 0) {
-    if (dt < new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate())) return true
-  } else {
-    // With advance restriction: block day if ALL its slots are too soon
-    const slots = generateSlots(hours.start, hours.end, cfg.slotDuration)
-    const allTooSoon = slots.every(slot => {
-      const [sh, sm] = slot.split(':').map(Number)
-      return new Date(y, m, d, sh, sm).getTime() < Date.now() + cfg.minAdvanceHours * 3600000
-    })
-    if (allTooSoon) return true
-  }
+  // Block day if ALL its slots are too soon (works for both 0 and non-zero advance)
+  const slots = generateSlots(hours.start, hours.end, cfg.slotDuration)
+  const allTooSoon = slots.every(slot => {
+    const [sh, sm] = slot.split(':').map(Number)
+    return new Date(y, m, d, sh, sm).getTime() < Date.now() + cfg.minAdvanceHours * 3600000
+  })
+  if (allTooSoon) return true
 
   // Full-day block
   const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
@@ -133,31 +129,37 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
   // cfg is only non-null after DB settings load
   const cfg = dbCfg
 
+  const y = calMonth.getFullYear()
+  const m = calMonth.getMonth()
+
+  // Fetch config + month blocks in parallel on mount / businessId change
   useEffect(() => {
     setCfgLoading(true)
-    getScheduleSettings(businessId).then(s => {
+    Promise.all([
+      getScheduleSettings(businessId),
+      getMonthBlocks(businessId, y, m),
+    ]).then(([s, blocks]) => {
+      setBlocks(blocks)
       if (s) {
         const resolved = settingsToConfig(s)
         setDbCfg(resolved)
         setCalMonth(prev => {
-          const y = prev.getFullYear(), m = prev.getMonth()
-          const days = new Date(y, m + 1, 0).getDate()
+          const py = prev.getFullYear(), pm = prev.getMonth()
+          const days = new Date(py, pm + 1, 0).getDate()
           const stillHasDay = Array.from({ length: days }, (_, i) => i + 1)
-            .some(d => !isDayUnavailable(y, m, d, resolved, []))
+            .some(d => !isDayUnavailable(py, pm, d, resolved, []))
           return stillHasDay ? prev : findFirstAvailableMonth(resolved)
         })
       }
       setCfgLoading(false)
     })
-  }, [businessId])
+  }, [businessId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const y = calMonth.getFullYear()
-  const m = calMonth.getMonth()
-
-  // Fetch blocks for the visible month
+  // Fetch blocks when month changes (but not on initial load — covered above)
   useEffect(() => {
+    if (cfgLoading) return
     getMonthBlocks(businessId, y, m).then(setBlocks)
-  }, [businessId, y, m])
+  }, [businessId, y, m]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch booked appointments + day-specific blocks when date changes
   useEffect(() => {

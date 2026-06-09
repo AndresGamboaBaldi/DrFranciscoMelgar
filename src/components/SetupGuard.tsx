@@ -66,6 +66,12 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
     }
     if (password === pro.setupPassword) {
       sessionStorage.setItem(sessionKey, '1')
+      // Reset iOS zoom after input focus
+      const viewport = document.querySelector('meta[name="viewport"]')
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1')
+        setTimeout(() => viewport.setAttribute('content', 'width=device-width, initial-scale=1'), 100)
+      }
       setUnlocked(true)
     } else {
       setError('Contraseña incorrecta')
@@ -112,7 +118,7 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
             <input type="password" value={password} autoFocus
               onChange={e => setPassword(e.target.value)}
               placeholder="Contraseña"
-              style={{ padding: '.85rem 1rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '.85rem', textAlign: 'center' }} />
+              style={{ padding: '.85rem 1rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '16px', textAlign: 'center' }} />
             {error && <p style={{ fontSize: '.78rem', color: '#c47070', margin: 0 }}>{error}</p>}
             <button type="submit"
               style={{ padding: '.85rem 1.5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}>

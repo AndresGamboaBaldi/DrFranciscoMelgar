@@ -65,6 +65,14 @@ function buildThemeVars(pro: Professional): React.CSSProperties {
 
   return {
     ...shared,
+    '--color-bg':           '#0a0907',
+    '--color-surface':      '#131110',
+    '--color-surface2':     '#1d1a16',
+    '--color-rim':          '#272320',
+    '--color-rim-l':        '#37322c',
+    '--color-ink':          '#f5f2ee',
+    '--color-ink-dim':      '#d4cdc5',
+    '--color-ink-ghost':    '#a09890',
     '--color-nav-scrolled': 'rgba(10,9,7,.93)',
     '--watermark-stroke':   hexToRgba(accent, 0.07),
     '--grain-opacity':      '0.025',

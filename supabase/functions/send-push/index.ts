@@ -32,8 +32,8 @@ Deno.serve(async (req: Request) => {
     })
   }
 
-  const { business_id, title, body } = await req.json() as {
-    business_id: string; title: string; body: string
+  const { business_id, title, body, url } = await req.json() as {
+    business_id: string; title: string; body: string; url?: string
   }
 
   if (!business_id || !title) {
@@ -51,7 +51,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ sent: 0 }), { status: 200 })
   }
 
-  const payload = JSON.stringify({ title, body })
+  const payload = JSON.stringify({ title, body, url: url ?? '/' })
   let sent = 0
   const expired: string[] = []
 

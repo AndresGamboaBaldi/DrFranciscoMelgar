@@ -72,6 +72,7 @@ const doctor_melgar: Professional = {
 //  2. BARBER VIP — Barbería de lujo
 // ────────────────────────────────────────────────────────────────
 const barber_vip: Professional = {
+  heroPhoto: '/jhoel_cuts/photos/barberia.webp',
   photos: ['/barber_vip/photos/vip2.avif'],
   slug:      'barber_vip',
   category:  'barbero',

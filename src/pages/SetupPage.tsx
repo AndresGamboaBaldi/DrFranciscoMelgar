@@ -107,7 +107,7 @@ export default function SetupPage() {
       </header>
 
       {/* ── Tab bar ── */}
-      <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto' }}>
+      <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
         <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
           {NAV.map(n => {
             const active = section === n.id
