@@ -130,7 +130,10 @@ export default function BookingDialog({ onClose }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-rim)', flexShrink: 0, gap: '1rem' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
             {success
-              ? <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>¡Reserva confirmada!</em>
+              ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem' }}>
+                  <em style={{ fontStyle: 'italic', color: 'var(--color-gold)', lineHeight: 1 }}>¡Reserva confirmada!</em>
+                  <span style={{ width: '1.6rem', height: '1.6rem', border: '1.5px solid var(--color-gold)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)', fontSize: '.7rem', flexShrink: 0 }}>✓</span>
+                </span>
               : <>Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></>
             }
           </h2>
@@ -302,23 +305,46 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
     URL.revokeObjectURL(url)
   }
 
+  const summaryRows = [
+    { label: 'Servicio', value: service?.name ?? '' },
+    { label: 'Fecha',    value: dayLabel },
+    { label: 'Hora',     value: time },
+    { label: 'Duración', value: `${durationMins} min` },
+  ]
+
   return (
-    <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
-      <div style={{ width: '3.5rem', height: '3.5rem', border: '1.5px solid var(--color-gold)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', color: 'var(--color-gold)', fontSize: '1.2rem' }}>✓</div>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.9rem', fontWeight: 300, marginBottom: '.5rem' }}>¡Cita Confirmada!</h3>
-      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.05rem', color: 'var(--color-ink-dim)', marginBottom: '.5rem' }}>
-        Gracias{name ? `, ${name.split(' ')[0]}` : ''}.{' '}
-        <span style={{ color: 'var(--color-ink)' }}>Te esperamos el {dayLabel} a las {time}.</span>
-      </p>
-      <p style={{ fontSize: '1.2rem', color: 'var(--color-gold)', marginBottom: '1rem', letterSpacing: '.04em' }}>
-        Guarda tu cita para no olvidarla
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem .25rem' }}>
+
+      {/* ── Header ── */}
+      <div style={{ textAlign: 'center' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.7rem', fontWeight: 300, marginBottom: '.4rem' }}>
+          Gracias{name ? `, ${name.split(' ')[0]}` : ''}
+        </h3>
+        <p style={{ fontSize: '1.05rem', color: 'var(--color-gold)', letterSpacing: '.03em' }}>
+          Los detalles de tu cita:
+        </p>
+      </div>
+
+      {/* ── Summary table ── */}
+      <div style={{ border: '1px solid var(--color-rim)', overflow: 'hidden' }}>
+        {summaryRows.map((row, i) => (
+          <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '.7rem 1rem', borderTop: i === 0 ? 'none' : '1px solid var(--color-rim)', background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent' }}>
+            <span style={{ fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>{row.label}</span>
+            <span style={{ fontSize: '.88rem', color: 'var(--color-ink)', fontWeight: 400 }}>{row.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Save reminder ── */}
+      <p style={{ textAlign: 'center', fontSize: '1.05rem', color: 'var(--color-gold)', letterSpacing: '.03em' }}>
+        Guarda tu cita para no olvidarla:
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '.65rem', width: '100%', maxWidth: '280px', margin: '0 auto' }}>
-        {/* WhatsApp */}
+      {/* ── Action buttons ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
         {waUrl && (
           <a href={waUrl} target="_blank" rel="noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s', width: '100%' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#1fb855')}
             onMouseLeave={e => (e.currentTarget.style.background = '#25D366')}
           >
@@ -326,24 +352,24 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
             Enviar por WhatsApp
           </a>
         )}
-        {/* Añadir a Calendario — solo en móvil */}
-        {window.matchMedia('(pointer: coarse)').matches && <button onClick={downloadICS}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: 'none', border: '1.5px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .3s', width: '100%' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.1)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Añadir a Calendario
-        </button>}
-        {/* Cerrar + Nueva Cita */}
-        <div style={{ display: 'flex', gap: '.65rem', width: '100%' }}>
+        {window.matchMedia('(pointer: coarse)').matches && (
+          <button onClick={downloadICS}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: 'none', border: '1.5px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .3s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.1)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Añadir a Calendario
+          </button>
+        )}
+        <div style={{ display: 'flex', gap: '.6rem' }}>
           <button onClick={onClose}
-            style={{ flex: 1, padding: '.85rem .5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s' }}
+            style={{ flex: 1, padding: '.8rem .5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-gold-l)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-gold)')}
           >Cerrar</button>
           <button onClick={onReset}
-            style={{ flex: 1, padding: '.85rem .5rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}
+            style={{ flex: 1, padding: '.8rem .5rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
           >Nueva Cita</button>
