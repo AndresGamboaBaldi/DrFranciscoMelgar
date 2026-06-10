@@ -14,7 +14,7 @@ function buildWhatsAppUrl(apt: Appointment, businessName: string): string {
   const phone = apt.phone.replace(/\D/g, '')
   const firstName = apt.name.split(' ')[0]
   const time = apt.appointment_time.substring(0,5)
-  const [y, m, d] = apt.appointment_date.split('-').map(Number)
+  const [, m, d] = apt.appointment_date.split('-').map(Number)
   const dateLabel = `${d} de ${MONTHS_ES[m - 1]}`
   const text = `Hola ${firstName}! 👋 Te recordamos tu cita con *${businessName}*:\n\n🗓️ ${dateLabel}\n🕐 ${time}\n\n¿Confirmas tu asistencia?`
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
