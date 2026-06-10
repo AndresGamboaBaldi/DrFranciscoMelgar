@@ -37,10 +37,10 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
       const urlKey = new URLSearchParams(window.location.search).get('key')
       if (urlKey && pro.setupPassword && urlKey === pro.setupPassword) {
         localStorage.setItem(sessionKey, '1')
-        // Clean the key from the URL without reloading
-        const url = new URL(window.location.href)
-        url.searchParams.delete('key')
-        window.history.replaceState({}, '', url.toString())
+        // NOTE: we deliberately keep ?key=... in the URL (don't strip it).
+        // If the professional adds this page to their home screen, the saved
+        // shortcut keeps the key, so the app can re-auth on every launch even
+        // if iOS clears localStorage for the standalone PWA.
         if (active) { setUnlocked(true); setChecking(false) }
         return
       }
