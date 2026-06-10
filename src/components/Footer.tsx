@@ -50,7 +50,7 @@ export default function Footer() {
         {/* CTA */}
         <div style={{ flexShrink: 0 }}>
           <button onClick={openBooking}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.7rem 1.4rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: 400, letterSpacing: '.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.7rem 1.4rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-gold-l)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-gold)')}
           >Reservar Cita</button>

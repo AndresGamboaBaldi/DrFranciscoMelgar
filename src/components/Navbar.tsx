@@ -69,7 +69,7 @@ export default function Navbar() {
         style={{
           fontFamily: 'var(--font-body)',
           fontSize: 'clamp(.7rem, 1.2vw, .82rem)',
-          fontWeight: 400,
+          fontWeight: 600,
           letterSpacing: '.12em',
           textTransform: 'uppercase',
           color: 'var(--color-bg)',
