@@ -112,8 +112,6 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
     carouselDays.push(d)
   }
 
-  const confirmedCount = appointments.filter(a => a.status === 'confirmed').length
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 

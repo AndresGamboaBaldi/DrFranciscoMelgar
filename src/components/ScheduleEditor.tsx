@@ -4,7 +4,6 @@ import { getScheduleSettings, saveScheduleSettings, type ScheduleSettings } from
 
 const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB']
 const SLOT_OPTIONS = [15, 30, 45, 60]
-const BREAK_OPTIONS = [0, 5, 10, 15, 20, 30]
 const ADVANCE_OPTIONS = [
   { v: 0,  l: 'Sin restricción' },
   { v: 1,  l: '1 hora' },
@@ -35,7 +34,6 @@ export default function ScheduleEditor() {
   const [sunEnd,     setSunEnd]     = useState('15:00')
 
   const [slotDur,    setSlotDur]    = useState(30)
-  const [breakDur,   setBreakDur]   = useState(0)
   const [minAdv,     setMinAdv]     = useState(0)
 
   const [loading, setLoading] = useState(true)
