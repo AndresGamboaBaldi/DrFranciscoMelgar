@@ -261,9 +261,9 @@ input[type="time"], input[type="date"], input[type="number"] {
     background: var(--color-nav-scrolled, var(--color-surface));
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--color-rim);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: max(.85rem, env(safe-area-inset-bottom));
   }
-  .setup-main-mobile-pad { padding-bottom: calc(4.75rem + env(safe-area-inset-bottom)) !important; }
+  .setup-main-mobile-pad { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important; }
 }
 
 /* ── Divider ── */

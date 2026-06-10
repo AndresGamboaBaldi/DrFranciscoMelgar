@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { CalendarDays, Clock, Settings } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
 import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
@@ -9,10 +10,10 @@ import { subscribeToPush, getPushStatus } from '../lib/supabase'
 type Section = 'citas' | 'schedule' | 'config'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
 
-const NAV: { id: Section; label: string; desc: string; icon: string }[] = [
-  { id: 'citas',    label: 'Citas',                 desc: 'Agenda del día',                  icon: '📅' },
-  { id: 'schedule', label: 'Horarios',              desc: 'Días y horas de atención',         icon: '🕐' },
-  { id: 'config',   label: 'Configuración inicial', desc: 'Calendario y notificaciones',      icon: '⚙️' },
+const NAV: { id: Section; label: string; desc: string; icon: typeof CalendarDays }[] = [
+  { id: 'citas',    label: 'Citas',                 desc: 'Agenda del día',                  icon: CalendarDays },
+  { id: 'schedule', label: 'Horarios',              desc: 'Días y horas de atención',         icon: Clock },
+  { id: 'config',   label: 'Configuración inicial', desc: 'Calendario y notificaciones',      icon: Settings },
 ]
 
 const STEPS_IPHONE = [
@@ -145,7 +146,7 @@ export default function SetupPage() {
 
           {section === 'schedule' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-              <Panel title="Horarios de atención" desc="Configura los días y horas en que aceptas citas. Los cambios aplican de inmediato al calendario de reservas.">
+              <Panel title="Horarios de atención" desc="">
                 <ScheduleEditor />
               </Panel>
 
@@ -237,20 +238,21 @@ export default function SetupPage() {
       <nav className="setup-tabbar-bottom">
         {NAV.map(n => {
           const active = section === n.id
+          const Icon = n.icon
           return (
             <button key={n.id} onClick={() => setSection(n.id)}
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                gap: '.2rem', padding: '.55rem .25rem .5rem', background: 'none', border: 'none',
+                gap: '.3rem', padding: '.7rem .25rem .35rem', minHeight: '3.75rem', background: 'none', border: 'none',
                 borderTop: `2px solid ${active ? 'var(--color-gold)' : 'transparent'}`,
                 marginTop: -1, cursor: 'pointer',
                 color: active ? 'var(--color-gold)' : 'var(--color-ink-dim)',
-                fontFamily: 'var(--font-body)', fontSize: '.62rem',
+                fontFamily: 'var(--font-body)', fontSize: '.68rem',
                 fontWeight: active ? 500 : 300, letterSpacing: '.04em', textTransform: 'uppercase',
                 transition: 'color .2s, border-color .2s',
               }}
             >
-              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{n.icon}</span>
+              <Icon size={22} color={active ? 'var(--color-gold)' : 'var(--color-ink-dim)'}/>
               {n.label}
             </button>
           )
