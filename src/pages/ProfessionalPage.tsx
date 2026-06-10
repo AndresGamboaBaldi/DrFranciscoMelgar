@@ -52,11 +52,11 @@ function buildThemeVars(pro: Professional): React.CSSProperties {
       '--color-bg':           '#fafaf8',
       '--color-surface':      '#ffffff',
       '--color-surface2':     '#f0ece3',
-      '--color-rim':          '#ddd8cc',
-      '--color-rim-l':        '#cac4b8',
+      '--color-rim':          '#c7c0b2',
+      '--color-rim-l':        '#b0a896',
       '--color-ink':          '#18160f',   // más profundo — mayor contraste
-      '--color-ink-dim':      '#3d3830',   // era #6b6259, ahora mucho más oscuro
-      '--color-ink-ghost':    '#6a6055',   // era #a09080, ahora legible
+      '--color-ink-dim':      '#2e2a23',   // ahora aún más oscuro
+      '--color-ink-ghost':    '#464036',   // ahora más oscuro/legible
       '--color-nav-scrolled': 'rgba(250,250,248,.96)',
       '--watermark-stroke':   hexToRgba(accent, 0.22),
       '--grain-opacity':      '0.04',

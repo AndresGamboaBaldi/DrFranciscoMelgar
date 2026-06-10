@@ -87,13 +87,13 @@ export default function BlockScheduler() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '1rem' }}>
           {/* Date */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', minWidth: 0 }}>
-            <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Fecha *</label>
+            <label style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Fecha *</label>
             <input type="date" value={date} min={todayIso} onChange={e => setDate(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
           </div>
 
           {/* Full day toggle */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', justifyContent: 'flex-end', minWidth: 0 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '.5rem', cursor: 'pointer', fontSize: '.78rem', color: 'var(--color-ink-dim)', paddingBottom: '.7rem' }}>
+            <label style={{ fontWeight:'500', display: 'flex', alignItems: 'center', gap: '.5rem', cursor: 'pointer', fontSize: '.78rem', color: 'var(--color-ink-dim)', paddingBottom: '.7rem' }}>
               <input type="checkbox" checked={fullDay} onChange={e => setFullDay(e.target.checked)}
                 style={{ width: '1rem', height: '1rem', accentColor: 'var(--color-gold)', cursor: 'pointer', appearance: 'auto', WebkitAppearance: 'checkbox', flexShrink: 0 }} />
               Todo el día
@@ -104,11 +104,11 @@ export default function BlockScheduler() {
           {!fullDay && (
             <div style={{ display: 'flex', gap: '1rem', minWidth: 0, gridColumn: '1 / -1' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1, minWidth: 0 }}>
-                <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Desde *</label>
+                <label style={{ fontWeight:'500',fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Desde *</label>
                 <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1, minWidth: 0 }}>
-                <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Hasta *</label>
+                <label style={{ fontWeight:'500',fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Hasta *</label>
                 <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
             </div>
@@ -116,7 +116,7 @@ export default function BlockScheduler() {
 
           {/* Reason */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', gridColumn: '1 / -1', minWidth: 0 }}>
-            <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Motivo (opcional)</label>
+            <label style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Motivo (opcional)</label>
             <input type="text" placeholder="Ej: Conferencia, Vacaciones, Feriado..." value={reason} onChange={e => setReason(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
           </div>
         </div>

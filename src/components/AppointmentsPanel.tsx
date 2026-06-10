@@ -149,7 +149,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
                 onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim)' }}
               >
-                <span style={{ fontSize: active ? '.74rem' : '.68rem', letterSpacing: '.08em', textTransform: 'uppercase', color: active ? '#fff' : 'var(--color-ink-dim)' }}>
+                <span style={{ fontWeight:'500', fontSize: active ? '.74rem' : '.68rem', letterSpacing: '.08em', textTransform: 'uppercase', color: active ? '#fff' : 'var(--color-ink-dim)' }}>
                   {DAYS_SHORT_ES[d.getDay()]}
                 </span>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: active ? '1.7rem' : '1.4rem', color: active ? '#fff' : 'var(--color-ink)', lineHeight: 1 }}>

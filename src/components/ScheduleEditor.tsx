@@ -159,14 +159,14 @@ export default function ScheduleEditor() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '.85rem' }}>
                 <div>
-                  <span style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', display: 'block', marginBottom: '.4rem' }}>Mañana</span>
+                  <span style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', display: 'block', marginBottom: '.4rem' }}>Mañana</span>
                   <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <TimeField label="Desde" value={amStart} onChange={setAmStart} />
                     <TimeField label="Hasta" value={amEnd}   onChange={setAmEnd}   />
                   </div>
                 </div>
                 <div>
-                  <span style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', display: 'block', marginBottom: '.4rem' }}>Tarde</span>
+                  <span style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', display: 'block', marginBottom: '.4rem' }}>Tarde</span>
                   <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <TimeField label="Desde" value={pmStart} onChange={setPmStart} />
                     <TimeField label="Hasta" value={pmEnd}   onChange={setPmEnd}   />
@@ -180,7 +180,7 @@ export default function ScheduleEditor() {
           {/* Sábado */}
           <div style={{ border: '1px solid var(--color-rim-l)', padding: '1rem', borderRadius: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: satActive ? '.9rem' : 0 }}>
-              <span style={{ fontSize: '.7rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>Sábado (horario especial)</span>
+              <span style={{ fontWeight:'500', fontSize: '.7rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>Sábado (horario especial)</span>
               <Toggle checked={satActive} onChange={setSatActive} />
             </div>
             {satActive && (
@@ -194,7 +194,7 @@ export default function ScheduleEditor() {
           {/* Domingo */}
           <div style={{ border: '1px solid var(--color-rim-l)', padding: '1rem', borderRadius: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: sunActive ? '.9rem' : 0 }}>
-              <span style={{ fontSize: '.7rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>Domingo (horario especial)</span>
+              <span style={{ fontWeight:'500', fontSize: '.7rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>Domingo (horario especial)</span>
               <Toggle checked={sunActive} onChange={setSunActive} />
             </div>
             {sunActive && (
@@ -281,13 +281,13 @@ function Section({ number, title, children }: { number: string; title: string; c
 }
 
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return <label style={{ fontSize: '.63rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', display: 'block', marginBottom: '.35rem', ...style }}>{children}</label>
+  return <label style={{ fontWeight:'500', fontSize: '.63rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', display: 'block', marginBottom: '.35rem', ...style }}>{children}</label>
 }
 
 function TimeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', flex: 1 }}>
-      <label style={{ fontSize: '.6rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>{label}</label>
+      <label style={{ fontWeight:'500', fontSize: '.6rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>{label}</label>
       <input type="time" value={value} onChange={e => onChange(e.target.value)} style={{ width: '100%' }} />
     </div>
   )
