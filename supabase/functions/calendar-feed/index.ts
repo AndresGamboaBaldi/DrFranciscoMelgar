@@ -137,6 +137,12 @@ function buildVEvent(apt: Appointment, timezone: string, now: string): string {
   ]
   if (apt.notes && apt.notes !== 'Sin comentarios especiales') descParts.push(`📝 ${apt.notes}`)
 
+  // WhatsApp reminder link with a short pre-filled confirmation message
+  const phone = apt.phone.replace(/\D/g, '')
+  const waText = `Hola ${apt.name.split(' ')[0]}, ¿confirmas tu cita de las ${apt.appointment_time.substring(0,5)}?`
+  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(waText)}`
+  descParts.push('', '💬 Confirmar asistencia:', waUrl)
+
   const lines = [
     'BEGIN:VEVENT',
     fold(`UID:apt-${apt.id}@plaza.bo`),

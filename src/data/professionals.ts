@@ -79,7 +79,7 @@ const barber_vip: Professional = {
   name:      'Barber VIP',
   shortName: 'Barber VIP',
   title:     'Barbería de Lujo',
-  specialty: 'Corte, barba y grooming de primera clase en La Paz',
+  specialty: 'Corte, barba y grooming de primera clase en Cochabamba',
   location:  'Cochabamba, Bolivia',
   tagline:   'El estilo no es accidental,',
   taglineSub: 'es una decisión.',
@@ -90,7 +90,7 @@ const barber_vip: Professional = {
 
   aboutTitle: 'de la Barbería',
   finalQuote: 'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
-  bio: 'Barber VIP nació con la visión de traer a La Paz una experiencia de barbería de lujo: ambiente premium, técnicas modernas y atención personalizada. Nuestro equipo de barberos certificados se especializa en cortes clásicos, fade, diseño de barba y tratamientos capilares.',
+  bio: 'Barber VIP nació con la visión de traer a Cochabamba una experiencia de barbería de lujo: ambiente premium, técnicas modernas y atención personalizada. Nuestro equipo de barberos certificados se especializa en cortes clásicos, fade, diseño de barba y tratamientos capilares.',
   credentials: [
     { label: 'Certificación', value: 'Barbería Profesional' },
     { label: 'Ambiente',      value: 'Premium & Exclusivo' },
@@ -119,6 +119,7 @@ const barber_vip: Professional = {
     },
   },
 
+  mapUrl: 'https://maps.app.goo.gl/qcWfFwZqksNu2iFYA?g_st=ic',
   businessId:        'barber_vip',
   calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=12d9f83cca937e8db7996811bfafff18bb0e725efacce7c76cad8029bf96fb3e',
   setupPassword:   'barbervip2026',

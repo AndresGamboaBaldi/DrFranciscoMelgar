@@ -193,6 +193,7 @@ export default function SetupPage() {
                 )}
 
                 {/* iOS instructions */}
+                {pushStatus !== 'active' && (
                 <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1rem 1.25rem' }}>
                   <p style={{ fontSize: '.92rem', fontWeight: 500, color: 'var(--color-ink-dim)', marginBottom: '.6rem' }}>📱 ¿Usas iPhone?</p>
                   <ol style={{ fontSize: '.88rem', color: 'var(--color-ink-ghost)', lineHeight: 2.1, paddingLeft: '1.2rem', margin: 0 }}>
@@ -203,6 +204,7 @@ export default function SetupPage() {
                     <li>Vuelve aquí y toca <strong style={{ color: 'var(--color-ink-dim)' }}>Activar notificaciones</strong></li>
                   </ol>
                 </div>
+                )}
 
                 <p style={{ fontSize: '.85rem', color: 'var(--color-ink-ghost)', lineHeight: 1.7 }}>
                   Las notificaciones se activan por dispositivo. Si usas varios, actívalas en cada uno.
