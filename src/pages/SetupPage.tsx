@@ -132,14 +132,14 @@ export default function SetupPage() {
 
       {/* ── Content ── */}
       <main className="setup-main-mobile-pad" style={{ flex: 1, padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
-        <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
+        <div style={{ maxWidth: (section === 'schedule' || section === 'config') ? '100rem' : '48rem', margin: '0 auto' }}>
 
           {section === 'citas' && (
             <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
           )}
 
           {section === 'schedule' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start' }}>
               <Panel title="Horarios de atención" desc="">
                 <ScheduleEditor />
               </Panel>
@@ -151,7 +151,7 @@ export default function SetupPage() {
           )}
 
           {section === 'config' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start' }}>
               <Panel title="Sincroniza tu calendario" desc="Conecta tu calendario una sola vez y todas las citas aparecerán automáticamente, sin que tengas que hacer nada más.">
                 <MagicLinkPanel />
               </Panel>
@@ -276,12 +276,12 @@ function SupportFooter() {
   const phone = '59172235605'
   const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent('Hola, tengo una consulta sobre mi configuración en Probo.pro')}`
   return (
-    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-rim)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1rem' }}>
+    <div className="support-footer" style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-rim)', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
       <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7, margin: 0 }}>
         ¿Tienes algún problema o no encuentras lo que buscas?<br />Contáctanos por WhatsApp y te ayudamos.
       </p>
       <a href={waUrl} target="_blank" rel="noopener noreferrer"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.75rem 1.5rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.75rem 1.5rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
         💬 Escribir por WhatsApp
       </a>
     </div>

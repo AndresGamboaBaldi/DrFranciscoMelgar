@@ -100,8 +100,30 @@ export async function getAppointmentById(id: string): Promise<Appointment | null
 
 export async function cancelAppointment(id: string): Promise<void> {
   if (!supabase) throw new Error('Supabase no configurado')
+
+  // Fetch appointment details first so we can notify the professional
+  const apt = await getAppointmentById(id)
+
   const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id)
   if (error) throw new Error(error.message)
+
+  // Fire-and-forget push notification — non-blocking
+  if (apt?.business_id) {
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
+    const FUNCTIONS_URL = import.meta.env.DEV
+      ? 'http://127.0.0.1:54321/functions/v1'
+      : `${SUPABASE_URL}/functions/v1`
+    const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+    const [y, mo, d] = apt.appointment_date.split('-').map(Number)
+    const currentYear = new Date().getFullYear()
+    const dateLabel = `${d} de ${MONTHS[mo - 1]}${y !== currentYear ? ` de ${y}` : ''}`
+    const body = `${apt.name} canceló ${apt.service} el ${dateLabel} a las ${apt.appointment_time}`
+    fetch(`${FUNCTIONS_URL}/send-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ business_id: apt.business_id, title: '❌ Cita cancelada', body, url: `/${apt.business_id}/setup` }),
+    }).catch(() => {})
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
