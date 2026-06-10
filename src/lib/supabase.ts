@@ -74,6 +74,25 @@ export async function getBookedSlots(date: string, businessId: string, slotDurat
   return expandBookedSlots(data ?? [], slotDuration)
 }
 
+export async function getAppointmentsByDate(businessId: string, date: string): Promise<Appointment[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('*')
+    .eq('business_id', businessId)
+    .eq('appointment_date', date)
+    .neq('status', 'cancelled')
+    .order('appointment_time', { ascending: true })
+  if (error) { console.error('[getAppointmentsByDate]', error); return [] }
+  return (data ?? []) as Appointment[]
+}
+
+export async function cancelAppointment(id: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase no configurado')
+  const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
 // ─────────────────────────────────────────────────────────────
 //  BLOCKED SLOTS
 // ─────────────────────────────────────────────────────────────

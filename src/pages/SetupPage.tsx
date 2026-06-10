@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
 import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
+import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
 import { subscribeToPush, getPushStatus } from '../lib/supabase'
 
-type Section = 'schedule' | 'blocks' | 'calendar' | 'notificaciones'
+type Section = 'citas' | 'schedule' | 'blocks' | 'calendar' | 'notificaciones'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
 
 const NAV: { id: Section; label: string; desc: string }[] = [
+  { id: 'citas',          label: 'Citas',           desc: 'Agenda del día' },
   { id: 'schedule',       label: 'Horarios',        desc: 'Días y horas de atención' },
   { id: 'blocks',         label: 'Bloqueos',        desc: 'Días no disponibles' },
   { id: 'calendar',       label: 'Calendario',      desc: 'Link mágico de sincronización' },
@@ -40,7 +42,7 @@ const STEPS_OUTLOOK = [
 
 export default function SetupPage() {
   const pro = useProfessional()
-  const [section, setSection]       = useState<Section>('schedule')
+  const [section, setSection]       = useState<Section>('citas')
   const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
   const [pushWorking, setPushWorking] = useState(false)
 
@@ -138,6 +140,12 @@ export default function SetupPage() {
       {/* ── Content ── */}
       <main style={{ flex: 1, padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
+
+          {section === 'citas' && (
+            <Panel title="Citas" desc="Revisa tus citas del día, confirma por WhatsApp con un solo clic o cancela si es necesario.">
+              <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
+            </Panel>
+          )}
 
           {section === 'schedule' && (
             <Panel title="Horarios de atención" desc="Configura los días y horas en que aceptas citas. Los cambios aplican de inmediato al calendario de reservas.">
