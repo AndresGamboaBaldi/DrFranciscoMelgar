@@ -10,13 +10,22 @@ function toISODate(d: Date): string {
   return `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`
 }
 
+function formatTime12h(time: string): string {
+  const [h, min] = time.substring(0,5).split(':').map(Number)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 === 0 ? 12 : h % 12
+  return `${h12}:${String(min).padStart(2,'0')} ${period}`
+}
+
 function buildWhatsAppUrl(apt: Appointment, businessName: string): string {
   const phone = apt.phone.replace(/\D/g, '')
   const firstName = apt.name.split(' ')[0]
-  const time = apt.appointment_time.substring(0,5)
-  const [, m, d] = apt.appointment_date.split('-').map(Number)
-  const dateLabel = `${d} de ${MONTHS_ES[m - 1]}`
-  const text = `Hola ${firstName}! 👋 Te recordamos tu cita con *${businessName}*:\n\n🗓️ ${dateLabel}\n🕐 ${time}\n\n¿Confirmas tu asistencia?`
+  const time = formatTime12h(apt.appointment_time)
+  const [y, m, d] = apt.appointment_date.split('-').map(Number)
+  const dateObj = new Date(y, m - 1, d)
+  const dateLabel = `${DAYS_ES[dateObj.getDay()]} ${d} de ${MONTHS_ES[m - 1]}`
+  const cancelUrl = `https://probo.pro/cancel/${apt.id}`
+  const text = `Hola ${firstName}! 👋🏼\nTu cita con ${businessName} es el ${dateLabel} a las ${time}\n\n✅ Te esperamos!\n\nSi no puedes asistir, cancela aquí 👇🏼\n${cancelUrl}`
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
 }
 

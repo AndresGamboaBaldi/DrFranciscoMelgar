@@ -87,6 +87,17 @@ export async function getAppointmentsByDate(businessId: string, date: string): P
   return (data ?? []) as Appointment[]
 }
 
+export async function getAppointmentById(id: string): Promise<Appointment | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id, name, service, appointment_date, appointment_time, business_id, status')
+    .eq('id', id)
+    .single()
+  if (error) return null
+  return data as Appointment
+}
+
 export async function cancelAppointment(id: string): Promise<void> {
   if (!supabase) throw new Error('Supabase no configurado')
   const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id)
