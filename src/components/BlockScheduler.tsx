@@ -76,10 +76,7 @@ export default function BlockScheduler() {
   const todayIso = new Date().toISOString().split('T')[0]
 
   return (
-    <div style={{ marginTop: '3rem', borderTop: '1px solid var(--color-rim)', paddingTop: '2.5rem' }}>
-      <p style={{ fontSize: '.88rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '1.5rem' }}>
-        Bloquear horarios — {pro.name}
-      </p>
+    <div>
 
       {/* ── Add block form ── */}
       <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.75rem', marginBottom: '2rem' }}>
@@ -87,47 +84,47 @@ export default function BlockScheduler() {
           Agregar bloqueo
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '1rem' }}>
           {/* Date */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', minWidth: 0 }}>
             <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Fecha *</label>
-            <input type="date" value={date} min={todayIso} onChange={e => setDate(e.target.value)} />
+            <input type="date" value={date} min={todayIso} onChange={e => setDate(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
           </div>
 
           {/* Full day toggle */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', justifyContent: 'flex-end', minWidth: 0 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '.5rem', cursor: 'pointer', fontSize: '.78rem', color: 'var(--color-ink-dim)', paddingBottom: '.7rem' }}>
               <input type="checkbox" checked={fullDay} onChange={e => setFullDay(e.target.checked)}
-                style={{ width: '1rem', height: '1rem', accentColor: 'var(--color-gold)', cursor: 'pointer', appearance: 'auto', WebkitAppearance: 'checkbox' }} />
+                style={{ width: '1rem', height: '1rem', accentColor: 'var(--color-gold)', cursor: 'pointer', appearance: 'auto', WebkitAppearance: 'checkbox', flexShrink: 0 }} />
               Todo el día
             </label>
           </div>
 
           {/* Start / End time */}
           {!fullDay && (
-            <>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', minWidth: 0, gridColumn: '1 / -1' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1, minWidth: 0 }}>
                 <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Desde *</label>
-                <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
+                <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1, minWidth: 0 }}>
                 <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Hasta *</label>
-                <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
+                <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
-            </>
+            </div>
           )}
 
           {/* Reason */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', gridColumn: fullDay ? 'span 2' : '1 / -1' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', gridColumn: '1 / -1', minWidth: 0 }}>
             <label style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Motivo (opcional)</label>
-            <input type="text" placeholder="Ej: Conferencia, Vacaciones, Feriado..." value={reason} onChange={e => setReason(e.target.value)} />
+            <input type="text" placeholder="Ej: Conferencia, Vacaciones, Feriado..." value={reason} onChange={e => setReason(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
           </div>
         </div>
 
         {error && <p style={{ fontSize: '.78rem', color: '#c47070', marginBottom: '.75rem' }}>{error}</p>}
 
         <button onClick={handleAdd} disabled={saving}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.75rem 1.75rem', background: saving ? 'var(--color-rim-l)' : 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', transition: 'background .3s' }}
+          style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '1rem', marginTop: '1.5rem', background: saving ? 'var(--color-rim-l)' : 'var(--color-gold)', color: saving ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', transition: 'background .3s', borderRadius: '4px' }}
           onMouseEnter={e => { if (!saving) e.currentTarget.style.background = 'var(--color-gold-l)' }}
           onMouseLeave={e => { if (!saving) e.currentTarget.style.background = 'var(--color-gold)' }}
         >
@@ -136,20 +133,20 @@ export default function BlockScheduler() {
       </div>
 
       {/* ── Upcoming blocks list ── */}
-      <div style={{ marginTop: '2.5rem' }}>
+      <div style={{ marginTop: '2.5rem', paddingBottom: '3rem' }}>
         {/* Section header — clearly visible */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '.75rem', borderBottom: '2px solid var(--color-gold)', gap: '1rem' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.3rem,2.5vw,1.6rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
             Próximos bloqueos
           </h3>
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.1rem', color: 'var(--color-ink-dim)', flexShrink: 0 }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-ink-dim)', flexShrink: 0 }}>
             {loading ? '…' : blocks.length === 0 ? 'ninguno' : `${blocks.length} ${blocks.length === 1 ? 'bloqueo' : 'bloqueos'}`}
           </span>
         </div>
 
         {!loading && blocks.length === 0 && (
           <div style={{ padding: '1.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1rem', color: 'var(--color-ink-dim)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-ink-dim)' }}>
               Sin bloqueos programados
             </p>
             <p style={{ fontSize: '.82rem', color: 'var(--color-ink-ghost)', marginTop: '.4rem' }}>

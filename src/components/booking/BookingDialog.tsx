@@ -131,7 +131,7 @@ export default function BookingDialog({ onClose }: Props) {
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
             {success
               ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem' }}>
-                  <em style={{ fontStyle: 'italic', color: 'var(--color-gold)', lineHeight: 1 }}>¡Reserva confirmada!</em>
+                  <em style={{ color: 'var(--color-gold)', lineHeight: 1 }}>¡Reserva confirmada!</em>
                   <span style={{ width: '1.6rem', height: '1.6rem', border: '1.5px solid var(--color-gold)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)', fontSize: '.7rem', flexShrink: 0 }}>✓</span>
                 </span>
               : <>Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></>
@@ -317,7 +317,7 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
 
       {/* ── Header ── */}
       <div style={{ textAlign: 'center' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.7rem', fontWeight: 300, marginBottom: '.4rem' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.7rem', fontWeight: 300, marginBottom: '.4rem' }}>
           Gracias{name ? `, ${name.split(' ')[0]}` : ''}
         </h3>
         <p style={{ fontSize: '1.05rem', color: 'var(--color-gold)', letterSpacing: '.03em' }}>

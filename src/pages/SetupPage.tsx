@@ -135,9 +135,7 @@ export default function SetupPage() {
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
 
           {section === 'citas' && (
-            <Panel title="Citas" desc="Revisa tus citas del día, confirma por WhatsApp con un solo clic o cancela si es necesario.">
-              <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
-            </Panel>
+            <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
           )}
 
           {section === 'schedule' && (
@@ -146,7 +144,7 @@ export default function SetupPage() {
                 <ScheduleEditor />
               </Panel>
 
-              <Panel title="Bloquear horarios" desc="Marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
+              <Panel title="Bloquear horarios (opcional)" desc="Cuando lo necesites, marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
                 <BlockScheduler />
               </Panel>
             </div>
@@ -174,7 +172,7 @@ export default function SetupPage() {
 
                 {pushStatus !== 'active' && pushStatus !== 'unsupported' && (
                   <button onClick={handleSubscribe} disabled={pushWorking}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.8rem 2rem', background: pushWorking ? 'var(--color-rim-l)' : 'var(--color-gold)', color: pushWorking ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: pushWorking ? 'not-allowed' : 'pointer', transition: 'background .3s', alignSelf: 'flex-start' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '1rem 2rem', background: pushWorking ? 'var(--color-rim-l)' : 'var(--color-gold)', color: pushWorking ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: pushWorking ? 'not-allowed' : 'pointer', transition: 'background .3s', alignSelf: 'flex-start', borderRadius: '4px' }}
                     onMouseEnter={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold-l)' }}
                     onMouseLeave={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold)' }}
                   >
@@ -259,14 +257,14 @@ export default function SetupPage() {
 }
 
 /* ── Panel wrapper ── */
-function Panel({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
+function Panel({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
     <div>
       <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem,3vw,2rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)', marginBottom: '.45rem' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,3.5vw,2.5rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)', marginBottom: desc ? '.45rem' : 0, textTransform: 'capitalize' }}>
           {title}
         </h2>
-        <p style={{ fontSize: '1rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>
+        {desc && <p style={{ fontSize: '1rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>}
       </div>
       {children}
     </div>
@@ -278,12 +276,12 @@ function SupportFooter() {
   const phone = '59172235605'
   const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent('Hola, tengo una consulta sobre mi configuración en Probo.pro')}`
   return (
-    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-rim)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+    <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-rim)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1rem' }}>
       <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7, margin: 0 }}>
         ¿Tienes algún problema o no encuentras lo que buscas?<br />Contáctanos por WhatsApp y te ayudamos.
       </p>
       <a href={waUrl} target="_blank" rel="noopener noreferrer"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.75rem 1.5rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.75rem 1.5rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>
         💬 Escribir por WhatsApp
       </a>
     </div>
@@ -349,7 +347,7 @@ function MagicLinkPanel() {
             {feedUrl}
           </div>
           <button onClick={copy}
-            style={{ padding: '.85rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0 }}>
+            style={{ padding: '1rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0, borderRadius: '4px' }}>
             {copied ? '✓ Copiado' : 'Copiar'}
           </button>
         </div>
