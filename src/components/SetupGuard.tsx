@@ -5,7 +5,7 @@
  *   1. "Continuar con Google" → Supabase Auth OAuth, valida que el email
  *      coincida con `pro.ownerEmail`.
  *   2. "Contraseña" → pide la contraseña configurada en `pro.setupPassword`
- *      y guarda un flag en sessionStorage para no pedirla de nuevo en esta sesión.
+ *      y guarda un flag en localStorage para no pedirla de nuevo en esta sesión.
  */
 import { useState, useEffect } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
@@ -29,7 +29,7 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     let active = true
     async function check() {
-      if (sessionStorage.getItem(sessionKey) === '1') {
+      if (localStorage.getItem(sessionKey) === '1') {
         if (active) { setUnlocked(true); setChecking(false) }
         return
       }
@@ -65,7 +65,7 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
       return
     }
     if (password === pro.setupPassword) {
-      sessionStorage.setItem(sessionKey, '1')
+      localStorage.setItem(sessionKey, '1')
       // Reset iOS zoom after input focus
       const viewport = document.querySelector('meta[name="viewport"]')
       if (viewport) {
