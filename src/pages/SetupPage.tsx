@@ -9,10 +9,10 @@ import { subscribeToPush, getPushStatus } from '../lib/supabase'
 type Section = 'citas' | 'schedule' | 'config'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
 
-const NAV: { id: Section; label: string; desc: string }[] = [
-  { id: 'citas',    label: 'Citas',                 desc: 'Agenda del día' },
-  { id: 'schedule', label: 'Horarios',              desc: 'Días y horas de atención' },
-  { id: 'config',   label: 'Configuración inicial', desc: 'Calendario y notificaciones' },
+const NAV: { id: Section; label: string; desc: string; icon: string }[] = [
+  { id: 'citas',    label: 'Citas',                 desc: 'Agenda del día',                  icon: '📅' },
+  { id: 'schedule', label: 'Horarios',              desc: 'Días y horas de atención',         icon: '🕐' },
+  { id: 'config',   label: 'Configuración inicial', desc: 'Calendario y notificaciones',      icon: '⚙️' },
 ]
 
 const STEPS_IPHONE = [
@@ -86,31 +86,26 @@ export default function SetupPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
           {pro.logo && <img src={pro.logo} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />}
           <div style={{ minWidth: 0 }}>
-            <span style={{ display: 'inline-block', fontSize: '.62rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--color-bg)', background: 'var(--color-gold)', padding: '.2rem .55rem', lineHeight: 1.4, marginBottom: '.35rem', borderRadius: 2 }}>
-              ⚙ Panel Admin
-            </span>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem,2.5vw,1.3rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {pro.name}
             </h1>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexShrink: 0 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(.85rem,2vw,1.1rem)', color: 'var(--color-ink-dim)' }} className="hidden sm:inline">
-            {pro.title}
-          </span>
+          
           <a href={`/${pro.slug}`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', textDecoration: 'none', border: '1px solid var(--color-rim-l)', padding: '.4rem .9rem', transition: 'all .2s', whiteSpace: 'nowrap' }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-bg)', background: 'var(--color-gold)', textDecoration: 'none', border: '1px solid var(--color-gold)', padding: '.45rem 1rem', transition: 'all .2s', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-gold-l, var(--color-gold))'; e.currentTarget.style.opacity = '.85' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-gold)'; e.currentTarget.style.opacity = '1' }}
           >
             <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
-            Ver página
+            Ver mi página
           </a>
         </div>
       </header>
 
-      {/* ── Tab bar ── */}
-      <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
+      {/* ── Tab bar (desktop/tablet) ── */}
+      <div className="setup-tabbar-top" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
         <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
           {NAV.map(n => {
             const active = section === n.id
@@ -139,7 +134,7 @@ export default function SetupPage() {
       </div>
 
       {/* ── Content ── */}
-      <main style={{ flex: 1, padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
+      <main className="setup-main-mobile-pad" style={{ flex: 1, padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
 
           {section === 'citas' && (
@@ -237,6 +232,30 @@ export default function SetupPage() {
           <SupportFooter />
         </div>
       </main>
+
+      {/* ── Tab bar (mobile, fixed bottom) ── */}
+      <nav className="setup-tabbar-bottom">
+        {NAV.map(n => {
+          const active = section === n.id
+          return (
+            <button key={n.id} onClick={() => setSection(n.id)}
+              style={{
+                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '.2rem', padding: '.55rem .25rem .5rem', background: 'none', border: 'none',
+                borderTop: `2px solid ${active ? 'var(--color-gold)' : 'transparent'}`,
+                marginTop: -1, cursor: 'pointer',
+                color: active ? 'var(--color-gold)' : 'var(--color-ink-dim)',
+                fontFamily: 'var(--font-body)', fontSize: '.62rem',
+                fontWeight: active ? 500 : 300, letterSpacing: '.04em', textTransform: 'uppercase',
+                transition: 'color .2s, border-color .2s',
+              }}
+            >
+              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{n.icon}</span>
+              {n.label}
+            </button>
+          )
+        })}
+      </nav>
     </div>
   )
 }

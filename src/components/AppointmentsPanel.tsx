@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { getAppointmentsByDate, cancelAppointment } from '../lib/supabase'
+import BookingDialog from './booking/BookingDialog'
 import type { Appointment } from '../types/booking'
 
 const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
 const DAYS_ES   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']
+const DAYS_SHORT_ES = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB']
 
 function toISODate(d: Date): string {
   const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate()
@@ -35,6 +37,10 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   const [loading, setLoading]     = useState(true)
   const [cancelingId, setCancelingId] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<Appointment | null>(null)
+  const [showBooking, setShowBooking] = useState(false)
+  const [range, setRange] = useState({ start: -60, end: 60 })
+  const activeCardRef = useRef<HTMLButtonElement>(null)
+  const carouselRef   = useRef<HTMLDivElement>(null)
 
   const isoDate = toISODate(date)
   const todayIso = toISODate(new Date())
@@ -49,6 +55,38 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   }, [businessId, isoDate])
 
   useEffect(() => { load() }, [load])
+
+  const daysFromToday = Math.round((date.getTime() - new Date(todayIso).getTime()) / 86400000)
+
+  // Expand range when nearing either edge, compensating scroll when prepending
+  useEffect(() => {
+    const EDGE = 5
+    const GROW = 30
+    if (daysFromToday <= range.start + EDGE) {
+      const added = GROW
+      const track = carouselRef.current
+      const prevScrollLeft = track?.scrollLeft ?? 0
+      const prevScrollWidth = track?.scrollWidth ?? 0
+      setRange(r => ({ ...r, start: r.start - added }))
+      requestAnimationFrame(() => {
+        if (!track) return
+        const newScrollWidth = track.scrollWidth
+        track.scrollLeft = prevScrollLeft + (newScrollWidth - prevScrollWidth)
+      })
+    } else if (daysFromToday >= range.end - EDGE) {
+      setRange(r => ({ ...r, end: r.end + GROW }))
+    }
+  }, [daysFromToday, range.start, range.end])
+
+  useEffect(() => {
+    activeCardRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [isoDate])
+
+  // On mount, center the carousel on today
+  useEffect(() => {
+    activeCardRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const shiftDay = (delta: number) => {
     const d = new Date(date)
@@ -71,34 +109,86 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
 
   const dateLabel = `${DAYS_ES[date.getDay()]}, ${date.getDate()} de ${MONTHS_ES[date.getMonth()]}`
 
+  // Carousel: range around today, expands at the edges as needed
+  const carouselDays: Date[] = []
+  for (let i = range.start; i <= range.end; i++) {
+    const d = new Date()
+    d.setDate(d.getDate() + i)
+    carouselDays.push(d)
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-      {/* Day navigator */}
+      {/* Header: date label + new appointment */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
-          <NavButton onClick={() => shiftDay(-1)} label="Día anterior">
-            <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1.5 6.5L7 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </NavButton>
-          <div style={{ minWidth: '11rem', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-ink)', textTransform: 'capitalize', lineHeight: 1.3 }}>{dateLabel}</p>
-            {isToday && <p style={{ fontSize: '.68rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)', marginTop: '.15rem' }}>Hoy</p>}
-          </div>
-          <NavButton onClick={() => shiftDay(1)} label="Día siguiente">
-            <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L6.5 6.5L1 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </NavButton>
+        <div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-ink)', textTransform: 'capitalize', lineHeight: 1.3 }}>{dateLabel}</p>
+          {isToday && <p style={{ fontSize: '.68rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)', marginTop: '.15rem' }}>Hoy</p>}
         </div>
 
-        {!isToday && (
-          <button onClick={() => setDate(new Date())}
-            style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontSize: '.7rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem 1rem', cursor: 'pointer', transition: 'all .2s' }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
-          >
-            Ir a hoy
-          </button>
-        )}
+        <button onClick={() => setShowBooking(true)}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: 'var(--color-gold)', border: '1px solid var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.6rem 1.1rem', cursor: 'pointer', transition: 'opacity .2s' }}
+          onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
+          onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+        >
+          + Nueva cita
+        </button>
       </div>
+
+      {/* Day carousel */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+        <NavButton onClick={() => shiftDay(-1)} label="Día anterior">
+          <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1.5 6.5L7 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </NavButton>
+
+        <div ref={carouselRef} style={{ display: 'flex', alignItems: 'center', gap: '.6rem', overflowX: 'auto', padding: '.4rem .2rem' }}>
+          {carouselDays.map(d => {
+            const iso = toISODate(d)
+            const active = iso === isoDate
+            const today  = iso === todayIso
+            return (
+              <button key={iso} ref={active ? activeCardRef : undefined} onClick={() => setDate(d)}
+                style={{
+                  flexShrink: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '.25rem',
+                  width: active ? '4.2rem' : '3.6rem',
+                  padding: active ? '.8rem .25rem' : '.6rem .25rem',
+                  background: active ? 'var(--color-gold)' : 'var(--color-surface)',
+                  border: `1px solid ${active ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+                  cursor: 'pointer', transition: 'all .2s',
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim)' }}
+              >
+                <span style={{ fontSize: active ? '.68rem' : '.62rem', letterSpacing: '.08em', textTransform: 'uppercase', color: active ? '#fff' : 'var(--color-ink-dim)' }}>
+                  {DAYS_SHORT_ES[d.getDay()]}
+                </span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: active ? '1.4rem' : '1.15rem', color: active ? '#fff' : 'var(--color-ink)', lineHeight: 1 }}>
+                  {d.getDate()}
+                </span>
+                {today && <span style={{ width: 4, height: 4, borderRadius: '50%', background: active ? '#fff' : 'var(--color-gold)' }} />}
+              </button>
+            )
+          })}
+        </div>
+
+        <NavButton onClick={() => shiftDay(1)} label="Día siguiente">
+          <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L6.5 6.5L1 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </NavButton>
+      </div>
+
+      {!isToday && (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <button onClick={() => setDate(new Date())}
+          style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontSize: '.7rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem .8rem', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
+        >
+          Hoy
+        </button>
+        </div>
+      )}
 
       {/* List */}
       {loading ? (
@@ -148,7 +238,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
 
               {/* Actions */}
               {!isPast && (
-              <div style={{ display: 'flex', gap: '.5rem', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flexShrink: 0 }}>
                 <IconButton as="a" href={buildWhatsAppUrl(apt, businessName)} target="_blank" rel="noopener noreferrer" title="Confirmar por WhatsApp"
                   style={{ background: '#25D366', borderColor: '#25D366', color: '#fff' }}
                   onMouseEnter={e => { e.currentTarget.style.opacity = '.85' }}
@@ -208,17 +298,24 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
           </div>
         </div>
       )}
+
+      {/* New appointment dialog */}
+      {showBooking && (
+        <BookingDialog onClose={() => { setShowBooking(false); load() }} />
+      )}
     </div>
   )
 }
 
 const ICON_BTN_BASE: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  width: '2.4rem', height: '2.4rem', boxSizing: 'border-box',
+  width: '2.4rem', height: '2.4rem', minWidth: '2.4rem', minHeight: '2.4rem',
+  maxWidth: '2.4rem', maxHeight: '2.4rem', boxSizing: 'border-box',
   padding: 0, margin: 0, borderWidth: 1, borderStyle: 'solid',
   borderRadius: 0, lineHeight: 0, fontSize: 'inherit', fontFamily: 'inherit',
   textDecoration: 'none', transition: 'all .2s', flexShrink: 0, overflow: 'hidden',
-}
+  WebkitAppearance: 'none', appearance: 'none', verticalAlign: 'middle',
+} as React.CSSProperties
 
 type IconButtonProps = {
   as: 'a' | 'button'
