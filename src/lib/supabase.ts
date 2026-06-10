@@ -31,7 +31,7 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
     fetch(`${FUNCTIONS_URL}/send-push`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ business_id: data.business_id, title: '📅 Nueva Cita', body, url: `/${data.business_id}` }),
+      body: JSON.stringify({ business_id: data.business_id, title: '📅 Nueva Cita', body, url: `/${data.business_id}/setup` }),
     }).catch(() => {}) // silently ignore errors
   }
 
