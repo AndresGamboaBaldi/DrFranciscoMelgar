@@ -88,11 +88,6 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const shiftDay = (delta: number) => {
-    const d = new Date(date)
-    d.setDate(d.getDate() + delta)
-    setDate(d)
-  }
 
   const handleCancel = async (apt: Appointment) => {
     if (!apt.id) return
@@ -120,15 +115,16 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-      {/* Header: date label + new appointment */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-        <div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-ink)', textTransform: 'capitalize', lineHeight: 1.3 }}>{dateLabel}</p>
-          {isToday && <p style={{ fontSize: '.68rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)', marginTop: '.15rem' }}>Hoy</p>}
-        </div>
+      {/* Header: date label */}
+      <div>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-ink)', textTransform: 'capitalize', lineHeight: 1.3 }}>{dateLabel}</p>
+        {isToday && <p style={{ fontSize: '.68rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)', marginTop: '.15rem' }}>Hoy</p>}
+      </div>
 
+      {/* Sticky "Nueva cita" button, anchored above bottom tabbar */}
+      <div style={{ position: 'sticky', bottom: 'calc(5.5rem + env(safe-area-inset-bottom))', zIndex: 40, display: 'flex', justifyContent: 'flex-end', pointerEvents: 'none' }}>
         <button onClick={() => setShowBooking(true)}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: 'var(--color-gold)', border: '1px solid var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.6rem 1.1rem', cursor: 'pointer', transition: 'opacity .2s' }}
+          style={{ pointerEvents: 'auto', display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: 'var(--color-gold)', border: '1px solid var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.7rem 1.2rem', cursor: 'pointer', transition: 'opacity .2s', boxShadow: '0 4px 16px rgba(0,0,0,.35)' }}
           onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
           onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
         >
@@ -138,10 +134,6 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
 
       {/* Day carousel */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-        <NavButton onClick={() => shiftDay(-1)} label="Día anterior">
-          <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1.5 6.5L7 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </NavButton>
-
         <div ref={carouselRef} style={{ display: 'flex', alignItems: 'center', gap: '.6rem', overflowX: 'auto', padding: '.4rem .2rem' }}>
           {carouselDays.map(d => {
             const iso = toISODate(d)
@@ -172,28 +164,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
             )
           })}
         </div>
-
-        <NavButton onClick={() => shiftDay(1)} label="Día siguiente">
-          <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1L6.5 6.5L1 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </NavButton>
       </div>
-
-      {!isToday && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button onClick={() => {
-          setDate(new Date())
-          requestAnimationFrame(() => {
-            activeCardRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' })
-          })
-        }}
-          style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontSize: '.7rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem .8rem', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
-        >
-          Hoy
-        </button>
-        </div>
-      )}
 
       {/* List */}
       {loading ? (
@@ -332,20 +303,4 @@ function IconButton({ as, children, style, ...rest }: IconButtonProps) {
   const merged = { ...ICON_BTN_BASE, ...style }
   if (as === 'a') return <a {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)} style={merged}>{children}</a>
   return <button {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)} style={merged}>{children}</button>
-}
-
-function NavButton({ onClick, label, children }: { onClick: () => void; label: string; children: React.ReactNode }) {
-  return (
-    <button onClick={onClick} aria-label={label}
-      style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: '2.2rem', height: '2.2rem', background: 'none', border: '1px solid var(--color-rim-l)',
-        color: 'var(--color-ink-dim)', cursor: 'pointer', transition: 'all .2s', flexShrink: 0,
-      }}
-      onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
-      onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
-    >
-      {children}
-    </button>
-  )
 }

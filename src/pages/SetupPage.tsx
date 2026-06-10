@@ -85,23 +85,19 @@ export default function SetupPage() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
+          <a href={`/${pro.slug}`} aria-label="Volver a mi página"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '2.1rem', height: '2.1rem', flexShrink: 0, color: 'var(--color-gold)', background: 'transparent', textDecoration: 'none', border: 'none', transition: 'opacity .2s' }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '.7' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+          >
+            <svg width="16" height="14" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+          </a>
           {pro.logo && <img src={pro.logo} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />}
           <div style={{ minWidth: 0 }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {pro.name}
             </h1>
           </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexShrink: 0 }}>
-          
-          <a href={`/${pro.slug}`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-bg)', background: 'var(--color-gold)', textDecoration: 'none', border: '1px solid var(--color-gold)', padding: '.45rem 1rem', transition: 'all .2s', whiteSpace: 'nowrap' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-gold-l, var(--color-gold))'; e.currentTarget.style.opacity = '.85' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-gold)'; e.currentTarget.style.opacity = '1' }}
-          >
-            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
-            Ver mi página
-          </a>
         </div>
       </header>
 
@@ -230,7 +226,7 @@ export default function SetupPage() {
             </div>
           )}
 
-          <SupportFooter />
+          {section === 'config' && <SupportFooter />}
         </div>
       </main>
 
