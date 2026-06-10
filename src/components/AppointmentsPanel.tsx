@@ -228,11 +228,11 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
                 <div>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '.78rem', letterSpacing: '.1em', color: accent, marginBottom: '.35rem' }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '1.2rem', letterSpacing: '.1em', color: accent, marginBottom: '.35rem' }}>
                     {formatTime12h(apt.appointment_time)}
                   </p>
-                  <p style={{ fontSize: '.95rem', fontWeight: 500, color: 'var(--color-ink)', marginBottom: '.2rem' }}>{apt.name}</p>
-                  <p style={{ fontSize: '.82rem', color: 'var(--color-ink-dim)' }}>{apt.service}</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: 500, color: 'var(--color-ink)', marginBottom: '.2rem' }}>{apt.name}</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-ink-dim)' }}>{apt.service}</p>
                   {apt.notes && apt.notes !== 'Sin comentarios especiales' && (
                     <p style={{ fontSize: '.78rem', color: 'var(--color-ink-ghost)', marginTop: '.25rem', fontStyle: 'italic' }}>"{apt.notes}"</p>
                   )}
