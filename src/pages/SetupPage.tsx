@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { CalendarDays, Clock, Settings } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
 import ScheduleEditor from '../components/ScheduleEditor'
@@ -50,6 +50,17 @@ export default function SetupPage() {
     getPushStatus(pro.businessId).then(setPushStatus)
   }, [pro.businessId])
 
+  // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
+  useEffect(() => {
+    const id = 'gf-setup-bebas-inter'
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id   = id
+    link.rel  = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap'
+    document.head.appendChild(link)
+  }, [])
+
   const handleSubscribe = async () => {
     setPushWorking(true)
     const result = await subscribeToPush(pro.businessId)
@@ -73,7 +84,7 @@ export default function SetupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', colorScheme: 'inherit' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', colorScheme: 'inherit', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
 
       {/* ── Sticky header ── */}
       <header style={{
@@ -135,7 +146,9 @@ export default function SetupPage() {
         <div style={{ maxWidth: (section === 'schedule' || section === 'config') ? '100rem' : '48rem', margin: '0 auto' }}>
 
           {section === 'citas' && (
-            <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
+            <div style={{ paddingBottom: '3rem' }}>
+              <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
+            </div>
           )}
 
           {section === 'schedule' && (
@@ -151,7 +164,7 @@ export default function SetupPage() {
           )}
 
           {section === 'config' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start', paddingBottom: '3rem' }}>
               <Panel title="Sincroniza tu calendario" desc="Conecta tu calendario una sola vez y todas las citas aparecerán automáticamente, sin que tengas que hacer nada más.">
                 <MagicLinkPanel />
               </Panel>
