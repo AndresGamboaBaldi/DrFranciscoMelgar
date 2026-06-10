@@ -22,6 +22,7 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
   const SHOW_GOOGLE = false
   const [mode, setMode]           = useState<'choose' | 'password'>(SHOW_GOOGLE ? 'choose' : 'password')
   const [password, setPassword]   = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError]         = useState('')
   const [googleBusy, setGoogleBusy] = useState(false)
 
@@ -126,10 +127,23 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
 
         {(!SHOW_GOOGLE || mode === 'password') && (
           <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '.7rem' }}>
-            <input type="password" value={password} autoFocus
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Contraseña"
-              style={{ padding: '.85rem 1rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '16px', textAlign: 'center' }} />
+            <div style={{ position: 'relative' }}>
+              <input type={showPassword ? 'text' : 'password'} value={password} autoFocus
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Contraseña"
+                style={{ width: '100%', padding: '.85rem 2.75rem .85rem 1rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink)', fontFamily: 'var(--font-body)', fontSize: '16px', textAlign: 'center' }}
+                className="no-native-reveal" />
+              <button type="button" onClick={() => setShowPassword(v => !v)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                style={{ position: 'absolute', top: 0, right: 0, height: '100%', width: '2.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: 'var(--color-ink-ghost)', cursor: 'pointer' }}
+              >
+                {showPassword ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="21" x2="21" y2="3"/></svg>
+                )}
+              </button>
+            </div>
             {error && <p style={{ fontSize: '.78rem', color: '#c47070', margin: 0 }}>{error}</p>}
             <button type="submit"
               style={{ padding: '.85rem 1.5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }}>

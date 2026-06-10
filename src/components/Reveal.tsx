@@ -1,17 +1,18 @@
-import { useEffect, useRef, type ReactNode, type ElementType } from 'react'
+import { useEffect, useRef, type ReactNode, type ElementType, type CSSProperties } from 'react'
 
 interface RevealProps {
   children: ReactNode
   delay?: number
   className?: string
   as?: ElementType
+  style?: CSSProperties
 }
 
 /**
  * Wraps children in a scroll-triggered fade-up reveal animation.
  * Uses IntersectionObserver — no library needed.
  */
-export default function Reveal({ children, delay = 0, className = '', as: Tag = 'div' }: RevealProps) {
+export default function Reveal({ children, delay = 0, className = '', as: Tag = 'div', style }: RevealProps) {
   const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -33,5 +34,5 @@ export default function Reveal({ children, delay = 0, className = '', as: Tag = 
     return () => obs.disconnect()
   }, [delay])
 
-  return <Tag ref={ref as never} className={`reveal ${className}`}>{children}</Tag>
+  return <Tag ref={ref as never} className={`reveal ${className}`} style={style}>{children}</Tag>
 }

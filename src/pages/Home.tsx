@@ -1,198 +1,259 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { PROFESSIONALS } from '../data/professionals'
-import type { Professional } from '../types/professional'
 import { HomeSEOHead } from '../components/SEOHead'
+import Reveal from '../components/Reveal'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  all: 'Todos', medico: 'Médico', dentista: 'Dentista',
-  barbero: 'Barbero', estetica: 'Estética', psicologo: 'Psicólogo', otro: 'Otro',
-}
-// Consistent single-color symbols — no multi-color emojis
-const CATEGORY_ICONS: Record<string, string> = {
-  all: '◈', medico: '◉', dentista: '◎',
-  barbero: '◇', estetica: '◆', psicologo: '○', otro: '◌',
-}
-const GOLD = '#c4995a'
+const GOLD   = '#c4995a'
 const GOLD_L = '#d4b078'
 
+// TODO: reemplaza por el número real de WhatsApp de ventas (formato 591XXXXXXXX)
+const SALES_WHATSAPP = '59100000000'
+const waLink = (msg: string) => `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent(msg)}`
+
+const FEATURES = [
+  {
+    icon: '📅',
+    title: 'Reservas 24/7',
+    desc: 'Tus clientes agendan citas en segundos, a cualquier hora, sin llamadas ni mensajes de ida y vuelta.',
+  },
+  {
+    icon: '🔔',
+    title: 'Notificaciones al instante',
+    desc: 'Recibe un aviso push apenas alguien reserva — directo en tu celular, sin instalar nada.',
+  },
+  {
+    icon: '🗓️',
+    title: 'Sincroniza tu calendario',
+    desc: 'Cada cita aparece automáticamente en tu Google Calendar, Apple Calendar u Outlook.',
+  },
+  {
+    icon: '💬',
+    title: 'Confirmación por WhatsApp',
+    desc: 'Con un clic mandas un recordatorio formateado y profesional a tus clientes.',
+  },
+  {
+    icon: '🎨',
+    title: 'Tu página, tu marca',
+    desc: 'Diseño elegante con tus colores, fotos, servicios y horarios — lista para compartir.',
+  },
+  {
+    icon: '📊',
+    title: 'Panel de administración',
+    desc: 'Gestiona tu agenda, bloquea horarios y controla todo desde un panel simple.',
+  },
+]
+
+const PLANS = [
+  {
+    name: 'Pro',
+    price: 'Bs 149',
+    period: '/mes',
+    tag: 'Más popular',
+    desc: 'Ideal para empezar a recibir reservas online.',
+    items: [
+      'Página propia personalizada',
+      'Reservas online ilimitadas',
+      'Notificaciones push',
+      'Sincronización con calendario',
+    ],
+  },
+  {
+    name: 'Agencia',
+    price: 'A medida',
+    period: '',
+    tag: null,
+    desc: 'Para negocios con varios profesionales o sucursales.',
+    items: [
+      'Todo lo del plan Pro',
+      'Múltiples profesionales / staff',
+      'Agenda individual por persona',
+      'Asesoría de configuración incluida',
+    ],
+  },
+]
+
 export default function Home() {
-  const pros = Object.values(PROFESSIONALS)
-  const [search,   setSearch]   = useState('')
-  const [category, setCategory] = useState('all')
-  const [city,     setCity]     = useState('all')
-
-  const cities = useMemo(() => {
-    const set = new Set(pros.map(p => p.location.split(',')[0].trim()))
-    return ['all', ...Array.from(set).sort()]
-  }, [pros])
-
-  const categories = useMemo(() => {
-    const set = new Set(pros.map(p => p.category ?? 'otro'))
-    return ['all', ...Array.from(set)]
-  }, [pros])
-
-  const filtered = useMemo(() => pros.filter(p => {
-    const matchCat    = category === 'all' || (p.category ?? 'otro') === category
-    const matchCity   = city === 'all' || p.location.split(',')[0].trim() === city
-    const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.specialty.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchCity && matchSearch
-  }), [pros, category, city, search])
-
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df', overflowX: 'hidden' }}>
       <HomeSEOHead />
 
-      {/* ── Header ── */}
-      <div style={{ padding: '4rem 1.5rem 2.5rem', textAlign: 'center' }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2.5rem,7vw,5rem)', fontWeight: 300, color: '#ffffff', letterSpacing: '-.02em', marginBottom: '.4rem' }}>
+      {/* ── Hero ── */}
+      <section style={{ position: 'relative', minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '6rem 1.5rem', overflow: 'hidden' }}>
+
+        {/* Decorative glow */}
+        <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: '60rem', height: '60rem', background: `radial-gradient(circle, ${GOLD}22 0%, transparent 65%)`, pointerEvents: 'none' }} />
+
+        <p className="animate-fade-up" style={{ fontSize: '.7rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '1.5rem', position: 'relative' }}>
+          Reservas online para profesionales
+        </p>
+
+        <h1 className="animate-fade-up" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2.8rem,9vw,6.5rem)', fontWeight: 300, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.05, marginBottom: '1.25rem', position: 'relative', animationDelay: '.1s' }}>
+          Tu página de citas,<br />
+          lista en <em style={{ color: GOLD }}>minutos</em>
+        </h1>
+
+        <p className="animate-fade-up" style={{ fontSize: 'clamp(1rem,2.2vw,1.25rem)', color: 'rgba(255,255,255,.72)', maxWidth: '34rem', margin: '0 auto 2.5rem', lineHeight: 1.7, position: 'relative', animationDelay: '.2s' }}>
+          Probo.pro te da una página elegante donde tus clientes reservan solos, recibes notificaciones al instante y todo se sincroniza con tu calendario.
+        </p>
+
+        <div className="animate-fade-up" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', position: 'relative', animationDelay: '.3s' }}>
+          <a href={waLink('Hola! Quiero crear mi página en Probo.pro 🙌')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '1rem 2.25rem', background: GOLD, color: '#0a0907', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .25s' }}
+            onMouseEnter={e => (e.currentTarget.style.background = GOLD_L)}
+            onMouseLeave={e => (e.currentTarget.style.background = GOLD)}
+          >
+            Quiero mi página
+            <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M7.5 1l4 4-4 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+          </a>
+          <a href="#planes"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '1rem 2.25rem', background: 'rgba(255,255,255,.06)', color: '#fff', border: '1px solid rgba(255,255,255,.25)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all .25s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.background = 'rgba(255,255,255,.1)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.25)'; e.currentTarget.style.background = 'rgba(255,255,255,.06)' }}
+          >
+            Ver planes
+          </a>
+        </div>
+
+        {/* Scroll cue */}
+        <div className="animate-scroll-bob" style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', width: 1, height: '3rem', background: 'rgba(255,255,255,.3)' }} />
+      </section>
+
+      {/* ── Beneficios ── */}
+      <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
+        <Reveal as="div" className="s-header" style={undefined as never}>
+          <div>
+            <p style={{ fontSize: '.7rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '.75rem' }}>Beneficios</p>
+            <h2 className="s-title">Todo lo que necesitas <em style={{ fontStyle: 'italic', color: GOLD }}>para crecer</em></h2>
+          </div>
+          <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,.6)', maxWidth: '24rem', lineHeight: 1.7 }}>
+            Diseñado para que dejes de perder clientes por no contestar a tiempo.
+          </p>
+        </Reveal>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1px', background: 'rgba(255,255,255,.08)' }}>
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.title} delay={i * 60} as="div" style={undefined as never}>
+              <div style={{ background: '#0a0907', padding: '2.25rem 1.75rem', height: '100%', transition: 'background .3s' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#151210')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#0a0907')}
+              >
+                <div style={{ fontSize: '1.8rem', marginBottom: '1.1rem' }}>{f.icon}</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', color: '#fff', fontWeight: 400, marginBottom: '.6rem' }}>{f.title}</h3>
+                <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.6)', lineHeight: 1.7 }}>{f.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      {/* ── Cómo funciona ── */}
+      <section className="s-pad" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
+          <p style={{ fontSize: '.7rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '.75rem' }}>Cómo funciona</p>
+          <h2 className="s-title">Tres pasos. <em style={{ fontStyle: 'italic', color: GOLD }}>Cero complicaciones.</em></h2>
+        </Reveal>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2.5rem' }}>
+          {[
+            { n: '01', title: 'Cuéntanos de tu negocio', desc: 'Nos compartes tus servicios, horarios y fotos — nosotros armamos tu página.' },
+            { n: '02', title: 'Recibe tu link', desc: 'Tu página queda lista con tu marca, lista para compartir en redes y WhatsApp.' },
+            { n: '03', title: 'Empieza a recibir citas', desc: 'Tus clientes reservan solos y tú administras todo desde tu celular.' },
+          ].map((s, i) => (
+            <Reveal key={s.n} delay={i * 100} as="div" style={undefined as never}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '3rem', color: 'rgba(255,255,255,.12)', fontWeight: 600, lineHeight: 1, marginBottom: '1rem' }}>{s.n}</p>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: '#fff', fontWeight: 400, marginBottom: '.6rem' }}>{s.title}</h3>
+              <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.6)', lineHeight: 1.7 }}>{s.desc}</p>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <div className="divider" />
+
+      {/* ── Planes ── */}
+      <section id="planes" className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
+        <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
+          <p style={{ fontSize: '.7rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '.75rem' }}>Planes</p>
+          <h2 className="s-title">Precios simples, <em style={{ fontStyle: 'italic', color: GOLD }}>sin sorpresas</em></h2>
+          <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,.6)', maxWidth: '28rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
+            Sin contratos forzosos. Cancela cuando quieras.
+          </p>
+        </Reveal>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          {PLANS.map((plan, i) => (
+            <Reveal key={plan.name} delay={i * 80} as="div" style={undefined as never}>
+              <div style={{
+                position: 'relative', height: '100%', display: 'flex', flexDirection: 'column',
+                padding: '2.5rem 2rem', background: plan.tag ? 'linear-gradient(160deg, #1d1813, #0e0c0a)' : '#0e0c0a',
+                border: `1px solid ${plan.tag ? GOLD : 'rgba(255,255,255,.1)'}`,
+              }}>
+                {plan.tag && (
+                  <span style={{ position: 'absolute', top: '-.7rem', left: '2rem', background: GOLD, color: '#0a0907', fontSize: '.62rem', fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', padding: '.3rem .75rem' }}>
+                    {plan.tag}
+                  </span>
+                )}
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: '#fff', fontWeight: 400, marginBottom: '.4rem' }}>{plan.name}</h3>
+                <p style={{ fontSize: '.85rem', color: 'rgba(255,255,255,.55)', marginBottom: '1.5rem', lineHeight: 1.6, minHeight: '2.6rem' }}>{plan.desc}</p>
+                <p style={{ marginBottom: '1.75rem' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', color: GOLD, fontWeight: 400 }}>{plan.price}</span>
+                  <span style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.5)' }}>{plan.period}</span>
+                </p>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '.75rem', marginBottom: '2.25rem', flex: 1 }}>
+                  {plan.items.map(item => (
+                    <li key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '.6rem', fontSize: '.88rem', color: 'rgba(255,255,255,.78)' }}>
+                      <span style={{ color: GOLD, flexShrink: 0, marginTop: '.15rem' }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <a href={waLink(`Hola! Me interesa el plan ${plan.name} de Probo.pro`)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+                    padding: '.9rem 1.5rem', textAlign: 'center',
+                    background: plan.tag ? GOLD : 'transparent', color: plan.tag ? '#0a0907' : '#fff',
+                    border: plan.tag ? 'none' : '1px solid rgba(255,255,255,.25)',
+                    fontFamily: 'var(--font-body)', fontSize: '.74rem', fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase',
+                    textDecoration: 'none', transition: 'all .25s',
+                  }}
+                  onMouseEnter={e => { if (plan.tag) e.currentTarget.style.background = GOLD_L; else { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.color = GOLD } }}
+                  onMouseLeave={e => { if (plan.tag) e.currentTarget.style.background = GOLD; else { e.currentTarget.style.borderColor = 'rgba(255,255,255,.25)'; e.currentTarget.style.color = '#fff' } }}
+                >
+                  Empezar
+                </a>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA final ── */}
+      <section className="s-pad" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', bottom: '-30%', left: '50%', transform: 'translateX(-50%)', width: '50rem', height: '50rem', background: `radial-gradient(circle, ${GOLD}1a 0%, transparent 65%)`, pointerEvents: 'none' }} />
+        <Reveal as="div" style={{ position: 'relative' } as never}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2rem,6vw,4rem)', fontWeight: 300, color: '#fff', marginBottom: '1.25rem' }}>
+            ¿Listo para dejar de perder citas?
+          </h2>
+          <p style={{ fontSize: '1.05rem', color: 'rgba(255,255,255,.65)', maxWidth: '30rem', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+            Escríbenos y arma tu página hoy mismo — sin compromiso.
+          </p>
+          <a href={waLink('Hola! Quiero crear mi página en Probo.pro 🙌')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '1.1rem 2.5rem', background: GOLD, color: '#0a0907', fontFamily: 'var(--font-body)', fontSize: '.8rem', fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .25s' }}
+            onMouseEnter={e => (e.currentTarget.style.background = GOLD_L)}
+            onMouseLeave={e => (e.currentTarget.style.background = GOLD)}
+          >
+            💬 Hablar por WhatsApp
+          </a>
+        </Reveal>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer style={{ textAlign: 'center', padding: '2.5rem 1.5rem', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.3rem', color: '#fff', marginBottom: '.5rem' }}>
           Probo<em style={{ color: GOLD }}>.pro</em>
         </p>
-        <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,.75)', maxWidth: '28rem', margin: '0 auto' }}>
-          Encuentra tu profesional y agenda en segundos
-        </p>
-      </div>
-
-      {/* ── Filters — all same width ── */}
-      <div style={{ padding: '0 1.5rem 2rem', width: '100%', maxWidth: '560px', margin: '0 auto' }}>
-        {/* Search */}
-        <div style={{ position: 'relative', marginBottom: '1.1rem' }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', pointerEvents: 'none' }}>
-            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M11 11l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <input type="text" placeholder="Buscar profesional..." value={search} onChange={e => setSearch(e.target.value)}
-            className="home-search"
-            style={{ paddingLeft: '2.75rem', background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.28)', color: '#ffffff', fontSize: '1rem', padding: '.85rem 1rem .85rem 2.75rem' }} />
-        </div>
-
-        {/* Category chips */}
-        <div style={{ display: 'flex', gap: '.45rem', flexWrap: 'wrap', marginBottom: '.75rem' }}>
-          {categories.map(cat => {
-            const active = category === cat
-            return (
-              <button key={cat} onClick={() => setCategory(cat)}
-                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.3rem', padding: '.42rem .5rem', background: active ? GOLD : 'rgba(255,255,255,.08)', color: active ? '#0a0907' : '#ffffff', border: `1px solid ${active ? GOLD : 'rgba(255,255,255,.22)'}`, fontFamily: 'var(--font-body)', fontSize: '.73rem', fontWeight: active ? 500 : 400, letterSpacing: '.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.background = 'rgba(255,255,255,.14)' }}}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'rgba(255,255,255,.22)'; e.currentTarget.style.background = 'rgba(255,255,255,.08)' }}}
-              >
-                <span style={{ fontSize: '.9rem', color: active ? '#0a0907' : GOLD }}>{CATEGORY_ICONS[cat] ?? '◇'}</span>
-                {CATEGORY_LABELS[cat] ?? cat}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* City chips */}
-        {cities.length > 2 && (
-          <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
-            <span style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginRight: '.2rem' }}>Ciudad:</span>
-            {cities.map(c => {
-              const active = city === c
-              return (
-                <button key={c} onClick={() => setCity(c)}
-                  style={{ padding: '.3rem .75rem', background: active ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.07)', color: active ? '#ffffff' : 'rgba(255,255,255,.7)', border: `1px solid ${active ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.2)'}`, fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: active ? 400 : 300, letterSpacing: '.06em', cursor: 'pointer', transition: 'all .2s' }}
-                >
-                  {c === 'all' ? 'Todas' : c}
-                </button>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Count */}
-        <p style={{ fontSize: 'clamp(1.25rem,3vw,1.75rem)', color: 'rgba(255,255,255,.85)', textAlign: 'center', marginBottom: '2rem', fontFamily: 'var(--font-display)', fontWeight: 300 }}>
-          <span style={{ color: '#ffffff', fontWeight: 400 }}>{filtered.length}</span> profesional{filtered.length !== 1 ? 'es' : ''}
-          {(search || category !== 'all' || city !== 'all') && (
-            <button onClick={() => { setSearch(''); setCategory('all'); setCity('all') }}
-              style={{ marginLeft: '1rem', background: 'none', border: 'none', color: GOLD, cursor: 'pointer', fontSize: '.7rem', fontFamily: 'var(--font-body)', textDecoration: 'underline' }}>
-              Limpiar
-            </button>
-          )}
-        </p>
-      </div>
-
-      {/* ── Cards — same horizontal padding as filters on mobile ── */}
-      <div style={{ padding: '0 1.5rem 5rem', maxWidth: '1320px', margin: '0 auto' }} className="home-cards-wrap">
-        {filtered.length === 0 ? (
-          <p style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.3rem', color: 'rgba(255,255,255,.35)', padding: '4rem 0' }}>
-            Sin resultados para esos filtros.
-          </p>
-        ) : (
-          /* Flexbox centers items when fewer than 4 fill a row */
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', justifyContent: 'center' }}>
-            {filtered.map(pro => (
-              <div key={pro.slug} style={{ flex: '1 1 260px', maxWidth: '320px', minWidth: '260px' }}>
-                <ProCard pro={pro} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-/* ── Professional card — always fully expanded ── */
-function ProCard({ pro }: { pro: Professional }) {
-  const navigate = useNavigate()
-  const city = pro.location.split(',')[0].trim()
-  const cat  = pro.category ?? 'otro'
-  const bg   = pro.heroPhoto ?? pro.photos?.[0] ?? null
-
-  return (
-    <div
-      onClick={() => navigate(`/${pro.slug}`)}
-      style={{ position: 'relative', overflow: 'hidden', background: '#1a1815', minHeight: '360px', height: '100%', cursor: 'pointer' }}
-      onMouseEnter={e => { const img = e.currentTarget.querySelector('.card-img') as HTMLElement; if (img) img.style.transform = 'scale(1.04)' }}
-      onMouseLeave={e => { const img = e.currentTarget.querySelector('.card-img') as HTMLElement; if (img) img.style.transform = 'scale(1)' }}
-    >
-      {/* Background image */}
-      {bg && (
-        <div className="card-img" style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center top', transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)' }} />
-      )}
-
-      {/* Gradient overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,.90) 0%, rgba(0,0,0,.45) 55%, rgba(0,0,0,.2) 100%)' }} />
-
-      {/* Gold top line */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: GOLD }} />
-
-      {/* Content */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 'clamp(1rem,3vw,1.75rem) clamp(.9rem,2.5vw,1.5rem)' }}>
-        {/* Category badge */}
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.3rem', fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: '#000', background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(4px)', padding: '.2rem .55rem', marginBottom: '.55rem', fontWeight: '500' }}>
-          <span style={{ color: GOLD }}>{CATEGORY_ICONS[cat]}</span> {CATEGORY_LABELS[cat]}
-        </span>
-
-        {/* Name */}
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.4rem,2.5vw,1.9rem)', fontWeight: 400, color: '#ffffff', lineHeight: 1.1, marginBottom: '.35rem', textShadow: '0 1px 10px rgba(0,0,0,.9)' }}>
-          {pro.name}
-        </h2>
-
-        {/* Title */}
-        <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.2rem', color: 'rgba(255,255,255,.78)', marginBottom: '.3rem' }}>
-          {pro.title}
-        </p>
-
-        {/* City */}
-        <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,.75)', marginBottom: '1.1rem' }}>
-          📍 {city}
-        </p>
-
-        {/* CTA */}
-        <button
-          onClick={e => { e.stopPropagation(); navigate(`/${pro.slug}`) }}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.6rem 1.4rem', background: GOLD, color: '#0a0907', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .2s' }}
-          onMouseEnter={e => (e.currentTarget.style.background = GOLD_L)}
-          onMouseLeave={e => (e.currentTarget.style.background = GOLD)}
-        >
-          Visitar Perfil
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M6.5 1l3 3L6.5 7M1 4h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
-        </button>
-      </div>
+        <p style={{ fontSize: '.78rem', color: 'rgba(255,255,255,.4)' }}>© {new Date().getFullYear()} Probo.pro — Reservas online para profesionales en Bolivia</p>
+      </footer>
     </div>
   )
 }

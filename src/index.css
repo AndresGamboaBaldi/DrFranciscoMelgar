@@ -163,6 +163,12 @@ input::placeholder, textarea::placeholder { color: var(--color-ink-ghost); }
   .home-cards-wrap > div > div { max-width: 100% !important; flex: 1 1 100% !important; }
 }
 textarea { resize: vertical; min-height: 90px; }
+
+/* Hide native browser password-reveal icons (we use a custom toggle) */
+.no-native-reveal::-ms-reveal,
+.no-native-reveal::-ms-clear { display: none; }
+.no-native-reveal::-webkit-credentials-auto-fill-button,
+.no-native-reveal::-webkit-strong-password-auto-fill-button { visibility: hidden; pointer-events: none; }
 select {
   /* Arrow adapts to theme via CSS variable */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238c8278'/%3E%3C/svg%3E");
