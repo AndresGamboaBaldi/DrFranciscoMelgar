@@ -180,7 +180,12 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
 
       {!isToday && (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button onClick={() => setDate(new Date())}
+        <button onClick={() => {
+          setDate(new Date())
+          requestAnimationFrame(() => {
+            activeCardRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' })
+          })
+        }}
           style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontSize: '.7rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem .8rem', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}
           onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
