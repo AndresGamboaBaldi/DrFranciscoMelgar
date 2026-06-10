@@ -25,11 +25,22 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
   const [error, setError]         = useState('')
   const [googleBusy, setGoogleBusy] = useState(false)
 
-  // 1. Check existing unlock (password session) or Google session on mount
+  // 1. Check existing unlock (password session), magic-link key, or Google session on mount
   useEffect(() => {
     let active = true
     async function check() {
       if (localStorage.getItem(sessionKey) === '1') {
+        if (active) { setUnlocked(true); setChecking(false) }
+        return
+      }
+      // Magic link: ?key=<setupPassword> auto-unlocks and persists
+      const urlKey = new URLSearchParams(window.location.search).get('key')
+      if (urlKey && pro.setupPassword && urlKey === pro.setupPassword) {
+        localStorage.setItem(sessionKey, '1')
+        // Clean the key from the URL without reloading
+        const url = new URL(window.location.href)
+        url.searchParams.delete('key')
+        window.history.replaceState({}, '', url.toString())
         if (active) { setUnlocked(true); setChecking(false) }
         return
       }
