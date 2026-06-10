@@ -78,7 +78,7 @@ export async function getAppointmentsByDate(businessId: string, date: string): P
   if (!supabase) return []
   const { data, error } = await supabase
     .from('appointments')
-    .select('*')
+    .select('id, name, phone, service, appointment_date, appointment_time, notes, status')
     .eq('business_id', businessId)
     .eq('appointment_date', date)
     .neq('status', 'cancelled')
