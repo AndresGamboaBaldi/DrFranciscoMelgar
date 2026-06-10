@@ -109,7 +109,7 @@ export default function ProfessionalPage() {
     document.head.appendChild(link)
     // No cleanup — fonts stay cached for performance
   }, [pro.slug, pro.theme?.fonts?.googleFontsUrl])
-  const isSetup    = new URLSearchParams(window.location.search).has('setup')
+  const isSetup    = new URLSearchParams(window.location.search).has('setup') || window.location.pathname.endsWith('/setup')
 
   return (
     <ProfessionalContext.Provider value={pro}>

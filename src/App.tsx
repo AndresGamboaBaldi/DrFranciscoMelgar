@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Home             from './pages/Home'
 import ProfessionalPage from './pages/ProfessionalPage'
-import CalendarRedirect from './pages/CalendarRedirect'
 
 /** Scrolls to top on every route change */
 function ScrollToTop() {
@@ -17,7 +16,7 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/"                  element={<Home />} />
-        <Route path="/:slug/calendar"    element={<CalendarRedirect />} />
+        <Route path="/:slug/setup"       element={<ProfessionalPage />} />
         <Route path="/:slug"             element={<ProfessionalPage />} />
       </Routes>
     </BrowserRouter>
