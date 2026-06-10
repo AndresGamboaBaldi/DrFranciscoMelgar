@@ -148,7 +148,7 @@ export async function getUpcomingBlocks(businessId: string): Promise<BlockedSlot
   const today = new Date().toISOString().split('T')[0]
   const { data } = await supabase
     .from('blocked_slots')
-    .select('*')
+    .select('id,business_id,date,start_time,end_time,reason')
     .eq('business_id', businessId)
     .gte('date', today)
     .order('date', { ascending: true })
@@ -179,7 +179,7 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
   if (!supabase) return null
   const { data } = await supabase
     .from('schedule_settings')
-    .select('*')
+    .select('business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance')
     .eq('business_id', businessId)
     .maybeSingle()
   return data as ScheduleSettings | null

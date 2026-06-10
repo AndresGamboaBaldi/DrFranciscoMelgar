@@ -6,15 +6,13 @@ import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
 import { subscribeToPush, getPushStatus } from '../lib/supabase'
 
-type Section = 'citas' | 'schedule' | 'blocks' | 'calendar' | 'notificaciones'
+type Section = 'citas' | 'schedule' | 'config'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
 
 const NAV: { id: Section; label: string; desc: string }[] = [
-  { id: 'citas',          label: 'Citas',           desc: 'Agenda del día' },
-  { id: 'schedule',       label: 'Horarios',        desc: 'Días y horas de atención' },
-  { id: 'blocks',         label: 'Bloqueos',        desc: 'Días no disponibles' },
-  { id: 'calendar',       label: 'Calendario',      desc: 'Link mágico de sincronización' },
-  { id: 'notificaciones', label: 'Notificaciones',  desc: 'Avisos de nuevas citas' },
+  { id: 'citas',    label: 'Citas',                 desc: 'Agenda del día' },
+  { id: 'schedule', label: 'Horarios',              desc: 'Días y horas de atención' },
+  { id: 'config',   label: 'Configuración inicial', desc: 'Calendario y notificaciones' },
 ]
 
 const STEPS_IPHONE = [
@@ -44,6 +42,7 @@ export default function SetupPage() {
   const pro = useProfessional()
   const [section, setSection]       = useState<Section>('citas')
   const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
+  const [showIosSteps, setShowIosSteps] = useState(false)
   const [pushWorking, setPushWorking] = useState(false)
 
   useEffect(() => {
@@ -87,8 +86,10 @@ export default function SetupPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
           {pro.logo && <img src={pro.logo} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />}
           <div style={{ minWidth: 0 }}>
-            <p style={{ fontSize: '.58rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--color-gold)', lineHeight: 1, marginBottom: '.2rem' }}>Panel Admin</p>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem,2.5vw,1.3rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ display: 'inline-block', fontSize: '.62rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--color-bg)', background: 'var(--color-gold)', padding: '.2rem .55rem', lineHeight: 1.4, marginBottom: '.35rem', borderRadius: 2 }}>
+              ⚙ Panel Admin
+            </span>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem,2.5vw,1.3rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {pro.name}
             </h1>
           </div>
@@ -148,25 +149,24 @@ export default function SetupPage() {
           )}
 
           {section === 'schedule' && (
-            <Panel title="Horarios de atención" desc="Configura los días y horas en que aceptas citas. Los cambios aplican de inmediato al calendario de reservas.">
-              <ScheduleEditor />
-            </Panel>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+              <Panel title="Horarios de atención" desc="Configura los días y horas en que aceptas citas. Los cambios aplican de inmediato al calendario de reservas.">
+                <ScheduleEditor />
+              </Panel>
+
+              <Panel title="Bloquear horarios" desc="Marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
+                <BlockScheduler />
+              </Panel>
+            </div>
           )}
 
-          {section === 'blocks' && (
-            <Panel title="Bloquear horarios" desc="Marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
-              <BlockScheduler />
-            </Panel>
-          )}
+          {section === 'config' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+              <Panel title="Sincroniza tu calendario" desc="Conecta tu calendario una sola vez y todas las citas aparecerán automáticamente, sin que tengas que hacer nada más.">
+                <MagicLinkPanel />
+              </Panel>
 
-          {section === 'calendar' && (
-            <Panel title="Link Mágico" desc="Agrega este link una sola vez y todas las citas aparecen automáticamente en tu calendario.">
-              <MagicLinkPanel />
-            </Panel>
-          )}
-
-          {section === 'notificaciones' && (
-            <Panel title="Notificaciones push" desc="Recibe una notificación en este dispositivo cada vez que un paciente reserve una cita — sin WhatsApp.">
+              <Panel title="Notificaciones push" desc="Recibe una notificación en este dispositivo cada vez que un paciente reserve una cita — sin WhatsApp.">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {/* Status */}
@@ -200,17 +200,29 @@ export default function SetupPage() {
                   </button>
                 )}
 
-                {/* iOS instructions */}
+                {/* iOS instructions (collapsible) */}
                 {pushStatus !== 'active' && (
-                <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1rem 1.25rem' }}>
-                  <p style={{ fontSize: '.92rem', fontWeight: 500, color: 'var(--color-ink-dim)', marginBottom: '.6rem' }}>📱 ¿Usas iPhone?</p>
-                  <ol style={{ fontSize: '.88rem', color: 'var(--color-ink-ghost)', lineHeight: 2.1, paddingLeft: '1.2rem', margin: 0 }}>
-                    <li>Abre esta página en <strong style={{ color: 'var(--color-ink-dim)' }}>Safari</strong></li>
-                    <li>Toca el botón <strong style={{ color: 'var(--color-ink-dim)' }}>Compartir</strong> (cuadrado con flecha hacia arriba)</li>
-                    <li>Toca <strong style={{ color: 'var(--color-ink-dim)' }}>Ver más</strong> y luego <strong style={{ color: 'var(--color-ink-dim)' }}>Agregar a inicio</strong></li>
-                    <li>Abre la app desde la pantalla de inicio de tu celular</li>
-                    <li>Vuelve aquí y toca <strong style={{ color: 'var(--color-ink-dim)' }}>Activar notificaciones</strong></li>
-                  </ol>
+                <div>
+                  <button onClick={() => setShowIosSteps(s => !s)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', background: 'rgba(196,153,90,.08)', border: '1px solid rgba(196,153,90,.25)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem 1rem', cursor: 'pointer', transition: 'background .2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(196,153,90,.14)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(196,153,90,.08)')}
+                  >
+                    <span style={{ display: 'inline-block', transform: showIosSteps ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s', fontSize: '.55rem' }}>▶</span>
+                    {showIosSteps ? 'Ocultar pasos adicionales' : '📱 ¿Usas iPhone? Ver pasos adicionales'}
+                  </button>
+
+                  {showIosSteps && (
+                    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1rem 1.25rem', marginTop: '1rem' }}>
+                      <ol style={{ fontSize: '.88rem', color: 'var(--color-ink-ghost)', lineHeight: 2.1, paddingLeft: '1.2rem', margin: 0 }}>
+                        <li>Abre esta página en <strong style={{ color: 'var(--color-ink-dim)' }}>Safari</strong></li>
+                        <li>Toca el botón <strong style={{ color: 'var(--color-ink-dim)' }}>Compartir</strong> (cuadrado con flecha hacia arriba)</li>
+                        <li>Toca <strong style={{ color: 'var(--color-ink-dim)' }}>Ver más</strong> y luego <strong style={{ color: 'var(--color-ink-dim)' }}>Agregar a inicio</strong></li>
+                        <li>Abre la app desde la pantalla de inicio de tu celular</li>
+                        <li>Vuelve aquí y toca <strong style={{ color: 'var(--color-ink-dim)' }}>Activar notificaciones</strong></li>
+                      </ol>
+                    </div>
+                  )}
                 </div>
                 )}
 
@@ -218,9 +230,11 @@ export default function SetupPage() {
                   Las notificaciones se activan por dispositivo. Si usas varios, actívalas en cada uno.
                 </p>
               </div>
-            </Panel>
+              </Panel>
+            </div>
           )}
 
+          <SupportFooter />
         </div>
       </main>
     </div>
@@ -238,7 +252,6 @@ function Panel({ title, desc, children }: { title: string; desc: string; childre
         <p style={{ fontSize: '1rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{desc}</p>
       </div>
       {children}
-      <SupportFooter />
     </div>
   )
 }
@@ -290,29 +303,39 @@ function MagicLinkPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      {/* URL row */}
-      <div style={{ display: 'flex', gap: 1, background: 'var(--color-rim)' }}>
-        <div style={{ flex: 1, background: 'var(--color-surface)', padding: '.85rem 1.25rem', fontFamily: 'monospace', fontSize: '.72rem', color: 'var(--color-ink-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {feedUrl}
+      {/* Quick sync buttons */}
+      <div>
+        <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, marginBottom: '.85rem' }}>
+          Primero, prueba sincronizar con un toque:
+        </p>
+        <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
+          <a href={webcalUrl}
+            style={{ ...OUTLINE_BTN, borderColor: 'var(--color-gold)', color: 'var(--color-ink)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.08)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+          >📱 Sincronizar en iPhone</a>
+          <a href={googleUrl} target="_blank" rel="noreferrer"
+            style={{ ...OUTLINE_BTN, borderColor: 'var(--color-gold)', color: 'var(--color-ink)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.08)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+          >🔵 Sincronizar con Google Calendar</a>
         </div>
-        <button onClick={copy}
-          style={{ padding: '.85rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0 }}>
-          {copied ? '✓ Copiado' : 'Copiar'}
-        </button>
       </div>
 
-      {/* Quick buttons */}
-      <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
-        <a href={webcalUrl}
-          style={OUTLINE_BTN}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-gold)'; e.currentTarget.style.color = 'var(--color-ink)' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-rim-l)'; e.currentTarget.style.color = 'var(--color-ink-dim)' }}
-        >📱 Abrir en iPhone</a>
-        <a href={googleUrl} target="_blank" rel="noreferrer"
-          style={OUTLINE_BTN}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-gold)'; e.currentTarget.style.color = 'var(--color-ink)' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-rim-l)'; e.currentTarget.style.color = 'var(--color-ink-dim)' }}
-        >🔵 Google Calendar</a>
+      {/* Fallback: link + instructions */}
+      <div>
+        <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, marginBottom: '.85rem' }}>
+          ¿No funcionó? Copia este link y agrégalo manualmente siguiendo las instrucciones:
+        </p>
+        <div style={{ display: 'flex', gap: 1, background: 'var(--color-rim)' }}>
+          <div style={{ flex: 1, background: 'var(--color-surface)', padding: '.85rem 1.25rem', fontFamily: 'monospace', fontSize: '.72rem', color: 'var(--color-ink-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {feedUrl}
+          </div>
+          <button onClick={copy}
+            style={{ padding: '.85rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0 }}>
+            {copied ? '✓ Copiado' : 'Copiar'}
+          </button>
+        </div>
       </div>
 
       {/* Collapsible instructions */}
