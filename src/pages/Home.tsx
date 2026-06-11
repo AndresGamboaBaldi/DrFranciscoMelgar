@@ -1,3 +1,4 @@
+import { useEffect, type CSSProperties } from 'react'
 import { HomeSEOHead } from '../components/SEOHead'
 import Reveal from '../components/Reveal'
 import { Bell, CalendarDays, MessageCircle, Palette } from 'lucide-react'
@@ -62,8 +63,18 @@ const PLANS = [
 ]
 
 export default function Home() {
+  useEffect(() => {
+    const id = 'gf-home-bebas-inter'
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id   = id
+    link.rel  = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;1,400&display=swap'
+    document.head.appendChild(link)
+  }, [])
+
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df', overflowX: 'hidden', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
       <HomeSEOHead />
 
       {/* ── Hero ── */}
@@ -73,7 +84,7 @@ export default function Home() {
         <div style={{ position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)', width: '60rem', height: '60rem', background: `radial-gradient(circle, ${GOLD}22 0%, transparent 65%)`, pointerEvents: 'none' }} />
 
 
-        <h1 className="animate-fade-up" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2.8rem,9vw,6.5rem)', fontWeight: 300, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.05, marginBottom: '1.25rem', position: 'relative', animationDelay: '.1s' }}>
+        <h1 className="animate-fade-up" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem,9vw,6.5rem)', fontWeight: 300, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.05, marginBottom: '1.25rem', position: 'relative', animationDelay: '.1s' }}>
           Tu propia página de<br />
          <em style={{ color: GOLD }}>reservas online,</em> lista en minutos
         </h1>
@@ -109,7 +120,7 @@ export default function Home() {
         <Reveal as="div" className="s-header" style={undefined as never}>
           <div>
             <p style={{ fontSize: '1rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '.75rem' }}>Beneficios diseñados para la excelencia</p>
-            <h2 className="s-title">Herramientas de <em style={{ fontStyle: 'italic', color: GOLD }}>élite</em></h2>
+            <h2 className="s-title">Herramientas de <em style={{ color: GOLD }}>élite</em></h2>
           </div>
         </Reveal>
 
@@ -132,7 +143,7 @@ export default function Home() {
       {/* ── Cómo funciona ── */}
       <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
-          <h2 className="s-title">Tres pasos. <em style={{ fontStyle: 'italic', color: GOLD }}>Cero complicaciones.</em></h2>
+          <h2 className="s-title">Tres pasos. <em style={{ color: GOLD }}>Cero complicaciones.</em></h2>
           <p style={{ fontSize: '1rem', letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginTop: '.75rem' }}>Cómo funciona</p>
         </Reveal>
 
@@ -192,7 +203,7 @@ export default function Home() {
       {/* ── Planes ── */}
       <section id="planes" className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
-          <h2 className="s-title">Inversion <em style={{ fontStyle: 'italic', color: GOLD }}>en tu marca</em></h2>
+          <h2 className="s-title">Inversion <em style={{ color: GOLD }}>en tu marca</em></h2>
           <p style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,.6)', maxWidth: '28rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
             Precios transparentes diseñados para crecer contigo.
           </p>
@@ -249,7 +260,7 @@ export default function Home() {
       <section className="s-pad" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', bottom: '-30%', left: '50%', transform: 'translateX(-50%)', width: '50rem', height: '50rem', background: `radial-gradient(circle, ${GOLD}1a 0%, transparent 65%)`, pointerEvents: 'none' }} />
         <Reveal as="div" style={{ position: 'relative' } as never}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2rem,6vw,4rem)', fontWeight: 300, color: '#fff', marginBottom: '1.25rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,6vw,4rem)', fontWeight: 300, color: '#fff', marginBottom: '1.25rem' }}>
             ¿Listo elevar tu estándar?
           </h2>
           <p style={{ fontSize: '1.3rem', color: 'rgba(255,255,255,.65)', maxWidth: '30rem', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
@@ -267,8 +278,8 @@ export default function Home() {
 
       {/* ── Footer ── */}
       <footer style={{ textAlign: 'center', padding: '2.5rem 1.5rem', borderTop: '1px solid rgba(255,255,255,.08)' }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.8rem', color: '#fff', marginBottom: '.5rem' }}>
-          Probo<em style={{ color: GOLD }}>.pro</em>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', color: '#fff', marginBottom: '.5rem' }}>
+          Pro<em style={{ fontStyle: 'italic', color: GOLD }}>bo</em>.pro
         </p>
         <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.4)' }}>© {new Date().getFullYear()} Probo.pro — Reservas online para profesionales en Bolivia</p>
       </footer>

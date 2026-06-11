@@ -177,9 +177,9 @@ export default function SetupPage() {
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: pushStatus === 'active' ? '#4caf50' : pushStatus === 'loading' ? 'var(--color-ink-ghost)' : '#888', flexShrink: 0 }} />
                   <span style={{ fontSize: '.95rem', color: 'var(--color-ink-dim)' }}>
                     {pushStatus === 'loading'      && 'Verificando…'}
-                    {pushStatus === 'active'       && 'Notificaciones activas en este dispositivo'}
-                    {pushStatus === 'inactive'     && 'Notificaciones no activadas en este dispositivo'}
-                    {pushStatus === 'unsupported'  && 'Tu navegador no soporta notificaciones push'}
+                    {pushStatus === 'active'       && <>Estado de notificaciones: <strong style={{ color: 'var(--color-ink)' }}>Activadas</strong></>}
+                    {pushStatus === 'inactive'     && <>Estado de notificaciones: <strong style={{ color: 'var(--color-ink)' }}>Desactivadas</strong></>}
+                    {pushStatus === 'unsupported'  && <>Estado de notificaciones: <strong style={{ color: 'var(--color-ink)' }}>No disponibles en este navegador</strong> — sigue las instrucciones abajo</>}
                   </span>
                 </div>
 

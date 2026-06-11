@@ -1,9 +1,21 @@
+import { useEffect } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useOpenBooking }  from '../context/BookingDialogContext'
 
 export default function Footer() {
   const pro = useProfessional()
   const openBooking = useOpenBooking()
+
+  // Load Playfair Display for the Probo.pro brand mark
+  useEffect(() => {
+    const id = 'gf-playfair-display'
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id   = id
+    link.rel  = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&display=swap'
+    document.head.appendChild(link)
+  }, [])
 
   return (
     <footer id="contacto" style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-rim)', padding: 'clamp(2rem,4vw,3rem) clamp(1.25rem,4vw,4.5rem)' }}>
@@ -59,8 +71,11 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1.1rem' }}>
-        <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)' }}>© 2026 {pro.name} — {pro.location}</p>
+      <div style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.75rem' }}>
+        <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)' }}>© 2026 Probo.pro — Reservas online para profesionales en Bolivia</p>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: 'var(--color-ink-ghost)' }}>
+          Pro<em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>bo</em>.pro
+        </p>
       </div>
 
     </footer>

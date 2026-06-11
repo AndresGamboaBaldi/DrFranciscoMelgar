@@ -58,6 +58,17 @@ export default function BookingDialog({ onClose }: Props) {
   const [success, setSuccess] = useState(false)
   const [waUrl,   setWaUrl]   = useState('')   // WhatsApp URL shown after success
 
+  // Load Playfair Display for the footer brand mark
+  useEffect(() => {
+    const id = 'gf-playfair-display'
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id   = id
+    link.rel  = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&display=swap'
+    document.head.appendChild(link)
+  }, [])
+
   // Lock body scroll
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -127,19 +138,13 @@ export default function BookingDialog({ onClose }: Props) {
       <div className="booking-dialog-panel" onClick={e => e.stopPropagation()}>
 
         {/* ── Header ── */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-rim)', flexShrink: 0, gap: '1rem' }}>
+        {!success && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-rim)', flexShrink: 0, gap: '1rem' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
-            {success
-              ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem' }}>
-                  <em style={{ color: 'var(--color-gold)', lineHeight: 1 }}>¡Reserva confirmada!</em>
-                  <span style={{ width: '1.6rem', height: '1.6rem', border: '1.5px solid var(--color-gold)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)', fontSize: '.7rem', flexShrink: 0 }}>✓</span>
-                </span>
-              : <>Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em></>
-            }
+            Reservar <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Cita</em>
           </h2>
 
           {/* Cancel — only shown before success */}
-          {!success && <button onClick={() => !loading && onClose()} disabled={loading}
+          <button onClick={() => !loading && onClose()} disabled={loading}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '.4rem',
               background: 'var(--color-surface2)',
@@ -157,8 +162,8 @@ export default function BookingDialog({ onClose }: Props) {
               <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             Cancelar
-          </button>}
-        </div>
+          </button>
+        </div>}
 
         {/* ── Progress ── */}
         {!success && (
@@ -189,7 +194,7 @@ export default function BookingDialog({ onClose }: Props) {
         )}
 
         {/* ── Scrollable content ── */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', minHeight: 0 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: success ? 0 : '1.25rem', minHeight: 0 }}>
           {success ? (
             <SuccessState name={form.name} waUrl={waUrl} service={service} date={date} time={time} durationMins={service?.durationMins ?? slotDuration} onClose={onClose} onReset={reset} />
           ) : (
@@ -312,41 +317,58 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
     { label: 'Duración', value: `${durationMins} min` },
   ]
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '1.5rem .25rem' }}>
+  // Stable confirmation number for this booking
+  const confNo = useState(() => Math.floor(1000 + Math.random() * 9000))[0]
 
-      {/* ── Header ── */}
-      <div style={{ textAlign: 'center' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.7rem', fontWeight: 300, marginBottom: '.4rem' }}>
-          Gracias{name ? `, ${name.split(' ')[0]}` : ''}
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem 1.5rem', background: 'var(--color-bg)', textAlign: 'center' }}>
+
+      {/* ── Check icon ── */}
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '3rem', height: '3rem', border: '1.5px solid var(--color-gold)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)' }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        </div>
+      </div>
+
+      {/* ── Title ── */}
+      <div>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 700, lineHeight: 1.05, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '.1rem' }}>
+          ¡Cita programada!
         </h3>
-        <p style={{ fontSize: '1.05rem', color: 'var(--color-gold)', letterSpacing: '.03em' }}>
-          Los detalles de tu cita:
+      </div>
+
+      {/* ── Greeting ── */}
+      <div>
+        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-ink)', marginBottom: '.5rem' }}>
+          Gracias{name ? `, ${name.split(' ')[0]}` : ''}
+        </h4>
+        <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>
+          Tu espacio ha sido reservado con éxito.
         </p>
       </div>
 
       {/* ── Summary table ── */}
-      <div style={{ border: '1px solid var(--color-rim)', overflow: 'hidden' }}>
-        {summaryRows.map((row, i) => (
-          <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '.7rem 1rem', borderTop: i === 0 ? 'none' : '1px solid var(--color-rim)', background: i % 2 === 0 ? 'var(--color-surface)' : 'transparent' }}>
-            <span style={{ fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>{row.label}</span>
-            <span style={{ fontSize: '.88rem', color: 'var(--color-ink)', fontWeight: 400 }}>{row.value}</span>
+      <div style={{ borderTop: '1px solid var(--color-rim)' }}>
+        {summaryRows.map((row) => (
+          <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '.8rem 0', borderBottom: '1px solid var(--color-rim)' }}>
+            <span style={{ fontSize: '.68rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>{row.label}</span>
+            <span style={{ fontSize: '.92rem', color: 'var(--color-ink)', fontWeight: 600 }}>{row.value}</span>
           </div>
         ))}
       </div>
 
       {/* ── Save reminder ── */}
-      <p style={{ textAlign: 'center', fontSize: '1.05rem', color: 'var(--color-gold)', letterSpacing: '.03em' }}>
-        Guarda tu cita para no olvidarla:
+      <p style={{ fontSize: '.7rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>
+        Guarda tu cita para no olvidarla (opcional)
       </p>
 
       {/* ── Action buttons ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
         {waUrl && (
           <a href={waUrl} target="_blank" rel="noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#1fb855')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#25D366')}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: 'none', border: '1.5px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', cursor: 'pointer', transition: 'all .3s', borderRadius: '4px' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.1)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L.057 23.5l5.799-1.52A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.659-.493-5.19-1.355l-.371-.221-3.845 1.008 1.025-3.741-.242-.385A9.947 9.947 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
             Enviar por WhatsApp
@@ -354,7 +376,7 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
         )}
         {window.matchMedia('(pointer: coarse)').matches && (
           <button onClick={downloadICS}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: 'none', border: '1.5px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .3s' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem', padding: '.85rem 1rem', background: 'none', border: '1.5px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .3s', borderRadius: '4px' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.1)' }}
             onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
           >
@@ -362,19 +384,24 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
             Añadir a Calendario
           </button>
         )}
-        <div style={{ display: 'flex', gap: '.6rem' }}>
-          <button onClick={onClose}
-            style={{ flex: 1, padding: '.8rem .5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s' }}
+        <div style={{ display: 'flex', gap: '.6rem', marginTop:'1rem'}}>
+          <button onClick={onReset}
+            style={{ flex: 1, padding: '.85rem .5rem', background: 'var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', borderRadius: '4px' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-gold-l)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-gold)')}
-          >Cerrar</button>
-          <button onClick={onReset}
-            style={{ flex: 1, padding: '.8rem .5rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}
+          >Nueva cita</button>
+          <button onClick={onClose}
+            style={{ flex: 1, padding: '.85rem .5rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s', borderRadius: '4px' }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
-          >Nueva Cita</button>
+          >Cerrar</button>
         </div>
       </div>
+
+      {/* ── Footer brand (always gold, regardless of professional theme) ── */}
+      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', letterSpacing: '.08em', color: 'var(--color-ink-ghost)', marginTop: '.5rem' }}>
+        Pro<em style={{ fontStyle: 'italic', color: '#c4995a' }}>bo</em>.pro
+      </p>
     </div>
   )
 }
