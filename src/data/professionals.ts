@@ -72,8 +72,8 @@ const doctor_melgar: Professional = {
 //  2. BARBER VIP — Barbería de lujo
 // ────────────────────────────────────────────────────────────────
 const barber_vip: Professional = {
-  heroPhoto: '/jhoel_cuts/photos/barberia.webp',
-  photos: ['/barber_vip/photos/vip2.avif'],
+  heroPhoto: '/barber_vip/photos/barberia.webp',
+  photos: ['/barber_vip/photos/jhoel.jpeg'],
   slug:      'barber_vip',
   category:  'barbero',
   name:      'Barber VIP',
@@ -129,8 +129,8 @@ const barber_vip: Professional = {
       id:       'jhoel',
       name:     'Jhoel',
       shortName:'Jhoel',
-      title:    'Barbero & Estilista',
-      photo:    '/jhoel_cuts/photos/jhoel.jpeg',
+      title:    'Barbero & Colorimetría',
+      photo:    '/barber_vip/photos/jhoel.jpeg',
       phone:    '59177933737',
       businessId:      'jhoel_cuts',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
@@ -141,7 +141,7 @@ const barber_vip: Professional = {
       name:     'Andres',
       shortName:'Andres',
       title:    'Barbero & Estilista',
-      photo:    '/jhoel_cuts/photos/jhoel.jpeg',
+      photo:    '/barber_vip/photos/andres.jpeg',
       phone:    '59172235605',
       businessId:      'andres',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',

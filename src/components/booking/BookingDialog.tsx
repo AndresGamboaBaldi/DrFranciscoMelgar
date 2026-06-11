@@ -260,32 +260,89 @@ export default function BookingDialog({ onClose }: Props) {
   )
 }
 
-/* ── Staff selector (step 1, agencies only) ── */
+/* ── Staff selector (step 1, agencies only) — carousel ── */
 function StaffSelector({ staff, selected, onSelect }: { staff: StaffMember[]; selected: StaffMember | null; onSelect: (s: StaffMember) => void }) {
+  const activeIndex = Math.max(0, staff.findIndex(s => s.id === selected?.id))
+  const [index, setIndex] = useState(selected ? activeIndex : 0)
+
+  useEffect(() => {
+    if (!selected && staff.length) onSelect(staff[0])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const go = (dir: 1 | -1) => {
+    const next = (index + dir + staff.length) % staff.length
+    setIndex(next)
+    onSelect(staff[next])
+  }
+
+  const current = staff[index]
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
-      <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', marginBottom: '.25rem' }}>¿Con quién quieres tu cita?</p>
-      {staff.map(s => {
-        const active = selected?.id === s.id
-        return (
-          <button key={s.id} onClick={() => onSelect(s)}
-            style={{ display: 'flex', alignItems: 'center', gap: '.9rem', padding: '.85rem 1rem', background: active ? 'rgba(196,153,90,.08)' : 'var(--color-surface)', border: `1.5px solid ${active ? 'var(--color-gold)' : 'var(--color-rim)'}`, cursor: 'pointer', textAlign: 'left', transition: 'all .2s', borderRadius: '4px' }}
-            onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
-            onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim)' }}
-          >
-            {s.photo
-              ? <img src={s.photo} alt="" style={{ width: '2.6rem', height: '2.6rem', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              : <div style={{ width: '2.6rem', height: '2.6rem', borderRadius: '50%', background: 'var(--color-surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-gold)' }}>
-                  {s.name.charAt(0)}
-                </div>
-            }
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color: 'var(--color-ink)', fontWeight: 400, lineHeight: 1.2 }}>{s.name}</p>
-              {s.title && <p style={{ fontSize: '.74rem', color: 'var(--color-ink-dim)', marginTop: '.15rem' }}>{s.title}</p>}
-            </div>
-          </button>
-        )
-      })}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.1rem' }}>
+      <p style={{ fontSize: '1rem', color: 'var(--color-ink)', textAlign: 'center' }}>¿Con quién quieres tu cita?</p>
+
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '17rem' }}>
+        {/* prev arrow */}
+        {staff.length > 1 && (
+          <button onClick={() => go(-1)} aria-label="Anterior"
+            style={{ position: 'absolute', left: 0, zIndex: 3, width: '2.2rem', height: '2.2rem', borderRadius: '50%', border: '1px solid var(--color-rim)', background: 'var(--color-surface)', color: 'var(--color-ink)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}
+          >‹</button>
+        )}
+
+        {/* cards */}
+        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {staff.map((s, i) => {
+            const offset = i - index
+            const isCenter = offset === 0
+            // wrap-around offset for nicer looping with >2 staff
+            let pos = offset
+            if (pos > staff.length / 2) pos -= staff.length
+            if (pos < -staff.length / 2) pos += staff.length
+
+            if (Math.abs(pos) > 1) return null
+
+            return (
+              <div key={s.id}
+                onClick={() => { setIndex(i); onSelect(s) }}
+                style={{
+                  position: 'absolute',
+                  width: isCenter ? '11rem' : '8.5rem',
+                  height: isCenter ? '15.5rem' : '12.5rem',
+                  transform: `translateX(${pos * 85}%) scale(${isCenter ? 1 : 0.85})`,
+                  zIndex: isCenter ? 2 : 1,
+                  opacity: isCenter ? 1 : 0.4,
+                  cursor: 'pointer',
+                  border: `1.5px solid ${isCenter ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  transition: 'all .35s ease',
+                  boxShadow: isCenter ? '0 8px 30px rgba(0,0,0,.35)' : 'none',
+                }}
+              >
+                {s.photo
+                  ? <img src={s.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: '3rem', color: 'var(--color-gold)' }}>
+                      {s.name.charAt(0)}
+                    </div>
+                }
+              </div>
+            )
+          })}
+        </div>
+
+        {/* next arrow */}
+        {staff.length > 1 && (
+          <button onClick={() => go(1)} aria-label="Siguiente"
+            style={{ position: 'absolute', right: 0, zIndex: 3, width: '2.2rem', height: '2.2rem', borderRadius: '50%', border: '1px solid var(--color-rim)', background: 'var(--color-surface)', color: 'var(--color-ink)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}
+          >›</button>
+        )}
+      </div>
+
+      {/* name + title */}
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', letterSpacing: '.04em', color: 'var(--color-ink)', textTransform: 'uppercase', fontWeight: 400 }}>{current.shortName ?? current.name}</p>
+        {current.title && <p style={{ fontSize: '.72rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)', marginTop: '.25rem' }}>{current.title}</p>}
+      </div>
     </div>
   )
 }
