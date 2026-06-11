@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../data/professionals'
 import { ProfessionalContext } from '../context/ProfessionalContext'
+import { StaffContext } from '../context/StaffContext'
 import { BookingDialogContext } from '../context/BookingDialogContext'
 import { ProSEOHead } from '../components/SEOHead'
 import Navbar        from '../components/Navbar'
@@ -80,8 +81,9 @@ function buildThemeVars(pro: Professional): React.CSSProperties {
 }
 
 export default function ProfessionalPage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { slug, staffId } = useParams<{ slug: string; staffId?: string }>()
   const pro = getProfessional(slug ?? '')
+  const staffMember = staffId ? pro?.staff?.find(s => s.id === staffId) ?? null : null
   const [bookingOpen, setBookingOpen] = useState(false)
 
   if (!pro) {
@@ -109,11 +111,12 @@ export default function ProfessionalPage() {
     document.head.appendChild(link)
     // No cleanup — fonts stay cached for performance
   }, [pro.slug, pro.theme?.fonts?.googleFontsUrl])
-  const isSetup    = window.location.pathname.endsWith('/setup')
+  const isSetup    = window.location.pathname.includes('/setup')
   const hasSetupAccess = typeof window !== 'undefined' && localStorage.getItem('probo_setup_unlocked_' + pro.businessId) === '1'
 
   return (
     <ProfessionalContext.Provider value={pro}>
+      <StaffContext.Provider value={staffMember}>
       <BookingDialogContext.Provider value={{ openBooking: () => setBookingOpen(true) }}>
         <ProSEOHead pro={pro} />
         {/* background + color use the INLINE var overrides, not the :root dark defaults */}
@@ -145,6 +148,7 @@ export default function ProfessionalPage() {
           )}
         </div>
       </BookingDialogContext.Provider>
+      </StaffContext.Provider>
     </ProfessionalContext.Provider>
   )
 }

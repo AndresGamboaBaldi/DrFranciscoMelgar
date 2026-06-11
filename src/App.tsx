@@ -18,6 +18,7 @@ export default function App() {
       <Routes>
         <Route path="/"                  element={<Home />} />
         <Route path="/cancel/:id"        element={<CancelPage />} />
+        <Route path="/:slug/setup/:staffId" element={<ProfessionalPage />} />
         <Route path="/:slug/setup"       element={<ProfessionalPage />} />
         <Route path="/:slug"             element={<ProfessionalPage />} />
       </Routes>

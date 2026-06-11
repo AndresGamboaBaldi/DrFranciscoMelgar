@@ -5,6 +5,7 @@ import ContactForm     from './ContactForm'
 import { createAppointment, getScheduleSettings } from '../../lib/supabase'
 import { useProfessional }   from '../../context/ProfessionalContext'
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
+import type { StaffMember } from '../../types/professional'
 
 const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
 
@@ -31,17 +32,22 @@ function formatDate(d: SelectedDate) {
 
 const EMPTY_FORM: BookingFormData = { name: '', phone: '', notes: '', consent: false }
 
-// 4 steps: service → date → time → contact
-type Step = 1 | 2 | 3 | 4
-
-const STEP_LABELS = ['Servicio', 'Fecha', 'Hora', 'Datos']
+// steps: [profesional →] service → date → time → contact
+type Step = number
 
 interface Props { onClose: () => void }
 
 export default function BookingDialog({ onClose }: Props) {
   const pro = useProfessional()
+  const hasStaff = !!pro.staff?.length
+
+  const STEP_LABELS = hasStaff
+    ? ['Profesional', 'Servicio', 'Fecha', 'Hora', 'Datos']
+    : ['Servicio', 'Fecha', 'Hora', 'Datos']
+  const TOTAL_STEPS = STEP_LABELS.length
 
   const [step, setStep]       = useState<Step>(1)
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null)
   const [service, setService] = useState<Service | null>(null)
   const [date, setDate]       = useState<SelectedDate | null>(null)
   const [time, setTime]       = useState('')
@@ -50,11 +56,14 @@ export default function BookingDialog({ onClose }: Props) {
   const [slotDuration, setSlotDuration] = useState(30)
   const [loading, setLoading] = useState(false)
 
+  const businessId = selectedStaff?.businessId ?? pro.businessId
+  const phone      = selectedStaff?.phone ?? pro.phone
+
   useEffect(() => {
-    getScheduleSettings(pro.businessId).then(s => {
+    getScheduleSettings(businessId).then(s => {
       if (s) setSlotDuration(s.slot_duration)
     })
-  }, [pro.businessId])
+  }, [businessId])
   const [success, setSuccess] = useState(false)
   const [waUrl,   setWaUrl]   = useState('')   // WhatsApp URL shown after success
 
@@ -106,11 +115,11 @@ export default function BookingDialog({ onClose }: Props) {
         service: service.name, appointment_date: isoDate, appointment_time: time,
         name:  form.name.trim(), phone: form.phone.trim(),
         notes: form.notes.trim() || 'Sin comentarios especiales',
-        business_id: pro.businessId,
+        business_id: businessId,
         duration_mins: service.durationMins ?? slotDuration,
       })
       const waMessage = buildWhatsAppMessage({ patientName: form.name.trim(), service: service.name, duration: `${service.durationMins ?? slotDuration} min`, date: formatDate(date), time, phone: form.phone.trim() })
-      const waFinalUrl = `https://wa.me/${pro.phone}?text=${encodeURIComponent(waMessage)}`
+      const waFinalUrl = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`
       setWaUrl(waFinalUrl)
       setSuccess(true)
     } catch (err) {
@@ -121,14 +130,16 @@ export default function BookingDialog({ onClose }: Props) {
     }
   }
 
-  const goNext = () => setStep(s => Math.min(s + 1, 4) as Step)
-  const goBack = () => setStep(s => Math.max(s - 1, 1) as Step)
-  const reset  = () => { setStep(1); setService(null); setDate(null); setTime(''); setForm(EMPTY_FORM); setErrors({}); setSuccess(false); setWaUrl('') }
+  const goNext = () => setStep(s => Math.min(s + 1, TOTAL_STEPS))
+  const goBack = () => setStep(s => Math.max(s - 1, 1))
+  const reset  = () => { setStep(1); setSelectedStaff(null); setService(null); setDate(null); setTime(''); setForm(EMPTY_FORM); setErrors({}); setSuccess(false); setWaUrl('') }
 
+  const stepKind = STEP_LABELS[step - 1]
   const canNext =
-    step === 1 ? !!service :
-    step === 2 ? !!date :
-    step === 3 ? !!time : true
+    stepKind === 'Profesional' ? !!selectedStaff :
+    stepKind === 'Servicio'    ? !!service :
+    stepKind === 'Fecha'       ? !!date :
+    stepKind === 'Hora'        ? !!time : true
 
   return (
     /* Backdrop — click to close */
@@ -170,7 +181,7 @@ export default function BookingDialog({ onClose }: Props) {
           <div style={{ padding: '.9rem 1.25rem .75rem', borderBottom: '1px solid var(--color-rim)', flexShrink: 0 }}>
             {/* Bar */}
             <div style={{ height: 2, background: 'var(--color-rim)', borderRadius: 1, marginBottom: '.85rem' }}>
-              <div style={{ height: '100%', background: 'var(--color-gold)', width: `${((step - 1) / 3) * 100}%`, transition: 'width .4s cubic-bezier(0.16,1,0.3,1)', borderRadius: 1 }} />
+              <div style={{ height: '100%', background: 'var(--color-gold)', width: `${((step - 1) / (TOTAL_STEPS - 1)) * 100}%`, transition: 'width .4s cubic-bezier(0.16,1,0.3,1)', borderRadius: 1 }} />
             </div>
             {/* Labels */}
             <div style={{ display: 'flex' }}>
@@ -199,31 +210,35 @@ export default function BookingDialog({ onClose }: Props) {
             <SuccessState name={form.name} waUrl={waUrl} service={service} date={date} time={time} durationMins={service?.durationMins ?? slotDuration} onClose={onClose} onReset={reset} />
           ) : (
             <>
-              {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} slotDuration={slotDuration} />}
+              {stepKind === 'Profesional' && pro.staff && (
+                <StaffSelector staff={pro.staff} selected={selectedStaff} onSelect={setSelectedStaff} />
+              )}
 
-              {step === 2 && (
+              {stepKind === 'Servicio' && <ServiceSelector services={pro.services} selected={service} onSelect={setService} slotDuration={slotDuration} />}
+
+              {stepKind === 'Fecha' && (
                 <CalendarPicker
                   selectedDate={date} selectedTime={time}
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
-                  businessId={pro.businessId}
+                  businessId={businessId}
                   serviceDurationMins={service?.durationMins}
                   view="calendar"
                 />
               )}
 
-              {step === 3 && date && (
+              {stepKind === 'Hora' && date && (
                 <CalendarPicker
                   selectedDate={date} selectedTime={time}
                   onDateChange={d => { setDate(d); setTime('') }}
                   onTimeChange={setTime}
-                  businessId={pro.businessId}
+                  businessId={businessId}
                   serviceDurationMins={service?.durationMins}
                   view="times"
                 />
               )}
 
-              {step === 4 && service && date && time && (
+              {stepKind === 'Datos' && service && date && time && (
                 <ContactForm summary={{ service, date, time, slotDuration }} data={form} onChange={updateForm} errors={errors} />
               )}
             </>
@@ -234,13 +249,43 @@ export default function BookingDialog({ onClose }: Props) {
         {!success && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '.9rem 1.25rem', borderTop: '1px solid var(--color-rim)', flexShrink: 0, gap: '1rem' }}>
             {step > 1 ? <BackBtn onClick={goBack} /> : <span />}
-            {step < 4
+            {step < TOTAL_STEPS
               ? <NextBtn disabled={!canNext} onClick={goNext}>Continuar</NextBtn>
               : <NextBtn disabled={loading} onClick={submit}>{loading ? 'Enviando…' : 'Confirmar Cita'}</NextBtn>
             }
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/* ── Staff selector (step 1, agencies only) ── */
+function StaffSelector({ staff, selected, onSelect }: { staff: StaffMember[]; selected: StaffMember | null; onSelect: (s: StaffMember) => void }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
+      <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', marginBottom: '.25rem' }}>¿Con quién quieres tu cita?</p>
+      {staff.map(s => {
+        const active = selected?.id === s.id
+        return (
+          <button key={s.id} onClick={() => onSelect(s)}
+            style={{ display: 'flex', alignItems: 'center', gap: '.9rem', padding: '.85rem 1rem', background: active ? 'rgba(196,153,90,.08)' : 'var(--color-surface)', border: `1.5px solid ${active ? 'var(--color-gold)' : 'var(--color-rim)'}`, cursor: 'pointer', textAlign: 'left', transition: 'all .2s', borderRadius: '4px' }}
+            onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
+            onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim)' }}
+          >
+            {s.photo
+              ? <img src={s.photo} alt="" style={{ width: '2.6rem', height: '2.6rem', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              : <div style={{ width: '2.6rem', height: '2.6rem', borderRadius: '50%', background: 'var(--color-surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-gold)' }}>
+                  {s.name.charAt(0)}
+                </div>
+            }
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color: 'var(--color-ink)', fontWeight: 400, lineHeight: 1.2 }}>{s.name}</p>
+              {s.title && <p style={{ fontSize: '.74rem', color: 'var(--color-ink-dim)', marginTop: '.15rem' }}>{s.title}</p>}
+            </div>
+          </button>
+        )
+      })}
     </div>
   )
 }

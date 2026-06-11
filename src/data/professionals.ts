@@ -83,6 +83,7 @@ const barber_vip: Professional = {
   location:  'Cochabamba, Bolivia',
   tagline:   'El estilo no es accidental,',
   taglineSub: 'es una decisión.',
+  
   stats: [
     { n: '+500', label: 'Clientes satisfechos' },
     { n: '8+',   label: 'Años de experiencia' },
@@ -100,13 +101,13 @@ const barber_vip: Professional = {
     { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
     { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
     { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150', icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150',durationMins: 120, icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
   ],
 
-  phone:   '59171234567',
+  phone:   '59177933737',
   email:   'citas@barbervip.bo',
   address: 'Av Uyuni #1234\nCochabamba, Bolivia',
-  schedule: ['Mar — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 15:00'],
+  schedule: ['Lun — Sáb: 9:00 — 20:00'],
 
  theme: {
     mode:        'dark',
@@ -123,6 +124,30 @@ const barber_vip: Professional = {
   businessId:        'barber_vip',
   calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=12d9f83cca937e8db7996811bfafff18bb0e725efacce7c76cad8029bf96fb3e',
   setupPassword:   'barbervip2026',
+  staff: [
+    {
+      id:       'jhoel',
+      name:     'Jhoel',
+      shortName:'Jhoel',
+      title:    'Barbero & Estilista',
+      photo:    '/jhoel_cuts/photos/jhoel.jpeg',
+      phone:    '59177933737',
+      businessId:      'jhoel_cuts',
+      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
+      setupPassword:   'jhoel2026',
+    },
+     {
+      id:       'andres',
+      name:     'Andres',
+      shortName:'Andres',
+      title:    'Barbero & Estilista',
+      photo:    '/jhoel_cuts/photos/jhoel.jpeg',
+      phone:    '59172235605',
+      businessId:      'andres',
+      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
+      setupPassword:   'andres2026',
+    },
+  ],
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -185,7 +210,7 @@ const dr_seifert: Professional = {
 // ────────────────────────────────────────────────────────────────
 //  4. JHOEL CUTS — Barbería & Estilismo
 // ────────────────────────────────────────────────────────────────
-const jhoel_cuts: Professional = {
+/*const jhoel_cuts: Professional = {
   slug:      'jhoel_cuts',
   category:  'barbero',
   name:      'Jhoel Cuts',
@@ -240,7 +265,7 @@ const jhoel_cuts: Professional = {
   businessId:        'jhoel_cuts',
   calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
   setupPassword:   'jhoel2026',
-}
+}*/
 
 // ────────────────────────────────────────────────────────────────
 //  REGISTRO
@@ -249,7 +274,7 @@ export const PROFESSIONALS: Record<string, Professional> = {
   doctor_melgar,
   barber_vip,
   dr_seifert,
-  jhoel_cuts,
+  //jhoel_cuts,
 }
 
 export function getProfessional(slug: string): Professional | null {

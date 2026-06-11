@@ -1,6 +1,7 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { CalendarDays, Clock, Settings } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
+import { useStaff } from '../context/StaffContext'
 import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import AppointmentsPanel from '../components/AppointmentsPanel'
@@ -41,14 +42,17 @@ const STEPS_OUTLOOK = [
 
 export default function SetupPage() {
   const pro = useProfessional()
+  const staff = useStaff()
+  const businessId  = staff?.businessId ?? pro.businessId
+  const displayName = staff?.name ?? pro.name
   const [section, setSection]       = useState<Section>('citas')
   const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
   const [showIosSteps, setShowIosSteps] = useState(false)
   const [pushWorking, setPushWorking] = useState(false)
 
   useEffect(() => {
-    getPushStatus(pro.businessId).then(setPushStatus)
-  }, [pro.businessId])
+    getPushStatus(businessId).then(setPushStatus)
+  }, [businessId])
 
   // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
   useEffect(() => {
@@ -63,7 +67,7 @@ export default function SetupPage() {
 
   const handleSubscribe = async () => {
     setPushWorking(true)
-    const result = await subscribeToPush(pro.businessId)
+    const result = await subscribeToPush(businessId)
     if (result === 'subscribed' || result === 'already') setPushStatus('active')
     else if (result === 'denied') alert('Permisos de notificación denegados. Actívalos en la configuración del navegador.')
     else if (result === 'unsupported') alert('Tu navegador no soporta notificaciones push.')
@@ -106,7 +110,7 @@ export default function SetupPage() {
           {pro.logo && <img src={pro.logo} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />}
           <div style={{ minWidth: 0 }}>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {pro.name}
+              {displayName}
             </h1>
           </div>
         </div>
@@ -147,7 +151,7 @@ export default function SetupPage() {
 
           {section === 'citas' && (
             <div style={{ paddingBottom: '3rem' }}>
-              <AppointmentsPanel businessId={pro.businessId} businessName={pro.name} />
+              <AppointmentsPanel businessId={businessId} businessName={displayName} />
             </div>
           )}
 
@@ -304,11 +308,12 @@ function SupportFooter() {
 /* ── Magic Link panel ── */
 function MagicLinkPanel() {
   const pro = useProfessional()
+  const staff = useStaff()
   const [copied, setCopied]       = useState(false)
   const [calTab, setCalTab]       = useState<CalTab>('iphone')
   const [showSteps, setShowSteps] = useState(false)
 
-  const feedUrl   = pro.calendarFeedUrl
+  const feedUrl   = staff?.calendarFeedUrl ?? pro.calendarFeedUrl
   const webcalUrl = getWebcalUrl(feedUrl)
   const googleUrl = getGoogleCalendarUrl(feedUrl)
   const steps     = calTab === 'iphone' ? STEPS_IPHONE : calTab === 'google' ? STEPS_GOOGLE : STEPS_OUTLOOK

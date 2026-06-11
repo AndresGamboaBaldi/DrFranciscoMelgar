@@ -40,6 +40,24 @@ export interface ProfessionalTheme {
   }
 }
 
+/** Miembro del staff dentro de una agencia (varios profesionales bajo un mismo slug) */
+export interface StaffMember {
+  /** Usado en la URL: /:slug/setup/:id */
+  id: string
+  name: string
+  shortName?: string
+  title?: string
+  photo?: string
+  phone?: string
+
+  /** Su propio negocio en Supabase — citas, horarios y notificaciones independientes */
+  businessId: string
+  calendarFeedUrl?: string
+
+  /** Contraseña propia para entrar a /:slug/setup/:id */
+  setupPassword?: string
+}
+
 /** Configuración del sistema de reservas */
 export interface BookingConfig {
   /** Duración de cada slot en minutos (15 | 30 | 45 | 60) */
@@ -135,8 +153,11 @@ export interface Professional {
   calendarFeedUrl: string
 
   // ── Acceso al panel ?setup ───────────────────────────────────
-  /** Email de Google autorizado a entrar al panel de administración (opcional) */
-  ownerEmail?: string
   /** Contraseña simple para entrar al panel sin Google (opcional, modo rápido) */
   setupPassword?: string
+
+  // ── Agencia: varios profesionales bajo el mismo slug ──────────
+  /** Si está presente, el booking dialog pide elegir profesional,
+   *  y cada uno tiene su propio panel en /:slug/setup/:staffId */
+  staff?: StaffMember[]
 }

@@ -7,6 +7,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
+import { useStaff } from '../context/StaffContext'
 import { addBlock, deleteBlock, getUpcomingBlocks, type BlockedSlot } from '../lib/supabase'
 
 const MONTHS_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
@@ -18,6 +19,8 @@ function formatBlockDate(dateStr: string) {
 
 export default function BlockScheduler() {
   const pro = useProfessional()
+  const staff = useStaff()
+  const businessId = staff?.businessId ?? pro.businessId
 
   const [blocks, setBlocks]     = useState<BlockedSlot[]>([])
   const [loading, setLoading]   = useState(false)
@@ -34,10 +37,10 @@ export default function BlockScheduler() {
 
   const loadBlocks = useCallback(async () => {
     setLoading(true)
-    const data = await getUpcomingBlocks(pro.businessId)
+    const data = await getUpcomingBlocks(businessId)
     setBlocks(data)
     setLoading(false)
-  }, [pro.businessId])
+  }, [businessId])
 
   useEffect(() => { loadBlocks() }, [loadBlocks])
 
@@ -50,7 +53,7 @@ export default function BlockScheduler() {
     setSaving(true)
     try {
       await addBlock({
-        business_id:  pro.businessId,
+        business_id:  businessId,
         date,
         start_time: fullDay ? null : startTime,
         end_time:   fullDay ? null : endTime,

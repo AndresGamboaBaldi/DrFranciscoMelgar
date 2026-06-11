@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
+import { useStaff } from '../context/StaffContext'
 import { getScheduleSettings, saveScheduleSettings, type ScheduleSettings } from '../lib/supabase'
 
 const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB']
@@ -16,6 +17,8 @@ const ADVANCE_OPTIONS = [
 
 export default function ScheduleEditor() {
   const pro = useProfessional()
+  const staff = useStaff()
+  const businessId = staff?.businessId ?? pro.businessId
 
   const [workDays,   setWorkDays]   = useState<number[]>([1,2,3,4,5])
 
@@ -60,11 +63,11 @@ export default function ScheduleEditor() {
   }, [])
 
   useEffect(() => {
-    getScheduleSettings(pro.businessId).then(s => {
+    getScheduleSettings(businessId).then(s => {
       if (s) applySettings(s)
       setLoading(false)
     })
-  }, [pro.businessId, applySettings])
+  }, [businessId, applySettings])
 
   const toggleDay = (d: number) =>
     setWorkDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort())
@@ -85,7 +88,7 @@ export default function ScheduleEditor() {
     setSaving(true)
     try {
       await saveScheduleSettings({
-        business_id:   pro.businessId,
+        business_id:   businessId,
         work_days:     workDays,
         work_start:    amStart,
         work_end:      pmActive ? pmEnd : amEnd,
