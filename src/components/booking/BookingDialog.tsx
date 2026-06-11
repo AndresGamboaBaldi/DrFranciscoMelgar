@@ -317,9 +317,6 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
     { label: 'Duración', value: `${durationMins} min` },
   ]
 
-  // Stable confirmation number for this booking
-  const confNo = useState(() => Math.floor(1000 + Math.random() * 9000))[0]
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '2rem 1.5rem', background: 'var(--color-bg)', textAlign: 'center' }}>
 
