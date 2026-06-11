@@ -45,7 +45,7 @@ export default function Hero() {
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '52rem' }}>
           <div className="animate-fade-up" style={{ animationDelay: '.2s', display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '1.25rem' }}>
             <div style={{ width: '2rem', height: 1, background: 'var(--color-gold)', opacity: .6, flexShrink: 0 }} />
-            <span style={{ fontSize: '.75rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)', textShadow: '0 1px 8px rgba(0,0,0,.8)' }}>
+            <span style={{ fontSize: '1rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)', textShadow: '0 1px 8px rgba(0,0,0,.8)' }}>
               {pro.title} — {pro.location}
             </span>
           </div>

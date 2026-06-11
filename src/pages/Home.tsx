@@ -127,9 +127,7 @@ export default function Home() {
         <div className="benefit-bento">
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={i * 80} as="div" className={`benefit-card benefit-card-${i + 1}`} style={undefined as never}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: '3.75rem', color: 'rgba(255,255,255,.18)', fontWeight: 600, lineHeight: 1, marginBottom: '1.25rem' }}>
-                {String(i + 1).padStart(2, '0')}
-              </p>
+              <span className="benefit-card-num">{String(i + 1).padStart(2, '0')}</span>
               <div className="benefit-card-icon" style={{ color: GOLD, marginBottom: '1rem' }}><f.icon size={28} strokeWidth={1.5} /></div>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: '#fff', fontWeight: 400, marginBottom: '.6rem' }}>{f.title}</h3>
               <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,.6)', lineHeight: 1.7 }}>{f.desc}</p>
