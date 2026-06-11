@@ -102,7 +102,7 @@ body::after {
 
 /* Section title */
 .s-title {
-  font-size: clamp(2rem, 5vw, 4rem);
+  font-size: clamp(3rem, 6vw, 5rem);
   font-weight: 300; letter-spacing: -.02em; line-height: 1;
   color: var(--color-ink);
 }
@@ -245,6 +245,40 @@ input[type="time"], input[type="date"], input[type="number"] {
   .service-accordion { flex-direction: row; height: 540px; }
 }
 
+/* ── Beneficios bento grid (Home) ── */
+.benefit-bento {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(180px, auto);
+  gap: 1px;
+  background: rgba(255,255,255,.08);
+}
+.benefit-card {
+  background: #0a0907;
+  padding: 1.75rem;
+  transition: background .35s ease, transform .35s ease;
+}
+.benefit-card:hover {
+  background: #151210;
+  transform: translateY(-4px);
+}
+.benefit-card .benefit-card-icon {
+  transition: transform .35s ease;
+}
+.benefit-card:hover .benefit-card-icon {
+  transform: scale(1.15) rotate(-6deg);
+}
+@media (min-width: 640px) {
+  .benefit-bento {
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: minmax(220px, auto) minmax(220px, auto);
+  }
+  .benefit-card-1 { grid-column: 1 / 3; grid-row: 1; }
+  .benefit-card-2 { grid-column: 3; grid-row: 1 / 3; display: flex; flex-direction: column; justify-content: center; }
+  .benefit-card-3 { grid-column: 1; grid-row: 2; }
+  .benefit-card-4 { grid-column: 2; grid-row: 2; }
+}
+
 /* ── Tap target minimum (solo botones, no links de nav) ── */
 @media (max-width: 640px) {
   button { min-height: 44px; }
@@ -264,6 +298,35 @@ input[type="time"], input[type="date"], input[type="number"] {
     padding-bottom: max(.85rem, env(safe-area-inset-bottom));
   }
   .setup-main-mobile-pad { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important; }
+}
+
+/* ── How it works grid (Home) ── */
+.how-it-works-grid {
+  grid-template-columns: 1fr 2fr;
+}
+@media (max-width: 800px) {
+  .how-it-works-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Timeline (Cómo funciona, Home) ── */
+@media (max-width: 800px) {
+  .timeline-line { left: 1.375rem !important; transform: none !important; }
+  .timeline-row {
+    grid-template-columns: 1fr !important;
+    padding-left: 4rem;
+  }
+  .timeline-text, .timeline-visual {
+    order: initial !important;
+    text-align: left !important;
+  }
+  .timeline-visual { margin-top: 1.5rem; }
+  .timeline-dot {
+    left: 1.375rem !important;
+    top: 2.5rem !important;
+    transform: translate(-50%,-50%) !important;
+  }
 }
 
 /* ── Support footer (config tab) ── */

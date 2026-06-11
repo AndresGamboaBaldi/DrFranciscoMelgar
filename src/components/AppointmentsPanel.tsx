@@ -93,7 +93,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
     if (!apt.id) return
     setCancelingId(apt.id)
     try {
-      await cancelAppointment(apt.id)
+      await cancelAppointment(apt.id, false)
       setAppts(prev => prev.filter(a => a.id !== apt.id))
     } catch (e) {
       alert('No se pudo cancelar la cita.')

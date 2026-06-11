@@ -108,10 +108,10 @@ const barber_vip: Professional = {
   address: 'Av Uyuni #1234\nCochabamba, Bolivia',
   schedule: ['Mar — Sáb: 9:00 — 20:00', 'Domingos: 10:00 — 15:00'],
 
-  theme: {
+ theme: {
     mode:        'dark',
-    accent:      '#4a8fa8',
-    accentLight: '#5ca3bf',
+    accent:      '#2855c2',
+    accentLight: '#3d6edc',
     fonts: {
       display:        'Bebas Neue',
       body:           'Inter',

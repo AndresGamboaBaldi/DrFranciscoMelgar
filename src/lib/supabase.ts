@@ -98,11 +98,11 @@ export async function getAppointmentById(id: string): Promise<Appointment | null
   return data as Appointment
 }
 
-export async function cancelAppointment(id: string): Promise<void> {
+export async function cancelAppointment(id: string, notify = true): Promise<void> {
   if (!supabase) throw new Error('Supabase no configurado')
 
   // Fetch appointment details first so we can notify the professional
-  const apt = await getAppointmentById(id)
+  const apt = notify ? await getAppointmentById(id) : null
 
   const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id)
   if (error) throw new Error(error.message)
