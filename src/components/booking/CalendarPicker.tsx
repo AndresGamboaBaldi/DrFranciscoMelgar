@@ -348,9 +348,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
               🕐 Reserva con {cfg.minAdvanceHours}h de anticipación
             </span>
           )}
-          <span style={{ display:'inline-flex', alignItems:'center', gap:'.35rem', fontSize:'.75rem', color:'var(--color-ink-dim)', background:'var(--color-surface)', border:'1px solid var(--color-rim)', padding:'.3rem .7rem', lineHeight:1 }}>
-            🔴 Día con horarios parcialmente ocupados
-          </span>
+        
         </div>
       </div>
 
