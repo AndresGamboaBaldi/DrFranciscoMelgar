@@ -432,12 +432,3 @@ const SOLID_BTN: React.CSSProperties = {
   textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s',
   borderRadius: '4px',
 }
-
-const OUTLINE_BTN: React.CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: '.4rem',
-  padding: '.55rem 1.1rem',
-  background: 'transparent', border: '1px solid var(--color-rim-l)',
-  color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)',
-  fontSize: '.72rem', fontWeight: 300, letterSpacing: '.1em',
-  textTransform: 'uppercase', textDecoration: 'none', transition: 'all .2s',
-}

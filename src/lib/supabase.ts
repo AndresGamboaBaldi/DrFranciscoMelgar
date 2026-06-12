@@ -163,7 +163,7 @@ export async function getMonthBlocks(businessId: string, year: number, month: nu
     .eq('business_id', businessId)
     .gte('date', from)
     .lte('date', to)
-    .then(({ data }) => (data ?? []) as BlockedSlot[])
+    .then(({ data }) => (data ?? []) as BlockedSlot[]) as Promise<BlockedSlot[]>
 
   monthBlocksCache.set(key, promise)
   setTimeout(() => monthBlocksCache.delete(key), CACHE_TTL)
@@ -226,7 +226,7 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
     .select('business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance')
     .eq('business_id', businessId)
     .maybeSingle()
-    .then(({ data }) => data as ScheduleSettings | null)
+    .then(({ data }) => data as ScheduleSettings | null) as Promise<ScheduleSettings | null>
 
   scheduleSettingsCache.set(businessId, promise)
   setTimeout(() => scheduleSettingsCache.delete(businessId), CACHE_TTL)
