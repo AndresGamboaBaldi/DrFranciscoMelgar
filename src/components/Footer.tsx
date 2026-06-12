@@ -6,6 +6,8 @@ export default function Footer() {
   const pro = useProfessional()
   const openBooking = useOpenBooking()
 
+  const GOLD   = '#c4995a'
+
   // Load Playfair Display for the Probo.pro brand mark
   useEffect(() => {
     const id = 'gf-playfair-display'
@@ -74,7 +76,7 @@ export default function Footer() {
       <div style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.75rem' }}>
         <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)' }}>© 2026 Probo.pro — Reservas online para profesionales en Bolivia</p>
         <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: 'var(--color-ink-ghost)' }}>
-          Pro<em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>bo</em>.pro
+          Pro<em style={{ fontStyle: 'italic', color: GOLD }}>bo</em>.pro
         </p>
       </div>
 

@@ -98,10 +98,9 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   price: 'Desde Bs. 60',  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.',                                                                                   image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'fade',   name: 'Fade & Degradado', tag: 'Moderno',   price: 'Desde Bs. 80',  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.',                                                                             image: '/barber_vip/services/fade.jpeg' },
-    { id: 'diseno', name: 'Diseño Capilar',   tag: 'Artístico', price: 'Desde Bs. 60',  icon: '◇', description: 'Líneas, figuras y patrones personalizados rasados con máquina de precisión. Cada diseño es único y refleja tu estilo.',                                     image: '/barber_vip/services/diseno.jpeg' },
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150',durationMins: 120, icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',             image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'fade',   name: 'Corte y Barba', tag: 'Moderno',   price: 'Desde Bs. 80',durationMins: 45,  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.', image: '/barber_vip/services/fade.jpeg' },
+    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   price: 'Desde Bs. 60',durationMins: 45,  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.', image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150',durationMins: 120, icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
   ],
 
   phone:   '59177933737',
@@ -129,7 +128,7 @@ const barber_vip: Professional = {
       id:       'jhoel',
       name:     'Jhoel',
       shortName:'Jhoel',
-      title:    'Barbero & Colorimetría',
+      title:    'Barbero y Especialista en Colorimetría',
       photo:    '/barber_vip/photos/jhoel.jpeg',
       phone:    '59177933737',
       businessId:      'jhoel_cuts',
@@ -146,6 +145,17 @@ const barber_vip: Professional = {
       businessId:      'andres',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
       setupPassword:   'andres2026',
+    },
+     {
+      id:       'jheison',
+      name:     'jheison',
+      shortName:'jheison',
+      title:    'Barbero & Estilista',
+      photo:    '/barber_vip/photos/jheison.jpeg',
+      phone:    '59177933737',
+      businessId:      'jheison',
+      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=ec7c7937994c8f1c8c506afb809432318770a2f382a190bd61575fffa1a736ed',
+      setupPassword:   'jheison2026',
     },
   ],
 }
