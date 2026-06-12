@@ -16,6 +16,24 @@ function formatDate(d: SelectedDate) {
   return `${days[dt.getDay()]}, ${d.d} de ${MONTHS_ES[d.m]} de ${d.y}`
 }
 
+function formatTime12h(time: string): string {
+  const [h, min] = time.split(':').map(Number)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 === 0 ? 12 : h % 12
+  return `${h12}:${String(min).padStart(2,'0')} ${period}`
+}
+
+function formatTimeRange(time: string, durationMins: number): string {
+  const [h, min] = time.split(':').map(Number)
+  const startTotal = h * 60 + min
+  const endTotal   = startTotal + durationMins
+  const endH = Math.floor(endTotal / 60) % 24
+  const endM = endTotal % 60
+  const start = formatTime12h(time)
+  const end   = formatTime12h(`${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`)
+  return `${start} - ${end}`
+}
+
 export default function ContactForm({ summary, data, onChange, errors }: Props) {
   return (
     <div>
@@ -26,9 +44,8 @@ export default function ContactForm({ summary, data, onChange, errors }: Props) 
         </p>
         {[
           { k: 'Servicio',  v: summary.service.name },
-          { k: 'Duración',  v: `${summary.service.durationMins ?? summary.slotDuration} min` },
           { k: 'Fecha',     v: formatDate(summary.date) },
-          { k: 'Hora',      v: summary.time },
+          { k: 'Hora',      v: formatTimeRange(summary.time, summary.service.durationMins ?? summary.slotDuration) },
         ].map((row, i, arr) => (
           <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '.6rem 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-rim)' : 'none', gap: '1rem' }}>
             <span style={{ fontSize: '.88rem', fontWeight: 400, letterSpacing: '.05em', color: 'var(--color-ink-dim)', flexShrink: 0 }}>{row.k}</span>

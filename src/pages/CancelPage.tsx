@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import { getAppointmentById, cancelAppointment } from '../lib/supabase'
 import { PROFESSIONALS } from '../data/professionals'
 import type { Appointment } from '../types/booking'
@@ -26,6 +27,17 @@ export default function CancelPage() {
     getAppointmentById(id).then(setApt)
   }, [id])
 
+  // Load Bebas Neue / Inter, same typography as /setup
+  useEffect(() => {
+    const id2 = 'gf-bebas-inter'
+    if (document.getElementById(id2)) return
+    const link = document.createElement('link')
+    link.id   = id2
+    link.rel  = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap'
+    document.head.appendChild(link)
+  }, [])
+
   const businessName = apt?.business_id
     ? Object.values(PROFESSIONALS).find(p => p.businessId === apt.business_id)?.name
     : undefined
@@ -46,7 +58,7 @@ export default function CancelPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0907', color: '#ede8df', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
       <div style={{ width: '100%', maxWidth: '26rem', textAlign: 'center', border: '1px solid rgba(255,255,255,.1)', padding: '2.5rem 2rem', background: '#0e0c0a' }}>
 
         {apt === undefined && (
@@ -62,7 +74,7 @@ export default function CancelPage() {
 
         {apt && apt.status === 'cancelled' && !done && (
           <>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✅</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}><CheckCircle2 size={44} color={GOLD} strokeWidth={1.5} /></div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, marginBottom: '.75rem' }}>Esta cita ya fue cancelada</h1>
             <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.6)' }}>No es necesario hacer nada más.</p>
           </>
@@ -74,7 +86,7 @@ export default function CancelPage() {
           const dateLabel = `${DAYS_ES[dateObj.getDay()]} ${d} de ${MONTHS_ES[m - 1]}`
           return (
             <>
-              <p style={{ fontSize: '.7rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '1rem' }}>Cancelar cita</p>
+              <p style={{ fontSize: '.8rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '1rem' }}>Cancelar cita</p>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, marginBottom: '1.5rem' }}>
                 {businessName ?? 'Tu cita'}
               </h1>
@@ -83,7 +95,7 @@ export default function CancelPage() {
                 <Row label="Fecha" value={dateLabel} />
                 <Row label="Hora" value={formatTime12h(apt.appointment_time)} />
               </div>
-              <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.65)', lineHeight: 1.7, marginBottom: '2rem' }}>
+              <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.85)', lineHeight: 1.7, marginBottom: '2rem' }}>
                 ¿Seguro que quieres cancelar esta cita? Esta acción no se puede deshacer.
               </p>
               <div style={{ display: 'flex', gap: '.75rem' }}>
@@ -106,7 +118,7 @@ export default function CancelPage() {
 
         {done && (
           <>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✅</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}><CheckCircle2 size={44} color={GOLD} strokeWidth={1.5} /></div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, marginBottom: '.75rem' }}>Cita cancelada</h1>
             <p style={{ fontSize: '.9rem', color: 'rgba(255,255,255,.6)', marginBottom: businessSlug ? '2rem' : 0 }}>
               Tu cita fue cancelada correctamente. ¡Gracias por avisar!

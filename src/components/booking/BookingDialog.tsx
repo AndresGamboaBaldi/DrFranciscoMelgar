@@ -24,6 +24,24 @@ function buildWhatsAppMessage({ patientName, service, duration, date, time, phon
   return lines.join('\n')
 }
 
+function formatTime12h(time: string): string {
+  const [h, min] = time.split(':').map(Number)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 === 0 ? 12 : h % 12
+  return `${h12}:${String(min).padStart(2,'0')} ${period}`
+}
+
+function formatTimeRange(time: string, durationMins: number): string {
+  const [h, min] = time.split(':').map(Number)
+  const startTotal = h * 60 + min
+  const endTotal   = startTotal + durationMins
+  const endH = Math.floor(endTotal / 60) % 24
+  const endM = endTotal % 60
+  const start = formatTime12h(time)
+  const end   = formatTime12h(`${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`)
+  return `${start} - ${end}`
+}
+
 function formatDate(d: SelectedDate) {
   const dt   = new Date(d.y, d.m, d.d)
   const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado']
@@ -429,8 +447,7 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
   const summaryRows = [
     { label: 'Servicio', value: service?.name ?? '' },
     { label: 'Fecha',    value: dayLabel },
-    { label: 'Hora',     value: time },
-    { label: 'Duración', value: `${durationMins} min` },
+    { label: 'Hora',     value: formatTimeRange(time, durationMins) },
   ]
 
   return (
