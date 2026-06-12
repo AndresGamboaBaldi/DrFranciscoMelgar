@@ -52,6 +52,8 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   const todayIso = toISODate(new Date())
   const isToday = isoDate === todayIso
   const isPast  = isoDate < todayIso
+  const now = new Date()
+  const nowTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -256,14 +258,15 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
           {appointments.map(apt => {
             const confirmed = apt.status === 'confirmed'
-            const accent = confirmed ? 'var(--color-gold)' : '#5b9bd5'
+            const aptPast = isPast || (isToday && apt.appointment_time.substring(0,5) <= nowTime)
+            const accent = aptPast ? 'var(--color-ink-ghost)' : (confirmed ? 'var(--color-gold)' : '#5b9bd5')
             return (
             <div key={apt.id}
               style={{
                 display: 'flex', flexDirection: 'column', gap: '.75rem',
                 padding: '1rem 1.25rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
                 borderLeft: `3px solid ${accent}`,
-                opacity: cancelingId === apt.id ? .5 : 1, transition: 'opacity .2s',
+                opacity: cancelingId === apt.id ? .5 : aptPast ? .55 : 1, transition: 'opacity .2s',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
@@ -277,11 +280,16 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
                     <p style={{ fontSize: '.78rem', color: 'var(--color-ink-ghost)', marginTop: '.25rem', fontStyle: 'italic' }}>"{apt.notes}"</p>
                   )}
                 </div>
-               
+                {aptPast && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.3rem', fontSize: '.65rem', fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    Completada
+                  </span>
+                )}
               </div>
 
               {/* Actions */}
-              {!isPast && (
+              {!aptPast && (
               <div style={{ display: 'flex', alignItems: 'stretch', gap: '.5rem' }}>
                 <a href={buildWhatsAppUrl(apt, businessName)} target="_blank" rel="noopener noreferrer"
                   style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem', background: 'var(--color-gold)', border: '1px solid var(--color-gold)', color: 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.65rem', textDecoration: 'none', transition: 'opacity .2s' }}
