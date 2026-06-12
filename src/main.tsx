@@ -13,6 +13,11 @@ root.render(
   </StrictMode>,
 )
 
+// Register service worker for asset caching (faster repeat/PWA loads)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {})
+}
+
 // Hide splash once React has painted
 requestAnimationFrame(() => {
   const splash = document.getElementById('splash')
