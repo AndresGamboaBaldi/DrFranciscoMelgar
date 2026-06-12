@@ -140,17 +140,34 @@ export interface BlockedSlot {
   created_at?: string
 }
 
+// Short-lived in-memory cache so re-fetching the same data (e.g. when the
+// booking dialog moves from step 2 to step 3) doesn't show a loading spinner.
+const CACHE_TTL = 30_000
+const monthBlocksCache = new Map<string, Promise<BlockedSlot[]>>()
+
+export function prefetchMonthBlocks(businessId: string, year: number, month: number) {
+  getMonthBlocks(businessId, year, month)
+}
+
 export async function getMonthBlocks(businessId: string, year: number, month: number): Promise<BlockedSlot[]> {
   if (!supabase) return []
+  const key = `${businessId}:${year}-${month}`
+  const cached = monthBlocksCache.get(key)
+  if (cached) return cached
+
   const from = `${year}-${String(month+1).padStart(2,'0')}-01`
   const to   = `${year}-${String(month+1).padStart(2,'0')}-${new Date(year, month+1, 0).getDate()}`
-  const { data } = await supabase
+  const promise = supabase
     .from('blocked_slots')
     .select('*')
     .eq('business_id', businessId)
     .gte('date', from)
     .lte('date', to)
-  return (data ?? []) as BlockedSlot[]
+    .then(({ data }) => (data ?? []) as BlockedSlot[])
+
+  monthBlocksCache.set(key, promise)
+  setTimeout(() => monthBlocksCache.delete(key), CACHE_TTL)
+  return promise
 }
 
 export async function addBlock(block: Omit<BlockedSlot, 'id' | 'created_at'>): Promise<void> {
@@ -197,14 +214,23 @@ export interface ScheduleSettings {
   min_advance:   number
 }
 
+const scheduleSettingsCache = new Map<string, Promise<ScheduleSettings | null>>()
+
 export async function getScheduleSettings(businessId: string): Promise<ScheduleSettings | null> {
   if (!supabase) return null
-  const { data } = await supabase
+  const cached = scheduleSettingsCache.get(businessId)
+  if (cached) return cached
+
+  const promise = supabase
     .from('schedule_settings')
     .select('business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance')
     .eq('business_id', businessId)
     .maybeSingle()
-  return data as ScheduleSettings | null
+    .then(({ data }) => data as ScheduleSettings | null)
+
+  scheduleSettingsCache.set(businessId, promise)
+  setTimeout(() => scheduleSettingsCache.delete(businessId), CACHE_TTL)
+  return promise
 }
 
 // ─────────────────────────────────────────────────────────────

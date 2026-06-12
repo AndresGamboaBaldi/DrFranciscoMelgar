@@ -10,8 +10,8 @@ function settingsToConfig(s: ScheduleSettings): BookingConfig {
     minAdvanceHours: s.min_advance,
     workDays:        s.work_days,
     workHours:       { start: s.work_start, end: s.work_end },
-    satHours:        s.sat_start ? { start: s.sat_start, end: s.sat_end! } : null,
-    sunHours:        s.sun_start ? { start: s.sun_start, end: s.sun_end! } : null,
+    satHours:        s.sat_start ? { start: s.sat_start, end: s.sat_end! } : undefined,
+    sunHours:        s.sun_start ? { start: s.sun_start, end: s.sun_end! } : undefined,
     breakHours:      s.break_start ? { start: s.break_start, end: s.break_end! } : null,
   }
 }

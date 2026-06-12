@@ -2,7 +2,7 @@
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker  from './CalendarPicker'
 import ContactForm     from './ContactForm'
-import { createAppointment, getScheduleSettings } from '../../lib/supabase'
+import { createAppointment, getScheduleSettings, prefetchMonthBlocks } from '../../lib/supabase'
 import { useProfessional }   from '../../context/ProfessionalContext'
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
 import type { StaffMember } from '../../types/professional'
@@ -81,6 +81,8 @@ export default function BookingDialog({ onClose }: Props) {
     getScheduleSettings(businessId).then(s => {
       if (s) setSlotDuration(s.slot_duration)
     })
+    const now = new Date()
+    prefetchMonthBlocks(businessId, now.getFullYear(), now.getMonth())
   }, [businessId])
   const [success, setSuccess] = useState(false)
   const [waUrl,   setWaUrl]   = useState('')   // WhatsApp URL shown after success

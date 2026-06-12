@@ -80,7 +80,7 @@ export default function ScheduleEditor() {
       if (pmStart >= pmEnd)  { setError('El rango de la tarde es inválido'); return }
       if (amEnd >= pmStart)  { setError('El rango de la tarde debe comenzar después del de la mañana'); return }
     } else {
-      if (amStart >= amEnd) { setError('El rango horario es inválido'); return }
+      if (amStart >= pmEnd) { setError('El rango horario es inválido'); return }
     }
     if (satActive && satStart >= satEnd) { setError('Horario de sábado inválido'); return }
     if (sunActive && sunStart >= sunEnd) { setError('Horario de domingo inválido'); return }
@@ -91,7 +91,7 @@ export default function ScheduleEditor() {
         business_id:   businessId,
         work_days:     workDays,
         work_start:    amStart,
-        work_end:      pmActive ? pmEnd : amEnd,
+        work_end:      pmEnd,
         sat_start:     satActive ? satStart : null,
         sat_end:       satActive ? satEnd   : null,
         sun_start:     sunActive ? sunStart : null,
