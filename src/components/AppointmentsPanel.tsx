@@ -42,6 +42,12 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   const activeCardRef = useRef<HTMLButtonElement>(null)
   const carouselRef   = useRef<HTMLDivElement>(null)
 
+  // Pull-to-refresh
+  const [pullY, setPullY]         = useState(0)
+  const [refreshing, setRefreshing] = useState(false)
+  const touchStartY = useRef<number | null>(null)
+  const PULL_THRESHOLD = 70
+
   const isoDate = toISODate(date)
   const todayIso = toISODate(new Date())
   const isToday = isoDate === todayIso
@@ -102,6 +108,27 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
     setCancelingId(null)
   }
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY > 0) { touchStartY.current = null; return }
+    touchStartY.current = e.touches[0].clientY
+  }
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY.current === null || refreshing) return
+    const delta = e.touches[0].clientY - touchStartY.current
+    if (delta > 0) setPullY(Math.min(delta * 0.5, 100))
+  }
+  const handleTouchEnd = async () => {
+    if (touchStartY.current === null) return
+    touchStartY.current = null
+    if (pullY >= PULL_THRESHOLD) {
+      setRefreshing(true)
+      setPullY(PULL_THRESHOLD)
+      await load()
+      setRefreshing(false)
+    }
+    setPullY(0)
+  }
+
   const dateLabel = `${DAYS_ES[date.getDay()]}, ${date.getDate()} de ${MONTHS_ES[date.getMonth()]}`
 
   // Carousel: range around today, expands at the edges as needed
@@ -113,7 +140,23 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', transform: `translateY(${pullY}px)`, transition: pullY === 0 ? 'transform .25s ease' : 'none' }}
+    >
+      {/* Pull-to-refresh indicator */}
+      {pullY > 0 && (
+        <div style={{ position: 'absolute', top: '-2.5rem', left: 0, right: 0, display: 'flex', justifyContent: 'center', opacity: Math.min(pullY / PULL_THRESHOLD, 1) }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            style={{ color: 'var(--color-gold)', transform: `rotate(${refreshing ? 0 : pullY * 3.6}deg)`, animation: refreshing ? 'spin .8s linear infinite' : 'none' }}
+          >
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M21 3v6h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      )}
 
       {/* Header: month/year + date label */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>

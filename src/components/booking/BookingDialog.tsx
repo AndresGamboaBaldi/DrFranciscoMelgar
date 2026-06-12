@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker  from './CalendarPicker'
 import ContactForm     from './ContactForm'
@@ -277,6 +277,16 @@ function StaffSelector({ staff, selected, onSelect }: { staff: StaffMember[]; se
 
   const current = staff[index]
 
+  const touchStartX = useRef<number | null>(null)
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const delta = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (Math.abs(delta) < 40) return
+    go(delta < 0 ? 1 : -1)
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.1rem' }}>
       <p style={{ fontSize: '1rem', color: 'var(--color-ink)', textAlign: 'center' }}>¿Con quién quieres tu cita?</p>
@@ -290,7 +300,11 @@ function StaffSelector({ staff, selected, onSelect }: { staff: StaffMember[]; se
         )}
 
         {/* cards */}
-        <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'pan-y' }}
+        >
           {staff.map((s, i) => {
             const offset = i - index
             const isCenter = offset === 0
