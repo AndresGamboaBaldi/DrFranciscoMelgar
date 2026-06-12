@@ -76,6 +76,21 @@ body::after {
     padding: var(--nav-h) 1.25rem 2rem;
     min-height: 100vh;
   }
+  .hero-pad > div[style*="max-width"] {
+    transform: translateY(-24px);
+  }
+
+  .hero-location-badge {
+    display: inline-flex !important;
+    width: auto;
+    color: #fff !important;
+    background: rgba(255,255,255,.15);
+    padding: .3rem .6rem;
+    border-radius: 2px;
+  }
+  .hero-location-badge span {
+    color: #fff !important;
+  }
 
   /* Mobile WITH photo: hide photo column completely */
   #inicio.hero-has-photo .hero-photo-col { display: none !important; }

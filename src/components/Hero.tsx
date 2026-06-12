@@ -43,9 +43,8 @@ export default function Hero() {
 
         {/* Content */}
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '52rem' }}>
-          <div className="animate-fade-up" style={{ animationDelay: '.2s', display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '1.25rem' }}>
-            <div style={{ width: '2rem', height: 1, background: 'var(--color-gold)', opacity: .6, flexShrink: 0 }} />
-            <span style={{ fontSize: '1rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
+          <div className={`animate-fade-up ${hasPhoto ? 'hero-location-badge' : ''}`} style={{ animationDelay: '.2s', display: 'flex', alignItems: 'center', gap: '.85rem', marginBottom: '1.25rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 500, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
               {pro.title} — {pro.location}
             </span>
           </div>
@@ -63,11 +62,6 @@ export default function Hero() {
 
           <p className="animate-fade-up" style={{ animationDelay: '.6s', fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem,2.2vw,1.55rem)', fontWeight: 300, color: 'var(--color-ink)', marginBottom: '2rem' }}>
             {pro.specialty}
-          </p>
-
-          <p className="animate-fade-up" style={{ animationDelay: '.75s', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.4rem,3vw,2.5rem)', fontWeight: 300, lineHeight: 1.4, maxWidth: '30rem', marginBottom: '2.5rem', color: 'var(--color-ink)' }}>
-            {pro.tagline}
-            <span style={{ display: 'block', color: 'var(--color-ink-dim)', fontSize: '90%' }}>{pro.taglineSub}</span>
           </p>
 
           <div className="animate-fade-up" style={{ animationDelay: '.9s', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>

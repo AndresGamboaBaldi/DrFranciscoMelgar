@@ -60,7 +60,7 @@ export default function Navbar() {
           textShadow: !scrolled && !isLight ? '0 1px 12px rgba(0,0,0,.7)' : 'none',
         }}>
           {first}{' '}
-          <em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>{last}</em>
+          <em style={{ color: 'var(--color-gold)', fontStyle: 'normal' }}>{last}</em>
         </span>
       </a>
 
