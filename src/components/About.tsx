@@ -26,7 +26,7 @@ export default function About() {
         <div>
           <Reveal delay={100}>
             <h2 className="s-title" style={{ marginBottom: '1.75rem' }}>
-              Acerca<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>{pro.aboutTitle}</em>
+              Acerca<br /><p style={{ color: 'var(--color-gold)' }}>{pro.aboutTitle}</p>
             </h2>
           </Reveal>
 

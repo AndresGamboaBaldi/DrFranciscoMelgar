@@ -86,7 +86,7 @@ export default function Home() {
 
         <h1 className="animate-fade-up" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem,9vw,6.5rem)', fontWeight: 300, color: '#fff', letterSpacing: '-.02em', lineHeight: 1.05, marginBottom: '1.25rem', position: 'relative', animationDelay: '.1s' }}>
           Tu propia página de<br />
-         <em style={{ color: GOLD }}>reservas online,</em> lista en minutos
+         <em style={{ color: GOLD, fontStyle: 'normal' }}>reservas online,</em> lista en minutos
         </h1>
 
         <p className="animate-fade-up" style={{ fontSize: 'clamp(1rem,2.2vw,1.25rem)', color: 'rgba(255,255,255,.72)', maxWidth: '48rem', margin: '0 auto 2.5rem', lineHeight: 1.7, position: 'relative', animationDelay: '.2s' }}>
@@ -120,7 +120,7 @@ export default function Home() {
         <Reveal as="div" className="s-header" style={undefined as never}>
           <div>
             <p style={{ fontSize: '1rem', letterSpacing: '.3em', textTransform: 'uppercase', color: GOLD, marginBottom: '.75rem' }}>Beneficios diseñados para la excelencia</p>
-            <h2 className="s-title">Herramientas de <em style={{ color: GOLD }}>élite</em></h2>
+            <h2 className="s-title">Herramientas de <em style={{ color: GOLD, fontStyle: 'normal' }}>élite</em></h2>
           </div>
         </Reveal>
 
@@ -141,7 +141,7 @@ export default function Home() {
       {/* ── Cómo funciona ── */}
       <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
-          <h2 className="s-title">Tres pasos. <em style={{ color: GOLD }}>Cero complicaciones.</em></h2>
+          <h2 className="s-title">Tres pasos. <em style={{ color: GOLD, fontStyle: 'normal' }}>Cero complicaciones.</em></h2>
           <p style={{ fontSize: '1rem', letterSpacing: '.2em', textTransform: 'uppercase', color: GOLD, marginTop: '.75rem' }}>Cómo funciona</p>
         </Reveal>
 
@@ -201,7 +201,7 @@ export default function Home() {
       {/* ── Planes ── */}
       <section id="planes" className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
-          <h2 className="s-title">Inversion <em style={{ color: GOLD }}>en tu marca</em></h2>
+          <h2 className="s-title">Inversion <em style={{ color: GOLD, fontStyle: 'normal' }}>en tu marca</em></h2>
           <p style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,.6)', maxWidth: '28rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
             Precios transparentes diseñados para crecer contigo.
           </p>

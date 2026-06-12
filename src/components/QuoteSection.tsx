@@ -9,19 +9,6 @@ export default function QuoteSection() {
     <section style={{ padding: 'clamp(4rem,8vw,7rem) clamp(1.5rem,8vw,12rem)', background: 'var(--color-bg)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
 
       {/* Decorative large quote mark behind */}
-      <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%, -55%)',
-        fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(12rem, 25vw, 22rem)',
-        fontWeight: 400,
-        color: 'transparent',
-        WebkitTextStroke: '1px var(--color-rim)',
-        lineHeight: 1,
-        pointerEvents: 'none',
-        userSelect: 'none',
-        opacity: .5,
-      }}>"</div>
 
       <Reveal>
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '52rem', margin: '0 auto' }}>

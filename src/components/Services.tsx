@@ -22,7 +22,7 @@ export default function Services() {
 
       <div className="s-header">
         <div>
-          <Reveal delay={100}><h2 className="s-title">Nuestros<br /><em style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Servicios</em></h2></Reveal>
+          <Reveal delay={100}><h2 className="s-title">Nuestros<br /><p style={{ color: 'var(--color-gold)' }}>Servicios</p></h2></Reveal>
         </div>
         <Reveal delay={200}>
           <p style={{ maxWidth: '44rem', fontSize: '1.2em', lineHeight: 1.9, color: 'var(--color-ink-dim)', fontWeight: 300 }}>
@@ -155,7 +155,7 @@ function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }
 
         {/* Description */}
         <p style={{
-          fontSize: '.85rem', lineHeight: 1.75,
+          fontSize: '1rem', lineHeight: 1.75,
           color: 'rgba(255,255,255,.82)',
           fontWeight: 300,
           textShadow: '0 1px 6px rgba(0,0,0,.8)',
