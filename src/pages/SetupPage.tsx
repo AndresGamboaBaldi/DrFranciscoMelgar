@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from 'react'
-import { CalendarDays, Clock, Settings } from 'lucide-react'
+import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, Briefcase } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useStaff } from '../context/StaffContext'
 import ScheduleEditor from '../components/ScheduleEditor'
@@ -38,6 +38,14 @@ const STEPS_OUTLOOK = [
   { n:3, title:'Suscribirse desde web', desc:'Selecciona "Suscribirse desde la web".' },
   { n:4, title:'Pega el link',          desc:'Pega el link y haz clic en "Importar".' },
   { n:5, title:'¡Listo!',              desc:'Las citas aparecerán en tu Outlook.' },
+]
+const STEPS_PUSH_IOS = [
+  { n:1, title:'Abre en Safari',       desc:'En iPhone, esta página debe abrirse en el navegador Safari, no en Chrome ni en otra app.' },
+  { n:2, title:'Botón Compartir',      desc:'Toca el botón Compartir (el cuadrado con una flecha hacia arriba) en la barra inferior.' },
+  { n:3, title:'Agregar a inicio',     desc:'Desplázate y toca "Ver más", luego selecciona "Agregar a inicio".' },
+  { n:4, title:'Abre desde el ícono',  desc:'Cierra Safari y abre la app desde el ícono que se creó en tu pantalla de inicio.' },
+  { n:5, title:'Activa notificaciones', desc:'Desde esa app de tu inicio, vuelve a esta pantalla y toca "Activar notificaciones".' },
+  { n:6, title:'¡Listo!', desc:'Recibiras notificaciones instantáneas cada que un cliente haga una reserva.' },
 ]
 
 export default function SetupPage() {
@@ -193,7 +201,7 @@ export default function SetupPage() {
                     onMouseEnter={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold-l)' }}
                     onMouseLeave={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold)' }}
                   >
-                    🔔 {pushWorking ? 'Activando…' : 'Activar notificaciones'}
+                    <Bell size={15} /> {pushWorking ? 'Activando…' : 'Activar notificaciones'}
                   </button>
                 )}
 
@@ -203,7 +211,7 @@ export default function SetupPage() {
                     onMouseEnter={e => { if (!pushWorking) { e.currentTarget.style.color = '#c47070'; e.currentTarget.style.borderColor = '#c47070' } }}
                     onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
                   >
-                    🔕 {pushWorking ? 'Desactivando…' : 'Desactivar notificaciones'}
+                    <BellOff size={14} /> {pushWorking ? 'Desactivando…' : 'Desactivar notificaciones'}
                   </button>
                 )}
 
@@ -211,23 +219,27 @@ export default function SetupPage() {
                 {pushStatus !== 'active' && (
                 <div>
                   <button onClick={() => setShowIosSteps(s => !s)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', background: 'rgba(196,153,90,.08)', border: '1px solid rgba(196,153,90,.25)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem 1rem', cursor: 'pointer', transition: 'background .2s' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', background: 'rgba(196,153,90,.08)', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem 1rem', cursor: 'pointer', transition: 'background .2s' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(196,153,90,.14)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'rgba(196,153,90,.08)')}
                   >
-                    <span style={{ display: 'inline-block', transform: showIosSteps ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s', fontSize: '.55rem' }}>▶</span>
-                    {showIosSteps ? 'Ocultar pasos adicionales' : '📱 ¿Usas iPhone? Ver pasos adicionales'}
+                    <ChevronRight size={12} style={{ transform: showIosSteps ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s' }} />
+                    {showIosSteps ? 'Ocultar pasos adicionales' : <><Smartphone size={13} style={{ verticalAlign: '-2px' }} /> ¿Usas iPhone? Ver pasos adicionales</>}
                   </button>
 
                   {showIosSteps && (
-                    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1rem 1.25rem', marginTop: '1rem' }}>
-                      <ol style={{ fontSize: '.88rem', color: 'var(--color-ink-ghost)', lineHeight: 2.1, paddingLeft: '1.2rem', margin: 0 }}>
-                        <li>Abre esta página en <strong style={{ color: 'var(--color-ink-dim)' }}>Safari</strong></li>
-                        <li>Toca el botón <strong style={{ color: 'var(--color-ink-dim)' }}>Compartir</strong> (cuadrado con flecha hacia arriba)</li>
-                        <li>Toca <strong style={{ color: 'var(--color-ink-dim)' }}>Ver más</strong> y luego <strong style={{ color: 'var(--color-ink-dim)' }}>Agregar a inicio</strong></li>
-                        <li>Abre la app desde la pantalla de inicio de tu celular</li>
-                        <li>Vuelve aquí y toca <strong style={{ color: 'var(--color-ink-dim)' }}>Activar notificaciones</strong></li>
-                      </ol>
+                    <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--color-rim)' }}>
+                      {STEPS_PUSH_IOS.map((step, i) => (
+                        <div key={step.n} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', background: 'var(--color-surface)', padding: '.9rem 1.25rem' }}>
+                          <div style={{ width: '1.5rem', height: '1.5rem', border: `1.5px solid ${i===STEPS_PUSH_IOS.length-1?'var(--color-gold)':'var(--color-rim-l)'}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.62rem', flexShrink: 0, color: i===STEPS_PUSH_IOS.length-1?'var(--color-gold)':'var(--color-ink-dim)', background: i===STEPS_PUSH_IOS.length-1?'rgba(196,153,90,.08)':'transparent' }}>
+                            {i===STEPS_PUSH_IOS.length-1?<Check size={12} />:step.n}
+                          </div>
+                          <div>
+                            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 400, color: 'var(--color-ink)', marginBottom: '.15rem' }}>{step.title}</div>
+                            <div style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.6 }}>{step.desc}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -299,7 +311,7 @@ function SupportFooter() {
       </p>
       <a href={waUrl} target="_blank" rel="noopener noreferrer"
         style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.75rem 1.5rem', background: '#25D366', color: '#fff', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-        💬 Escribir por WhatsApp
+        <MessageCircle size={15} /> Escribir por WhatsApp
       </a>
     </div>
   )
@@ -328,7 +340,7 @@ function MagicLinkPanel() {
   if (!feedUrl) return (
     <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1.5rem' }}>
       <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--color-ink-ghost)', fontSize: '.9rem' }}>
-        ⚠️ Configura <code style={{ background: 'var(--color-surface2)', padding: '.1rem .4rem', color: 'var(--color-gold)', fontSize: '.8rem' }}>calendarFeedUrl</code> en{' '}
+        <AlertTriangle size={14} style={{ verticalAlign: '-2px' }} /> Configura <code style={{ background: 'var(--color-surface2)', padding: '.1rem .4rem', color: 'var(--color-gold)', fontSize: '.8rem' }}>calendarFeedUrl</code> en{' '}
         <code style={{ background: 'var(--color-surface2)', padding: '.1rem .4rem', fontSize: '.8rem' }}>src/data/professionals.ts</code>
       </p>
     </div>
@@ -343,15 +355,15 @@ function MagicLinkPanel() {
         </p>
         <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
           <a href={webcalUrl}
-            style={{ ...OUTLINE_BTN, borderColor: 'var(--color-gold)', color: 'var(--color-ink)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.08)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-          >📱 Sincronizar en iPhone</a>
+            style={{ ...SOLID_BTN }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-gold-l)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-gold)' }}
+          ><Smartphone size={15} /> Sincronizar en iPhone</a>
           <a href={googleUrl} target="_blank" rel="noreferrer"
-            style={{ ...OUTLINE_BTN, borderColor: 'var(--color-gold)', color: 'var(--color-ink)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,153,90,.08)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-          >🔵 Sincronizar con Google Calendar</a>
+            style={{ ...SOLID_BTN }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-gold-l)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-gold)' }}
+          ><CalendarDays size={15} /> Sincronizar con Google Calendar</a>
         </div>
       </div>
 
@@ -365,8 +377,8 @@ function MagicLinkPanel() {
             {feedUrl}
           </div>
           <button onClick={copy}
-            style={{ padding: '1rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0, borderRadius: '4px' }}>
-            {copied ? '✓ Copiado' : 'Copiar'}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.4rem', padding: '1rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0, borderRadius: '4px' }}>
+            {copied ? <><Check size={14} /> Copiado</> : 'Copiar'}
           </button>
         </div>
       </div>
@@ -374,28 +386,28 @@ function MagicLinkPanel() {
       {/* Collapsible instructions */}
       <div>
         <button onClick={() => setShowSteps(s => !s)}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', background: 'rgba(196,153,90,.08)', border: '1px solid rgba(196,153,90,.25)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem 1rem', cursor: 'pointer', transition: 'background .2s' }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', background: 'rgba(196,153,90,.08)', border: '1px solid var(--color-gold)', color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 400, letterSpacing: '.1em', textTransform: 'uppercase', padding: '.5rem 1rem', cursor: 'pointer', transition: 'background .2s' }}
           onMouseEnter={e => (e.currentTarget.style.background = 'rgba(196,153,90,.14)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'rgba(196,153,90,.08)')}
         >
-          <span style={{ display: 'inline-block', transform: showSteps ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s', fontSize: '.55rem' }}>▶</span>
+          <ChevronRight size={12} style={{ transform: showSteps ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s' }} />
           {showSteps ? 'Ocultar instrucciones' : 'Ver instrucciones paso a paso'}
         </button>
 
         {showSteps && (
           <div style={{ marginTop: '1.25rem' }}>
             <div style={{ display: 'flex', borderBottom: '1px solid var(--color-rim)', marginBottom: '1.25rem' }}>
-              {([['iphone','📱 iPhone'],['google','🔵 Google'],['outlook','💼 Outlook']] as [CalTab,string][]).map(([id,label]) => (
+              {([['iphone',Smartphone,'iPhone'],['google',CalendarDays,'Google'],['outlook',Briefcase,'Outlook']] as [CalTab, typeof Smartphone, string][]).map(([id,Icon,label]) => (
                 <button key={id} onClick={() => setCalTab(id)}
-                  style={{ padding: '.6rem 1.1rem', background: 'none', border: 'none', fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: calTab===id?500:300, letterSpacing: '.08em', textTransform: 'uppercase', color: calTab===id?'var(--color-ink)':'var(--color-ink-dim)', borderBottom: `2px solid ${calTab===id?'var(--color-gold)':'transparent'}`, cursor: 'pointer', marginBottom: -1, transition: 'color .2s' }}
-                >{label}</button>
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', padding: '.6rem 1.1rem', background: 'none', border: 'none', fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: calTab===id?500:300, letterSpacing: '.08em', textTransform: 'uppercase', color: calTab===id?'var(--color-ink)':'var(--color-ink-dim)', borderBottom: `2px solid ${calTab===id?'var(--color-gold)':'transparent'}`, cursor: 'pointer', marginBottom: -1, transition: 'color .2s' }}
+                ><Icon size={13} /> {label}</button>
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--color-rim)' }}>
               {steps.map((step, i) => (
                 <div key={step.n} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', background: 'var(--color-surface)', padding: '.9rem 1.25rem' }}>
                   <div style={{ width: '1.5rem', height: '1.5rem', border: `1.5px solid ${i===steps.length-1?'var(--color-gold)':'var(--color-rim-l)'}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '.62rem', flexShrink: 0, color: i===steps.length-1?'var(--color-gold)':'var(--color-ink-dim)', background: i===steps.length-1?'rgba(196,153,90,.08)':'transparent' }}>
-                    {i===steps.length-1?'✓':step.n}
+                    {i===steps.length-1?<Check size={12} />:step.n}
                   </div>
                   <div>
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 400, color: 'var(--color-ink)', marginBottom: '.15rem' }}>{step.title}</div>
@@ -409,6 +421,16 @@ function MagicLinkPanel() {
       </div>
     </div>
   )
+}
+
+const SOLID_BTN: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: '.4rem',
+  padding: '.85rem 1.5rem',
+  background: 'var(--color-gold)', border: 'none',
+  color: 'var(--color-bg)', fontFamily: 'var(--font-body)',
+  fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em',
+  textTransform: 'uppercase', textDecoration: 'none', transition: 'background .3s',
+  borderRadius: '4px',
 }
 
 const OUTLINE_BTN: React.CSSProperties = {

@@ -165,9 +165,6 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
             {dateLabel}{isToday && <span style={{ color: 'var(--color-gold)' }}> · Hoy</span>}
           </p>
         </div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '2.4rem', height: '2.4rem', border: '1px solid var(--color-rim)', color: 'var(--color-gold)', flexShrink: 0 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-        </span>
       </div>
 
       {/* Day carousel */}

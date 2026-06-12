@@ -465,7 +465,7 @@ function SuccessState({ name, waUrl, service, date, time, durationMins, onClose,
       {/* ── Title ── */}
       <div>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 700, lineHeight: 1.05, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: '.1rem' }}>
-          ¡Cita programada!
+          ¡Cita confirmada!
         </h3>
       </div>
 
