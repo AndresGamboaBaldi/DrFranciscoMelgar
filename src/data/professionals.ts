@@ -266,107 +266,92 @@ const barber_vip: Professional = {
 }
 
 // ────────────────────────────────────────────────────────────────
-//  2.1 ANDRES — Barbero & Estilista (página de pruebas, standalone)
+//  2.1 ANDRES — Desarrollador Frontend & Data Science (página de pruebas, standalone)
 // ────────────────────────────────────────────────────────────────
 const andres: Professional = {
   heroPhoto: '/barber_vip/photos/andres.jpeg',
   photos: ['/barber_vip/photos/andres.jpeg'],
   slug: 'andres',
-  category: 'barbero',
-  name: 'Andres',
+  category: 'otro',
+  name: 'Andres Gamboa',
   shortName: 'Andres',
-  title: 'Barbero & Estilista',
-  specialty: 'Corte, barba y grooming de primera clase en Cochabamba',
+  title: 'Desarrollador Frontend & Data Science',
+  specialty: 'Desarrollo web a medida, dashboards y análisis de datos',
   location: 'Cochabamba, Bolivia',
-  tagline: 'El estilo no es accidental,',
-  taglineSub: 'es una decisión.',
+  tagline: 'El código no es magia,',
+  taglineSub: 'es una decisión bien diseñada.',
 
   stats: [
-    { n: '+500', label: 'Clientes satisfechos' },
-    { n: '8+', label: 'Años de experiencia' },
+    { n: '+10', label: 'Proyectos entregados' },
+    { n: '3+', label: 'Años de experiencia' },
   ],
 
   aboutTitle: 'de Andres',
   finalQuote:
-    'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
-  bio: 'Andres combina su pasión por la barbería con su trabajo como desarrollador de software — de hecho, él mismo programó esta página. Especializado en cortes clásicos, fade, diseño de barba y tratamientos capilares, ofrece una experiencia premium con la misma atención al detalle que pone en su código.',
+    'Un buen producto no se nota en el código. Se nota en lo simple que se vuelve para quien lo usa.',
+  bio: 'Andres es desarrollador frontend especializado en React, TypeScript y experiencias de usuario pulidas — esta misma página es un ejemplo de su trabajo. Combina ese perfil con data science: limpieza de datos, automatización y dashboards que convierten información cruda en decisiones claras para negocios pequeños y medianos.',
   credentials: [
-    { label: 'Certificación', value: 'Barbería Profesional' },
-    { label: 'Ambiente', value: 'Premium & Exclusivo' },
+    { label: 'Stack principal', value: 'React · TypeScript · Python' },
+    { label: 'Enfoque', value: 'Frontend & Análisis de Datos' },
   ],
 
   services: [
     {
-      id: 'corte',
-      name: 'Corte',
-      tag: 'Esencial',
-      price: 'Bs. 70',
-      durationMins: 45,
-      description:
-        'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.',
-      image: '/barber_vip/services/corte.jpeg',
-    },
-    {
-      id: 'barba',
-      name: 'Corte y Barba',
-      tag: 'Clásico',
-      price: 'Bs. 100',
-      durationMins: 45,
-      description:
-        'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.',
-      image: '/barber_vip/services/fade.jpeg',
-    },
-    {
-      id: 'tinte',
-      name: 'Tinte & Color',
-      tag: 'Color',
-      price: 'Bs. 350',
-      durationMins: 180,
-      description:
-        'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',
-      image: '/barber_vip/services/tinte.jpeg',
-    },
-    {
-      id: 'ritual',
-      name: 'Ritual de Barba',
-      tag: 'Premium',
-      price: 'Bs. 80',
+      id: 'landing',
+      name: 'Landing Page',
+      tag: 'Web',
+      price: 'Desde Bs. 800',
       durationMins: 60,
       description:
-        'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.',
-      image: '/barber_vip/services/toallaritual.jpg',
+        'Sitio de una sola página, rápido y responsivo, listo para mostrar tu negocio y captar clientes.',
     },
     {
-      id: 'ondulacion',
-      name: 'Ondulación',
-      tag: 'Estilo',
-      price: 'Bs. 60',
-      durationMins: 120,
+      id: 'web-app',
+      name: 'Aplicación Web a Medida',
+      tag: 'Desarrollo',
+      price: 'Cotización',
+      durationMins: 60,
       description:
-        'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',
-      image: '/barber_vip/services/ondulacion.jpeg',
+        'Sistemas a medida en React + TypeScript: reservas, paneles internos, integraciones con bases de datos.',
     },
     {
-      id: 'limpieza',
-      name: 'Limpieza Facial',
-      tag: 'Premium',
-      price: 'Bs. 150',
-      durationMins: 120,
+      id: 'dashboard',
+      name: 'Dashboard de Datos',
+      tag: 'Data Science',
+      price: 'Desde Bs. 600',
+      durationMins: 60,
       description:
-        'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.',
-      image: '/barber_vip/services/limpiezafacial2.webp',
+        'Visualización interactiva de tus datos de negocio — ventas, clientes, operaciones — para tomar decisiones con claridad.',
+    },
+    {
+      id: 'automatizacion',
+      name: 'Automatización & Análisis',
+      tag: 'Data Science',
+      price: 'Cotización',
+      durationMins: 60,
+      description:
+        'Limpieza, procesamiento y análisis de datos con Python. Automatiza tareas repetitivas y obtén reportes recurrentes.',
+    },
+    {
+      id: 'consultoria',
+      name: 'Consultoría Técnica',
+      tag: 'Asesoría',
+      price: 'Bs. 150/hora',
+      durationMins: 60,
+      description:
+        'Sesión de asesoría para definir arquitectura, elegir tecnologías o resolver problemas puntuales de tu proyecto.',
     },
   ],
 
   phone: '59172235605',
-  email: 'citas@barbervip.bo',
-  address: 'Av Uyuni #1234\nCochabamba, Bolivia',
-  schedule: ['Lun — Sáb: 9:00 — 20:00'],
+  email: 'andresgamboabaldi@gmail.com',
+  address: 'Cochabamba, Bolivia',
+  schedule: ['Lun — Vie: 9:00 — 18:00'],
 
   theme: {
     mode: 'dark',
-    accent: '#2855c2',
-    accentLight: '#3d6edc',
+    accent: '#b07c35',
+    accentLight: '#c48c45',
     fonts: {
       display: 'Bebas Neue',
       body: 'Inter',
@@ -375,7 +360,6 @@ const andres: Professional = {
     },
   },
 
-  mapUrl: 'https://maps.app.goo.gl/qcWfFwZqksNu2iFYA?g_st=ic',
   businessId: 'andres',
   calendarFeedUrl:
     'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
