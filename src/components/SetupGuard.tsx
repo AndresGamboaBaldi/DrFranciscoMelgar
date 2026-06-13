@@ -25,6 +25,21 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError]         = useState('')
 
+  // PWA — use the professional's name for the home screen icon title instead of "Probo.pro"
+  useEffect(() => {
+    const setMeta = (name: string, content: string) => {
+      let tag = document.querySelector(`meta[name="${name}"]`)
+      if (!tag) {
+        tag = document.createElement('meta')
+        tag.setAttribute('name', name)
+        document.head.appendChild(tag)
+      }
+      tag.setAttribute('content', content)
+    }
+    document.title = displayName
+    setMeta('apple-mobile-web-app-title', displayName)
+  }, [displayName])
+
   // 1. Check existing unlock (password session) or magic-link key on mount
   useEffect(() => {
     let active = true
