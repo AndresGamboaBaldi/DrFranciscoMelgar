@@ -77,6 +77,14 @@ export default function BookingDialog({ onClose }: Props) {
   const businessId = selectedStaff?.businessId ?? pro.businessId
   const phone      = selectedStaff?.phone ?? pro.phone
 
+  // Lock background scroll while the dialog is open so the overlay sits
+  // fixed over everything (incl. fixed tab bars) without page scroll bleeding through.
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
   useEffect(() => {
     getScheduleSettings(businessId).then(s => {
       if (s) setSlotDuration(s.slot_duration)

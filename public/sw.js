@@ -5,7 +5,7 @@
  * home-screen PWA icon).
  */
 
-const CACHE_NAME = 'probo-assets-v1'
+const CACHE_NAME = 'probo-assets-v2'
 
 self.addEventListener('install', event => {
   self.skipWaiting()
@@ -28,6 +28,15 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url)
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api')) return
+
+  // Navigation requests (HTML) are network-first so a new deploy's
+  // hashed JS/CSS references are always fresh — never serve a stale shell.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).catch(() => caches.match(req))
+    )
+    return
+  }
 
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache => {
