@@ -80,9 +80,8 @@ export default function BookingDialog({ onClose }: Props) {
   // Lock background scroll while the dialog is open so the overlay sits
   // fixed over everything (incl. fixed tab bars) without page scroll bleeding through.
   useEffect(() => {
-    const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    return () => { document.body.style.overflow = '' }
   }, [])
 
   useEffect(() => {
@@ -115,9 +114,8 @@ export default function BookingDialog({ onClose }: Props) {
 
   // Lock body scroll
   useEffect(() => {
-    const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    return () => { document.body.style.overflow = '' }
   }, [])
 
   // Close on Escape

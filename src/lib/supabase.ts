@@ -87,6 +87,21 @@ export async function getAppointmentsByDate(businessId: string, date: string): P
   return (data ?? []) as Appointment[]
 }
 
+export async function getAppointmentsByDateRange(businessId: string, startDate: string, endDate: string): Promise<Appointment[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id, name, phone, service, appointment_date, appointment_time, notes, status')
+    .eq('business_id', businessId)
+    .gte('appointment_date', startDate)
+    .lte('appointment_date', endDate)
+    .neq('status', 'cancelled')
+    .order('appointment_date', { ascending: true })
+    .order('appointment_time', { ascending: true })
+  if (error) { console.error('[getAppointmentsByDateRange]', error); return [] }
+  return (data ?? []) as Appointment[]
+}
+
 export async function getAppointmentById(id: string): Promise<Appointment | null> {
   if (!supabase) return null
   const { data, error } = await supabase

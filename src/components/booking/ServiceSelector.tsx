@@ -65,7 +65,6 @@ function ServiceCard({
   onSelect: (s: Service) => void
 }) {
   const [hovered, setHovered] = useState(false)
-  const active = isSelected || hovered
   const displayMins = svc.durationMins ?? slotDuration
 
   return (
