@@ -51,14 +51,7 @@ export default function Footer() {
         {/* Contact */}
         <div style={{ flexShrink: 0 }}>
           <p style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.35rem' }}>Contacto</p>
-          <a href={`tel:+${pro.phone}`} style={{ display: 'block', fontSize: '.84rem', color: 'var(--color-ink-dim)', textDecoration: 'none', lineHeight: 1.8 }}>+{pro.phone}</a>
-          <a href={`mailto:${pro.email}`} style={{ display: 'block', fontSize: '.84rem', color: 'var(--color-ink-dim)', textDecoration: 'none' }}>{pro.email}</a>
-        </div>
-
-        {/* Schedule */}
-        <div style={{ flexShrink: 0 }}>
-          <p style={{ fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.35rem' }}>Horario</p>
-          {pro.schedule.map(s => <p key={s} style={{ fontSize: '.84rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>{s}</p>)}
+          <a href={`tel:+${pro.phone}`} style={{ display: 'block', fontSize: '.84rem', color: 'var(--color-ink-dim)', textDecoration: 'none' }}>+{pro.phone}</a>
         </div>
 
         {/* CTA */}

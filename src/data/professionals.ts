@@ -24,7 +24,7 @@ const doctor_melgar: Professional = {
   tagline:    'La confianza',
   taglineSub: 'comienza aquí.',
   stats: [
-    { n: '+1.000', label: 'Pacientes atendidos' },
+    { n: '+500', label: 'Pacientes satisfechos' },
     { n: '5+',    label: 'Años de experiencia' },
   ],
 
@@ -34,8 +34,7 @@ const doctor_melgar: Professional = {
   credentials: [
     { label: 'Formación',       value: 'Universidad Privada del Valle' },
     { label: 'Fellowship',      value: 'Madrid · Medicina Estetica' },
-    { label: 'Especialización', value: 'Medicina Estetica y Tricologia' },
-    { label: 'Certificaciones', value: 'ISAPS · AMAE · SEME' },
+    { label: 'Especialización', value: 'Medicina Estética y Tricologia' },
   ],
 
   services: [
@@ -49,7 +48,7 @@ const doctor_melgar: Professional = {
   phone:   '59172235604',
   email:   'melgarbaldi.hf@gmail.com',
   address: 'Parque Fidel Anze #2345, Of. 8B\nCochabamba, Bolivia',
-  schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 14:00'],
+  schedule: ['Lun — Vie: 9:00 — 21:00', 'Sábados: 9:00 — 14:00'],
 
   theme: {
     mode:        'light',
@@ -98,9 +97,12 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'fade',   name: 'Corte y Barba', tag: 'Moderno',   price: 'Desde Bs. 80',durationMins: 45,  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un resultado perfecto.', image: '/barber_vip/services/fade.jpeg' },
-    { id: 'corte',  name: 'Corte Clásico',    tag: 'Clásico',   price: 'Desde Bs. 60',durationMins: 45,  icon: '◈', description: 'Corte tradicional con tijera o máquina. Acabado impecable con productos premium.', image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Desde Bs. 150',durationMins: 120, icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'corte',   name: 'Corte', tag: 'Esencial',   price: 'Bs. 70',durationMins: 45,  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.', image: '/barber_vip/services/fade.jpeg' },
+    { id: 'barba',  name: 'Corte y Barba',    tag: 'Clásico',   price: 'Bs. 100',durationMins: 45,  icon: '◈', description: 'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.', image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Bs. 350',durationMins: 180, icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'ritual',   name: 'Ritual de Barba', tag: 'Premium',   price: 'Bs. 80',durationMins: 45,  icon: '✦', description: 'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.', image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'ondulacion',  name: 'Ondulación',    tag: 'Estilo',   price: 'Bs. 60',durationMins: 45,  icon: '◇', description: 'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.', image: '/barber_vip/services/diseno.jpeg' },
+    { id: 'limpieza',  name: 'Limpieza Facial',    tag: 'Premium',     price: 'Bs. 150',durationMins: 120, icon: '✺', description: 'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.', image: '/barber_vip/services/tinte.jpeg' },
   ],
 
   phone:   '59177933737',
@@ -135,7 +137,7 @@ const barber_vip: Professional = {
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
       setupPassword:   'jhoel2026',
     },
-     {
+    {
       id:       'andres',
       name:     'Andres',
       shortName:'Andres',
@@ -146,7 +148,7 @@ const barber_vip: Professional = {
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
       setupPassword:   'andres2026',
     },
-     {
+    /* {
       id:       'jheison',
       name:     'jheison',
       shortName:'jheison',
@@ -156,7 +158,7 @@ const barber_vip: Professional = {
       businessId:      'jheison',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=ec7c7937994c8f1c8c506afb809432318770a2f382a190bd61575fffa1a736ed',
       setupPassword:   'jheison2026',
-    },
+    },*/
   ],
 }
 
@@ -177,7 +179,7 @@ const dr_seifert: Professional = {
   taglineSub: 'es diseño.',
   stats: [
     { n: '+2.000', label: 'Pacientes atendidos' },
-    { n: '12+',    label: 'Años de experiencia' },
+    { n: '22+',    label: 'Años de experiencia' },
   ],
 
   aboutTitle: 'del Doctor',
@@ -212,7 +214,7 @@ const dr_seifert: Professional = {
     },
   },
 
-  businessId:        'dr_seifert',
+  businessId:       'dr_seifert',
   calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',
   setupPassword:   'seifert2026',
 }

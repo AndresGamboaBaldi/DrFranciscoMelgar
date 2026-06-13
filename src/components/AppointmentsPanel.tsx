@@ -111,7 +111,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (window.scrollY > 0) { touchStartY.current = null; return }
+    if (showBooking || confirmTarget || window.scrollY > 0) { touchStartY.current = null; return }
     touchStartY.current = e.touches[0].clientY
   }
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -146,7 +146,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', transform: `translateY(${pullY}px)`, transition: pullY === 0 ? 'transform .25s ease' : 'none' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative', transform: pullY === 0 ? 'none' : `translateY(${pullY}px)`, transition: pullY === 0 ? 'transform .25s ease' : 'none' }}
     >
       {/* Pull-to-refresh indicator */}
       {pullY > 0 && (

@@ -84,6 +84,13 @@ export default function BookingDialog({ onClose }: Props) {
     const now = new Date()
     prefetchMonthBlocks(businessId, now.getFullYear(), now.getMonth())
   }, [businessId])
+
+  // Preload staff photos immediately so the carousel doesn't show blank/loading images
+  useEffect(() => {
+    pro.staff?.forEach(s => {
+      if (s.photo) { const img = new Image(); img.src = s.photo }
+    })
+  }, [pro.staff])
   const [success, setSuccess] = useState(false)
   const [waUrl,   setWaUrl]   = useState('')   // WhatsApp URL shown after success
 
@@ -354,7 +361,7 @@ function StaffSelector({ staff, selected, onSelect }: { staff: StaffMember[]; se
                 }}
               >
                 {s.photo
-                  ? <img src={s.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={s.photo} alt="" loading="eager" decoding="sync" fetchPriority="high" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: '3rem', color: 'var(--color-gold)' }}>
                       {s.name.charAt(0)}
                     </div>
