@@ -5,16 +5,51 @@
  * Permite al admin bloquear días completos o rangos de horas para
  * un profesional (ej: "hoy de 14:00 a 19:00 — conferencia").
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useStaff } from '../context/StaffContext'
-import { addBlock, deleteBlock, getUpcomingBlocks, type BlockedSlot } from '../lib/supabase'
+import { addBlocks, deleteBlock, getUpcomingBlocks, type BlockedSlot } from '../lib/supabase'
 
 const MONTHS_ES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
 
 function formatBlockDate(dateStr: string) {
   const [y, m, d] = dateStr.split('-')
   return `${parseInt(d)} ${MONTHS_ES[parseInt(m)-1]} ${y}`
+}
+
+function nextDay(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00')
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().split('T')[0]
+}
+
+interface BlockGroup {
+  ids: string[]
+  fromDate: string
+  toDate: string
+  start_time: string | null
+  end_time: string | null
+  reason?: string | null
+}
+
+function groupBlocks(blocks: BlockedSlot[]): BlockGroup[] {
+  const groups: BlockGroup[] = []
+  for (const b of blocks) {
+    const last = groups[groups.length - 1]
+    if (
+      last &&
+      last.start_time === b.start_time &&
+      last.end_time === b.end_time &&
+      last.reason === b.reason &&
+      nextDay(last.toDate) === b.date
+    ) {
+      last.toDate = b.date
+      last.ids.push(b.id)
+    } else {
+      groups.push({ ids: [b.id], fromDate: b.date, toDate: b.date, start_time: b.start_time, end_time: b.end_time, reason: b.reason })
+    }
+  }
+  return groups
 }
 
 export default function BlockScheduler() {
@@ -25,10 +60,11 @@ export default function BlockScheduler() {
   const [blocks, setBlocks]     = useState<BlockedSlot[]>([])
   const [loading, setLoading]   = useState(false)
   const [saving, setSaving]     = useState(false)
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string[] | null>(null)
 
   // Form state
   const [date,      setDate]      = useState('')
+  const [endDate,   setEndDate]   = useState('')
   const [startTime, setStartTime] = useState('')
   const [endTime,   setEndTime]   = useState('')
   const [reason,    setReason]    = useState('')
@@ -47,19 +83,28 @@ export default function BlockScheduler() {
   const handleAdd = async () => {
     setError('')
     if (!date) { setError('Selecciona una fecha'); return }
+    if (endDate && endDate < date) { setError('La fecha final debe ser igual o posterior a la inicial'); return }
     if (!fullDay && (!startTime || !endTime)) { setError('Pon hora de inicio y fin, o marca "Todo el día"'); return }
     if (!fullDay && startTime >= endTime) { setError('La hora de inicio debe ser anterior a la de fin'); return }
 
     setSaving(true)
     try {
-      await addBlock({
-        business_id:  businessId,
-        date,
+      const dates: string[] = []
+      const cursor = new Date(date + 'T00:00:00')
+      const last = new Date((endDate || date) + 'T00:00:00')
+      while (cursor <= last) {
+        dates.push(cursor.toISOString().split('T')[0])
+        cursor.setDate(cursor.getDate() + 1)
+      }
+
+      await addBlocks(dates.map(d => ({
+        business_id: businessId,
+        date: d,
         start_time: fullDay ? null : startTime,
         end_time:   fullDay ? null : endTime,
         reason:     reason.trim() || null,
-      })
-      setDate(''); setStartTime(''); setEndTime(''); setReason(''); setFullDay(false)
+      })))
+      setDate(''); setEndDate(''); setStartTime(''); setEndTime(''); setReason(''); setFullDay(false)
       await loadBlocks()
     } catch {
       setError('Error al guardar. Intenta de nuevo.')
@@ -68,12 +113,14 @@ export default function BlockScheduler() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    setDeleting(id)
-    try { await deleteBlock(id); await loadBlocks() }
+  const handleDelete = async (ids: string[]) => {
+    setDeleting(ids)
+    try { await Promise.all(ids.map(deleteBlock)); await loadBlocks() }
     catch { alert('Error al eliminar') }
     finally { setDeleting(null) }
   }
+
+  const groups = useMemo(() => groupBlocks(blocks), [blocks])
 
   // Today's ISO date for min attribute
   const todayIso = new Date().toISOString().split('T')[0]
@@ -90,8 +137,13 @@ export default function BlockScheduler() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '1rem' }}>
           {/* Date */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', minWidth: 0 }}>
-            <label style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Fecha *</label>
+            <label style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Desde (fecha) *</label>
             <input type="date" value={date} min={todayIso} onChange={e => setDate(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', minWidth: 0 }}>
+            <label style={{ fontWeight:'500', fontSize: '.62rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>Hasta (fecha, opcional)</label>
+            <input type="date" value={endDate} min={date || todayIso} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
           </div>
 
           {/* Full day toggle */}
@@ -158,29 +210,32 @@ export default function BlockScheduler() {
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: blocks.length ? 'var(--color-rim)' : 'transparent' }}>
-          {blocks.map(b => (
-            <div key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface)', padding: '1.1rem 1.5rem', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: groups.length ? 'var(--color-rim)' : 'transparent' }}>
+          {groups.map(g => {
+            const isDeleting = deleting?.[0] === g.ids[0]
+            return (
+            <div key={g.ids[0]} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface)', padding: '1.1rem 1.5rem', gap: '1rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', flexWrap: 'wrap' }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 400, color: 'var(--color-ink)' }}>
-                    {formatBlockDate(b.date)}
+                    {g.fromDate === g.toDate ? formatBlockDate(g.fromDate) : `${formatBlockDate(g.fromDate)} — ${formatBlockDate(g.toDate)}`}
                   </span>
                   <span style={{ fontSize: '.88rem', color: 'var(--color-gold)', fontWeight: 400 }}>
-                    {!b.start_time ? 'Todo el día' : `${b.start_time} — ${b.end_time}`}
+                    {!g.start_time ? 'Todo el día' : `${g.start_time} — ${g.end_time}`}
                   </span>
                 </div>
-                {b.reason && <p style={{ fontSize: '.88rem', color: 'var(--color-ink-dim)', marginTop: '.25rem' }}>{b.reason}</p>}
+                {g.reason && <p style={{ fontSize: '.88rem', color: 'var(--color-ink-dim)', marginTop: '.25rem' }}>{g.reason}</p>}
               </div>
-              <button onClick={() => handleDelete(b.id)} disabled={deleting === b.id}
-                style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: deleting === b.id ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.76rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.45rem 1rem', cursor: deleting === b.id ? 'not-allowed' : 'pointer', transition: 'all .2s', flexShrink: 0 }}
-                onMouseEnter={e => { if (deleting !== b.id) { e.currentTarget.style.borderColor = '#c47070'; e.currentTarget.style.color = '#c47070' } }}
+              <button onClick={() => handleDelete(g.ids)} disabled={isDeleting}
+                style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: isDeleting ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.76rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.45rem 1rem', cursor: isDeleting ? 'not-allowed' : 'pointer', transition: 'all .2s', flexShrink: 0 }}
+                onMouseEnter={e => { if (!isDeleting) { e.currentTarget.style.borderColor = '#c47070'; e.currentTarget.style.color = '#c47070' } }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-rim-l)'; e.currentTarget.style.color = 'var(--color-ink-dim)' }}
               >
-                {deleting === b.id ? '…' : 'Quitar'}
+                {isDeleting ? '…' : 'Quitar'}
               </button>
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

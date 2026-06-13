@@ -191,6 +191,12 @@ export async function addBlock(block: Omit<BlockedSlot, 'id' | 'created_at'>): P
   if (error) throw new Error(error.message)
 }
 
+export async function addBlocks(blocks: Omit<BlockedSlot, 'id' | 'created_at'>[]): Promise<void> {
+  if (!supabase) throw new Error('Supabase no configurado')
+  const { error } = await supabase.from('blocked_slots').insert(blocks)
+  if (error) throw new Error(error.message)
+}
+
 export async function deleteBlock(id: string): Promise<void> {
   if (!supabase) throw new Error('Supabase no configurado')
   const { error } = await supabase.from('blocked_slots').delete().eq('id', id)

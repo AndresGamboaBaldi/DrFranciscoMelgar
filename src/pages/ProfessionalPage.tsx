@@ -124,7 +124,7 @@ export default function ProfessionalPage() {
     <ProfessionalContext.Provider value={pro}>
       <StaffContext.Provider value={staffMember}>
       <BookingDialogContext.Provider value={{ openBooking: () => setBookingOpen(true) }}>
-        <ProSEOHead pro={pro} />
+        {!isSetup && <ProSEOHead pro={pro} />}
         {/* background + color use the INLINE var overrides, not the :root dark defaults */}
         <div style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark', background: 'var(--color-bg)', color: 'var(--color-ink)', minHeight: '100vh' }}>
           {isSetup ? (

@@ -222,7 +222,7 @@ export default function AppointmentsPanel({
       ? 'var(--color-ink-ghost)'
       : confirmed
         ? 'var(--color-gold)'
-        : '#5b9bd5'
+        : 'var(--color-gold-l)'
     return (
       <div
         key={apt.id}
