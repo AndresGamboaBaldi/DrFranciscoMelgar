@@ -49,7 +49,7 @@ const PLANS = [
   },
   {
     name: 'Agencia',
-    price: 'Bs 399',
+    price: 'Bs 449',
     period: '/mes',
     tag: null,
     desc: 'Para negocios con varios profesionales o sucursales.',

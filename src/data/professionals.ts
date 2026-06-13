@@ -239,7 +239,7 @@ const barber_vip: Professional = {
         'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
       setupPassword: 'jhoel2026',
     },
-    {
+    /*{
       id: 'andres',
       name: 'Andres',
       shortName: 'Andres',
@@ -251,7 +251,7 @@ const barber_vip: Professional = {
         'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
       setupPassword: 'andres2026',
     },
-    /* {
+     {
       id:       'jheison',
       name:     'jheison',
       shortName:'jheison',
@@ -263,6 +263,123 @@ const barber_vip: Professional = {
       setupPassword:   'jheison2026',
     },*/
   ],
+}
+
+// ────────────────────────────────────────────────────────────────
+//  2.1 ANDRES — Barbero & Estilista (página de pruebas, standalone)
+// ────────────────────────────────────────────────────────────────
+const andres: Professional = {
+  heroPhoto: '/barber_vip/photos/andres.jpeg',
+  photos: ['/barber_vip/photos/andres.jpeg'],
+  slug: 'andres',
+  category: 'barbero',
+  name: 'Andres',
+  shortName: 'Andres',
+  title: 'Barbero & Estilista',
+  specialty: 'Corte, barba y grooming de primera clase en Cochabamba',
+  location: 'Cochabamba, Bolivia',
+  tagline: 'El estilo no es accidental,',
+  taglineSub: 'es una decisión.',
+
+  stats: [
+    { n: '+500', label: 'Clientes satisfechos' },
+    { n: '8+', label: 'Años de experiencia' },
+  ],
+
+  aboutTitle: 'de Andres',
+  finalQuote:
+    'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
+  bio: 'Andres combina su pasión por la barbería con su trabajo como desarrollador de software — de hecho, él mismo programó esta página. Especializado en cortes clásicos, fade, diseño de barba y tratamientos capilares, ofrece una experiencia premium con la misma atención al detalle que pone en su código.',
+  credentials: [
+    { label: 'Certificación', value: 'Barbería Profesional' },
+    { label: 'Ambiente', value: 'Premium & Exclusivo' },
+  ],
+
+  services: [
+    {
+      id: 'corte',
+      name: 'Corte',
+      tag: 'Esencial',
+      price: 'Bs. 70',
+      durationMins: 45,
+      description:
+        'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.',
+      image: '/barber_vip/services/corte.jpeg',
+    },
+    {
+      id: 'barba',
+      name: 'Corte y Barba',
+      tag: 'Clásico',
+      price: 'Bs. 100',
+      durationMins: 45,
+      description:
+        'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.',
+      image: '/barber_vip/services/fade.jpeg',
+    },
+    {
+      id: 'tinte',
+      name: 'Tinte & Color',
+      tag: 'Color',
+      price: 'Bs. 350',
+      durationMins: 180,
+      description:
+        'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',
+      image: '/barber_vip/services/tinte.jpeg',
+    },
+    {
+      id: 'ritual',
+      name: 'Ritual de Barba',
+      tag: 'Premium',
+      price: 'Bs. 80',
+      durationMins: 60,
+      description:
+        'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.',
+      image: '/barber_vip/services/toallaritual.jpg',
+    },
+    {
+      id: 'ondulacion',
+      name: 'Ondulación',
+      tag: 'Estilo',
+      price: 'Bs. 60',
+      durationMins: 120,
+      description:
+        'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',
+      image: '/barber_vip/services/ondulacion.jpeg',
+    },
+    {
+      id: 'limpieza',
+      name: 'Limpieza Facial',
+      tag: 'Premium',
+      price: 'Bs. 150',
+      durationMins: 120,
+      description:
+        'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.',
+      image: '/barber_vip/services/limpiezafacial2.webp',
+    },
+  ],
+
+  phone: '59172235605',
+  email: 'citas@barbervip.bo',
+  address: 'Av Uyuni #1234\nCochabamba, Bolivia',
+  schedule: ['Lun — Sáb: 9:00 — 20:00'],
+
+  theme: {
+    mode: 'dark',
+    accent: '#2855c2',
+    accentLight: '#3d6edc',
+    fonts: {
+      display: 'Bebas Neue',
+      body: 'Inter',
+      googleFontsUrl:
+        'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
+    },
+  },
+
+  mapUrl: 'https://maps.app.goo.gl/qcWfFwZqksNu2iFYA?g_st=ic',
+  businessId: 'andres',
+  calendarFeedUrl:
+    'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
+  setupPassword: 'andres2026',
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -418,6 +535,7 @@ const dr_seifert: Professional = {
 export const PROFESSIONALS: Record<string, Professional> = {
   doctor_melgar,
   barber_vip,
+  andres,
   dr_seifert,
   //jhoel_cuts,
 }
