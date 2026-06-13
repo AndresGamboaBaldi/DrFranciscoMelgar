@@ -12,24 +12,24 @@ const waLink = (msg: string) => `https://wa.me/${SALES_WHATSAPP}?text=${encodeUR
 
 const FEATURES = [
   {
-    icon: Bell,
-    title: 'Notificaciones al instante',
-    desc: 'Recibe un aviso push apenas alguien reserva — directo en tu celular, sin instalar nada.',
+    icon: MessageCircle,
+    title: 'Más reservas, menos coordinación',
+    desc: 'Tus clientes eligen horario y reservan solos, sin intercambiar mensajes ni llamadas.',
   },
   {
-    icon: CalendarDays,
-    title: 'Sincroniza tu calendario',
+    icon: Bell,
+    title: 'Notificaciones al instante',
     desc: 'Cada cita aparece automáticamente en tu Google Calendar, Apple Calendar u Outlook.',
   },
   {
-    icon: MessageCircle,
-    title: 'Confirmación por WhatsApp',
-    desc: 'Con un clic mandas un recordatorio formateado y profesional a tus clientes.',
+    icon: CalendarDays,
+    title: 'Tu calendario siempre actualizado',
+    desc: 'Cada reserva se sincroniza automáticamente con Google Calendar, Apple Calendar u Outlook.',
   },
   {
     icon: Palette,
-    title: 'Tu página, tu marca',
-    desc: 'Diseño elegante con tus colores, fotos, servicios y horarios — lista para compartir.',
+    title: 'Una imagen más profesional',
+    desc: 'Comparte una página elegante con tus servicios, horarios y fotos, lista para enviar por WhatsApp o redes sociales.',
   },
 ]
 
@@ -216,19 +216,9 @@ export default function Home() {
       <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" className="s-header" style={undefined as never}>
           <div>
-            <p
-              style={{
-                fontSize: '1rem',
-                letterSpacing: '.3em',
-                textTransform: 'uppercase',
-                color: GOLD,
-                marginBottom: '.75rem',
-              }}
-            >
-              Beneficios diseñados para la excelencia
-            </p>
             <h2 className="s-title">
-              Herramientas de <em style={{ color: GOLD, fontStyle: 'normal' }}>élite</em>
+              Todo lo que necesitas para recibir citas{' '}
+              <em style={{ color: GOLD, fontStyle: 'normal' }}>profesionalmente</em>
             </h2>
           </div>
         </Reveal>
@@ -271,19 +261,8 @@ export default function Home() {
       <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
           <h2 className="s-title">
-            Tres pasos. <em style={{ color: GOLD, fontStyle: 'normal' }}>Cero complicaciones.</em>
+            Empieza en <em style={{ color: GOLD, fontStyle: 'normal' }}>minutos.</em>
           </h2>
-          <p
-            style={{
-              fontSize: '1rem',
-              letterSpacing: '.2em',
-              textTransform: 'uppercase',
-              color: GOLD,
-              marginTop: '.75rem',
-            }}
-          >
-            Cómo funciona
-          </p>
         </Reveal>
 
         <div style={{ position: 'relative' }}>
@@ -311,14 +290,14 @@ export default function Home() {
               },
               {
                 n: '02',
-                title: 'Recibe tu link',
-                desc: 'Tu página queda lista con tu marca, lista para compartir en redes y WhatsApp.',
+                title: 'Recibe tu página lista para compartir',
+                desc: 'Diseñada con tu marca, optimizada para móviles y lista para enviar por WhatsApp y redes.',
                 image: '/steps/step2.jpeg',
               },
               {
                 n: '03',
-                title: 'Empieza a recibir citas',
-                desc: 'Tus clientes reservan solos y tú administras todo desde tu celular.',
+                title: 'Empieza a recibir reservas',
+                desc: 'Tus clientes reservan solos mientras tú administras todo desde tu celular.',
                 image: '/steps/step3.png',
               },
             ].map((s, i) => {
@@ -439,7 +418,7 @@ export default function Home() {
       <section id="planes" className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
           <h2 className="s-title">
-            Inversion <em style={{ color: GOLD, fontStyle: 'normal' }}>en tu marca</em>
+            Una inversión <em style={{ color: GOLD, fontStyle: 'normal' }}>en tu negocio</em>
           </h2>
           <p
             style={{
@@ -450,7 +429,7 @@ export default function Home() {
               lineHeight: 1.7,
             }}
           >
-            Precios transparentes diseñados para crecer contigo.
+            Empieza a recibir reservas online con una experiencia profesional para tus clientes.
           </p>
         </Reveal>
 
@@ -626,7 +605,7 @@ export default function Home() {
               marginBottom: '1.25rem',
             }}
           >
-            ¿Listo elevar tu estándar?
+            La experiencia que esperan tus clientes
           </h2>
           <p
             style={{
@@ -637,7 +616,7 @@ export default function Home() {
               lineHeight: 1.7,
             }}
           >
-            Hablemos hoy mismo sobre como podemos automatizar tu negocio — sin compromiso.
+            Una página profesional, reservas automáticas y una agenda siempre organizada.
           </p>
           <a
             href={waLink('Hola! Quiero crear mi página en Probo.pro 🙌')}
@@ -659,7 +638,7 @@ export default function Home() {
             onMouseEnter={(e) => (e.currentTarget.style.background = GOLD_L)}
             onMouseLeave={(e) => (e.currentTarget.style.background = GOLD)}
           >
-            Hablemos ahora
+            Solicitar mi página
           </a>
         </Reveal>
       </section>
