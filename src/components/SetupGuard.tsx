@@ -25,6 +25,15 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError]         = useState('')
 
+  // Remove the manifest link on /setup pages: with a manifest present, iOS ignores
+  // the current URL and "Add to Home Screen" always opens manifest.start_url ("/"),
+  // dropping the ?key=... needed to auto-unlock. Without a manifest, iOS bookmarks
+  // the exact current URL instead.
+  useEffect(() => {
+    const link = document.querySelector('link[rel="manifest"]')
+    if (link) link.remove()
+  }, [])
+
   // 1. Check existing unlock (password session) or magic-link key on mount
   useEffect(() => {
     let active = true
