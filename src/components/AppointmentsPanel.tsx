@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { getAppointmentsByDate, getAppointmentsByDateRange, cancelAppointment } from '../lib/supabase'
+import { getAppointmentsByDate, getAppointmentsByDateRange, cancelAppointment, getScheduleSettings } from '../lib/supabase'
 import BookingDialog from './booking/BookingDialog'
 import type { Appointment } from '../types/booking'
 
@@ -39,6 +39,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   const [confirmTarget, setConfirmTarget] = useState<Appointment | null>(null)
   const [showBooking, setShowBooking] = useState(false)
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day')
+  const [workDays, setWorkDays] = useState<number[] | null>(null)
   const [range, setRange] = useState({ start: -60, end: 60 })
   const activeCardRef = useRef<HTMLButtonElement>(null)
   const carouselRef   = useRef<HTMLDivElement>(null)
@@ -78,6 +79,10 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
   }, [businessId, isoDate, viewMode, weekStartIso, weekEndIso])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    getScheduleSettings(businessId).then(s => { if (s) setWorkDays(s.work_days) })
+  }, [businessId])
 
   const daysFromToday = Math.round((date.getTime() - new Date(todayIso).getTime()) / 86400000)
 
@@ -292,6 +297,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
             const iso = toISODate(d)
             const active = iso === isoDate
             const today  = iso === todayIso
+            const isWorkDay = workDays === null || workDays.includes(d.getDay())
             return (
               <button key={iso} ref={active ? activeCardRef : undefined} onClick={() => setDate(d)}
                 style={{
@@ -303,6 +309,7 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
                   border: `1px solid ${active ? 'var(--color-gold)' : 'var(--color-rim)'}`,
                   borderRadius: '6px',
                   cursor: 'pointer', transition: 'all .2s',
+                  opacity: isWorkDay ? 1 : .4,
                 }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-rim)' }}
@@ -409,6 +416,8 @@ export default function AppointmentsPanel({ businessId, businessName }: { busine
             const iso = toISODate(d)
             const dayAppts = appointments.filter(a => a.appointment_date === iso)
             const isTodayCol = iso === todayIso
+            const isWorkDay = workDays === null || workDays.includes(d.getDay())
+            if (!isWorkDay && dayAppts.length === 0) return null
             return (
               <div key={iso}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '.5rem', marginBottom: '.6rem' }}>
