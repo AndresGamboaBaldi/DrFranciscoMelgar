@@ -12,59 +12,103 @@ import type { Professional } from '../types/professional'
 //  1. DR. FRANCISCO MELGAR — Medicina Estética
 // ────────────────────────────────────────────────────────────────
 const doctor_melgar: Professional = {
-  photos: ['/doctor_melgar/photos/drmelgar_1.jpeg', '/doctor_melgar/photos/drmelgar_ofi2.jpeg', '/doctor_melgar/photos/drmelgar_ofi3.jpeg', '/doctor_melgar/photos/drmelgar_ofi.jpeg'],
-  slug:      'doctor_melgar',
-  category:  'estetica',
+  photos: [
+    '/doctor_melgar/photos/drmelgar_1.jpeg',
+    '/doctor_melgar/photos/drmelgar_ofi2.jpeg',
+    '/doctor_melgar/photos/drmelgar_ofi3.jpeg',
+    '/doctor_melgar/photos/drmelgar_ofi.jpeg',
+  ],
+  slug: 'doctor_melgar',
+  category: 'estetica',
   heroPhoto: '/doctor_melgar/photos/drmelgar.jpeg',
-  name:      'Dr. Francisco Melgar',
+  name: 'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
-  title:     'Médico Estético',
+  title: 'Médico Estético',
   specialty: 'Especialista en Medicina Estetica y Tricologia',
-  location:  'Cochabamba, Bolivia',
-  tagline:    'La confianza',
+  location: 'Cochabamba, Bolivia',
+  tagline: 'La confianza',
   taglineSub: 'comienza aquí.',
   stats: [
     { n: '+500', label: 'Pacientes satisfechos' },
-    { n: '5+',    label: 'Años de experiencia' },
+    { n: '5+', label: 'Años de experiencia' },
   ],
 
   aboutTitle: 'del Doctor',
   finalQuote: 'La mejor inversión es en ti mismo.',
   bio: 'Después de años de formación en España y Brasil, dos referentes mundiales en medicina estética, y con experiencia en congresos internacionales junto a los mejores especialistas del mundo, llego a Bolivia para brindarte lo último en estética y salud capilar. Mi consulta nace con la visión de que la medicina estética no debe cambiar quien eres, sino resaltar tu mejor versión con elegancia, naturalidad y confianza. Cada detalle de mi práctica esta pensada para ofrecerte una experiencia personalizada y cercana, porque la verdadera transformación se refleja no solo en tu imagen, sino en la seguridad con la que eliges presentarte al mundo.',
   credentials: [
-    { label: 'Formación',       value: 'Universidad Privada del Valle' },
-    { label: 'Fellowship',      value: 'Madrid · Medicina Estetica' },
+    { label: 'Formación', value: 'Universidad Privada del Valle' },
+    { label: 'Fellowship', value: 'Madrid · Medicina Estetica' },
     { label: 'Especialización', value: 'Medicina Estética y Tricologia' },
   ],
 
   services: [
-    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  durationMins: 120, description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
-    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',durationMins: 30, description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
-    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',durationMins: 30, description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
-    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación',durationMins: 30, description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
-    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',durationMins: 30, description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
+    {
+      id: 'botox',
+      name: 'Toxina Botulínica',
+      tag: 'Neuromodulador',
+      durationMins: 120,
+      description:
+        'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',
+      image: '/doctor_melgar/services/toxina.jpg',
+    },
+    {
+      id: 'hialuronico',
+      name: 'Ácido Hialurónico',
+      tag: 'Voluminizador',
+      durationMins: 30,
+      description:
+        'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',
+      image: '/doctor_melgar/services/acido.jpeg',
+    },
+    {
+      id: 'labios',
+      name: 'Diseño de Labios',
+      tag: 'Diseño',
+      durationMins: 30,
+      description:
+        'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',
+      image: '/doctor_melgar/services/labios.jpg',
+    },
+    {
+      id: 'colageno',
+      name: 'Colágeno & PRP',
+      tag: 'Bioestimulación',
+      durationMins: 30,
+      description:
+        'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.',
+    },
+    {
+      id: 'radio',
+      name: 'Radiofrecuencia',
+      tag: 'Reafirmación',
+      durationMins: 30,
+      description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.',
+    },
   ],
 
-  phone:   '59172235604',
-  email:   'melgarbaldi.hf@gmail.com',
+  phone: '59172235604',
+  email: 'melgarbaldi.hf@gmail.com',
   address: 'Parque Fidel Anze #2345, Of. 8B\nCochabamba, Bolivia',
   schedule: ['Lun — Vie: 9:00 — 21:00', 'Sábados: 9:00 — 14:00'],
 
   theme: {
-    mode:        'light',
-    accent:      '#b07c35',
+    mode: 'light',
+    accent: '#b07c35',
     accentLight: '#c48c45',
     fonts: {
-      display:        'Playfair Display',
-      body:           'DM Sans',
-      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
+      display: 'Playfair Display',
+      body: 'DM Sans',
+      googleFontsUrl:
+        'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
     },
   },
 
   mapUrl: 'https://maps.app.goo.gl/eMHRUCNk4ji62wC99?g_st=ic',
-  businessId:        'doctor_melgar',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=cdebf6a18fc4c3be2c64acffa23b946165c8c5c1ba50981dee6ad5d70df5c5c7',
-  setupPassword:   'melgar2026',
+  businessId: 'doctor_melgar',
+  calendarFeedUrl:
+    'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=cdebf6a18fc4c3be2c64acffa23b946165c8c5c1ba50981dee6ad5d70df5c5c7',
+  setupPassword: 'melgar2026',
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -73,80 +117,139 @@ const doctor_melgar: Professional = {
 const barber_vip: Professional = {
   heroPhoto: '/barber_vip/photos/barberia.webp',
   photos: ['/barber_vip/photos/jhoel.jpeg'],
-  slug:      'barber_vip',
-  category:  'barbero',
-  name:      'Barber VIP',
+  slug: 'barber_vip',
+  category: 'barbero',
+  name: 'Barber VIP',
   shortName: 'Barber VIP',
-  title:     'Barbería de Lujo',
+  title: 'Barbería de Lujo',
   specialty: 'Corte, barba y grooming de primera clase en Cochabamba',
-  location:  'Cochabamba, Bolivia',
-  tagline:   'El estilo no es accidental,',
+  location: 'Cochabamba, Bolivia',
+  tagline: 'El estilo no es accidental,',
   taglineSub: 'es una decisión.',
-  
+
   stats: [
     { n: '+500', label: 'Clientes satisfechos' },
-    { n: '8+',   label: 'Años de experiencia' },
+    { n: '8+', label: 'Años de experiencia' },
   ],
 
   aboutTitle: 'de la Barbería',
-  finalQuote: 'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
+  finalQuote:
+    'Un buen corte no cambia cómo te ves. Cambia cómo te sientes al salir por esa puerta.',
   bio: 'Barber VIP nació con la visión de traer a Cochabamba una experiencia de barbería de lujo: ambiente premium, técnicas modernas y atención personalizada. Nuestro equipo de barberos certificados se especializa en cortes clásicos, fade, diseño de barba y tratamientos capilares.',
   credentials: [
     { label: 'Certificación', value: 'Barbería Profesional' },
-    { label: 'Ambiente',      value: 'Premium & Exclusivo' },
+    { label: 'Ambiente', value: 'Premium & Exclusivo' },
   ],
 
   services: [
-    { id: 'corte',   name: 'Corte', tag: 'Esencial',   price: 'Bs. 70',durationMins: 45, description: 'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.', image: '/barber_vip/services/fade.jpeg' },
-    { id: 'barba',  name: 'Corte y Barba',    tag: 'Clásico',   price: 'Bs. 100',durationMins: 45, description: 'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.', image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Bs. 350',durationMins: 180,description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
-    { id: 'ritual',   name: 'Ritual de Barba', tag: 'Premium',   price: 'Bs. 80',durationMins: 60, description: 'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.', image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'ondulacion',  name: 'Ondulación',    tag: 'Estilo',   price: 'Bs. 60',durationMins: 120, description: 'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.', image: '/barber_vip/services/diseno.jpeg' },
-    { id: 'limpieza',  name: 'Limpieza Facial',    tag: 'Premium',     price: 'Bs. 150',durationMins: 120, description: 'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.', image: '/barber_vip/services/tinte.jpeg' },
+    {
+      id: 'corte',
+      name: 'Corte',
+      tag: 'Esencial',
+      price: 'Bs. 70',
+      durationMins: 45,
+      description:
+        'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.',
+      image: '/barber_vip/services/corte.jpeg',
+    },
+    {
+      id: 'barba',
+      name: 'Corte y Barba',
+      tag: 'Clásico',
+      price: 'Bs. 100',
+      durationMins: 45,
+      description:
+        'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.',
+      image: '/barber_vip/services/fade.jpeg',
+    },
+    {
+      id: 'tinte',
+      name: 'Tinte & Color',
+      tag: 'Color',
+      price: 'Bs. 350',
+      durationMins: 180,
+      description:
+        'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.',
+      image: '/barber_vip/services/tinte.jpeg',
+    },
+    {
+      id: 'ritual',
+      name: 'Ritual de Barba',
+      tag: 'Premium',
+      price: 'Bs. 80',
+      durationMins: 60,
+      description:
+        'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.',
+      image: '/barber_vip/services/toallaritual.jpg',
+    },
+    {
+      id: 'ondulacion',
+      name: 'Ondulación',
+      tag: 'Estilo',
+      price: 'Bs. 60',
+      durationMins: 120,
+      description:
+        'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',
+      image: '/barber_vip/services/ondulacion.jpeg',
+    },
+    {
+      id: 'limpieza',
+      name: 'Limpieza Facial',
+      tag: 'Premium',
+      price: 'Bs. 150',
+      durationMins: 120,
+      description:
+        'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.',
+      image: '/barber_vip/services/limpiezafacial2.webp',
+    },
   ],
 
-  phone:   '59177933737',
-  email:   'citas@barbervip.bo',
+  phone: '59177933737',
+  email: 'citas@barbervip.bo',
   address: 'Av Uyuni #1234\nCochabamba, Bolivia',
   schedule: ['Lun — Sáb: 9:00 — 20:00'],
 
- theme: {
-    mode:        'dark',
-    accent:      '#2855c2',
+  theme: {
+    mode: 'dark',
+    accent: '#2855c2',
     accentLight: '#3d6edc',
     fonts: {
-      display:        'Bebas Neue',
-      body:           'Inter',
-      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
+      display: 'Bebas Neue',
+      body: 'Inter',
+      googleFontsUrl:
+        'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
     },
   },
 
   mapUrl: 'https://maps.app.goo.gl/qcWfFwZqksNu2iFYA?g_st=ic',
-  businessId:        'barber_vip',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=12d9f83cca937e8db7996811bfafff18bb0e725efacce7c76cad8029bf96fb3e',
-  setupPassword:   'barbervip2026',
+  businessId: 'barber_vip',
+  calendarFeedUrl:
+    'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=12d9f83cca937e8db7996811bfafff18bb0e725efacce7c76cad8029bf96fb3e',
+  setupPassword: 'barbervip2026',
   staff: [
     {
-      id:       'jhoel',
-      name:     'Jhoel',
-      shortName:'Jhoel',
-      title:    'Barbero y Especialista en Colorimetría',
-      photo:    '/barber_vip/photos/jhoel.jpeg',
-      phone:    '59177933737',
-      businessId:      'jhoel_cuts',
-      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
-      setupPassword:   'jhoel2026',
+      id: 'jhoel',
+      name: 'Jhoel',
+      shortName: 'Jhoel',
+      title: 'Barbero y Especialista en Colorimetría',
+      photo: '/barber_vip/photos/jhoel.jpeg',
+      phone: '59177933737',
+      businessId: 'jhoel_cuts',
+      calendarFeedUrl:
+        'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
+      setupPassword: 'jhoel2026',
     },
     {
-      id:       'andres',
-      name:     'Andres',
-      shortName:'Andres',
-      title:    'Barbero & Estilista',
-      photo:    '/barber_vip/photos/andres.jpeg',
-      phone:    '59172235605',
-      businessId:      'andres',
-      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
-      setupPassword:   'andres2026',
+      id: 'andres',
+      name: 'Andres',
+      shortName: 'Andres',
+      title: 'Barbero & Estilista',
+      photo: '/barber_vip/photos/andres.jpeg',
+      phone: '59172235605',
+      businessId: 'andres',
+      calendarFeedUrl:
+        'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
+      setupPassword: 'andres2026',
     },
     /* {
       id:       'jheison',
@@ -168,55 +271,85 @@ const barber_vip: Professional = {
 const dr_seifert: Professional = {
   photos: ['/dr_seifert/photos/dr_seifert_3.jpeg', '/dr_seifert/photos/dr_seifert_1.jpeg'],
   heroPhoto: '/dr_seifert/photos/dr_seifert_2.jpeg',
-  slug:      'dr_seifert',
-  category:  'dentista',
-  name:      'Dr. Ivan Seifert',
+  slug: 'dr_seifert',
+  category: 'dentista',
+  name: 'Dr. Ivan Seifert',
   shortName: 'Dr. Seifert',
-  title:     'Especialista en Endodoncia',
+  title: 'Especialista en Endodoncia',
   specialty: 'Especialista en endodoncia y tratamiento de conductos',
-  location:  'Cochabamba, Bolivia',
-  tagline:   'Una sonrisa perfecta no es suerte,',
+  location: 'Cochabamba, Bolivia',
+  tagline: 'Una sonrisa perfecta no es suerte,',
   taglineSub: 'es diseño.',
   stats: [
     { n: '+2.000', label: 'Pacientes atendidos' },
-    { n: '22+',    label: 'Años de experiencia' },
+    { n: '22+', label: 'Años de experiencia' },
   ],
 
   aboutTitle: 'del Doctor',
-  finalQuote: 'Una sonrisa saludable y hermosa es la inversión más visible que puedes hacer en ti mismo.',
+  finalQuote:
+    'Una sonrisa saludable y hermosa es la inversión más visible que puedes hacer en ti mismo.',
   bio: 'El Dr. Ivan Seifert es especialista en Endodoncia, egresado de la Universidad Mayor de San Andrés con especialización en tratamiento de conductos y patología pulpar. Con más de 12 años de experiencia, combina tecnología de vanguardia con precisión clínica para preservar la salud dental de sus pacientes, siempre priorizando el bienestar y la comodidad durante cada procedimiento.',
   credentials: [
-    { label: 'Formación',       value: 'Univ. Mayor de San Simon' },
+    { label: 'Formación', value: 'Univ. Mayor de San Simon' },
     { label: 'Especialización', value: 'Endodoncia' },
-    { label: 'Área principal',  value: 'Tratamiento de Conductos' },
+    { label: 'Área principal', value: 'Tratamiento de Conductos' },
     { label: 'Certificaciones', value: 'ADA · LAOBO · SOB' },
   ],
 
   services: [
-    { id: 'limpieza',       name: 'Limpieza & Profilaxis',  tag: 'Preventivo',durationMins: 60, price: 'Desde Bs. 180', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/dr_seifert//services/limpieza.jpg'  },
-    { id: 'blanqueamiento', name: 'Blanqueamiento Dental',  tag: 'Estético',durationMins: 120,   price: 'Desde Bs. 450', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/dr_seifert//services/blanqueamiento.jpg'  },
-    { id: 'carillas',       name: 'Carillas de Porcelana',  tag: 'Diseño',durationMins: 120,     price: 'Desde Bs. 650', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/dr_seifert//services/carillas.jpg'  },
+    {
+      id: 'limpieza',
+      name: 'Limpieza & Profilaxis',
+      tag: 'Preventivo',
+      durationMins: 60,
+      price: 'Desde Bs. 180',
+      description:
+        'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.',
+      image: '/dr_seifert//services/limpieza.jpg',
+    },
+    {
+      id: 'blanqueamiento',
+      name: 'Blanqueamiento Dental',
+      tag: 'Estético',
+      durationMins: 120,
+      price: 'Desde Bs. 450',
+      description:
+        'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.',
+      image: '/dr_seifert//services/blanqueamiento.jpg',
+    },
+    {
+      id: 'carillas',
+      name: 'Carillas de Porcelana',
+      tag: 'Diseño',
+      durationMins: 120,
+      price: 'Desde Bs. 650',
+      description:
+        'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.',
+      image: '/dr_seifert//services/carillas.jpg',
+    },
   ],
 
-  phone:   '59170788218',
-  email:   'citas@drseifert.bo',
+  phone: '59170788218',
+  email: 'citas@drseifert.bo',
   address: 'Av. Salamanca #1234\nCochabamba, Bolivia',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 13:00'],
 
   theme: {
-    mode:        'light',
-    accent:      '#2b7a9e',
+    mode: 'light',
+    accent: '#2b7a9e',
     accentLight: '#3a8fb5',
     fonts: {
-      display:        'Playfair Display',
-      body:           'DM Sans',
-      googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
+      display: 'Playfair Display',
+      body: 'DM Sans',
+      googleFontsUrl:
+        'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap',
     },
   },
 
-  businessId:       'dr_seifert',
-  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',
-  setupPassword:   'seifert2026',
+  businessId: 'dr_seifert',
+  calendarFeedUrl:
+    'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',
+  setupPassword: 'seifert2026',
 }
 
 // ────────────────────────────────────────────────────────────────

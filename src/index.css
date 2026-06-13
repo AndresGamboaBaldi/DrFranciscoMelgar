@@ -147,6 +147,77 @@ body::after {
 .animate-fade-in    { animation: fadeIn 1s  cubic-bezier(0.16,1,0.3,1) both; }
 .animate-scroll-bob { animation: scrollBob 2.5s ease-in-out infinite; }
 
+/* ── Hero hero entrance + glow pulse ── */
+@keyframes heroTitleIn {
+  from { opacity: 0; transform: translateY(2.5rem) scale(.94); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.animate-hero-title { animation: heroTitleIn 1.3s cubic-bezier(0.16,1,0.3,1) both; }
+
+@keyframes glowPulse {
+  0%, 100% { opacity: .7; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 1;  transform: translateX(-50%) scale(1.12); }
+}
+.hero-glow { animation: glowPulse 6s ease-in-out infinite; }
+
+/* Shimmer sweep across the gold accent text */
+@keyframes shimmerSweep {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.hero-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--shimmer-color, #c4995a) 35%,
+    #fff 50%,
+    var(--shimmer-color, #c4995a) 65%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmerSweep 4s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+/* ── Liquid obsidian hero background ── */
+@keyframes liquidShift {
+  0%   { background-position: 0% 50%, 100% 30%; }
+  50%  { background-position: 100% 50%, 0% 70%; }
+  100% { background-position: 0% 50%, 100% 30%; }
+}
+.hero-liquid-bg {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(196,153,90,.18) 0%, transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(120,80,40,.16) 0%, transparent 60%);
+  background-size: 140% 140%, 160% 160%;
+  animation: liquidShift 18s ease-in-out infinite;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+/* Ghost outline watermark text with slow float */
+@keyframes ghostFloat {
+  0%, 100% { transform: translate3d(0,0,0); }
+  50%      { transform: translate3d(0,-1.2rem,0); }
+}
+.hero-ghost-text {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(196,153,90,.14);
+  letter-spacing: -.02em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  animation: ghostFloat 10s ease-in-out infinite;
+}
+
 /* ── Form inputs ── */
 input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   background: var(--color-bg);
@@ -268,28 +339,37 @@ input[type="time"], input[type="date"], input[type="number"] {
 /* ── Beneficios bento grid (Home) — layout desordenado con marcas de agua ── */
 .benefit-bento {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: minmax(180px, auto);
+  grid-template-columns: 1fr;
   gap: 1.25rem;
   position: relative;
 }
 .benefit-card {
   position: relative;
-  background: #0a0907;
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(20,19,17,.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(196,153,90,.18);
   padding: 2rem;
   overflow: hidden;
-  transition: background .35s ease, transform .35s ease, border-color .35s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: background .35s ease, transform .35s ease, border-color .35s ease, box-shadow .35s ease;
 }
-.benefit-card:hover {
-  background: #151210;
-  border-color: rgba(196,153,90,.35);
-  transform: translateY(-4px);
+.benefit-card:hover,
+.benefit-card:active,
+.benefit-card.is-active {
+  background: rgba(30,27,23,.8);
+  border-color: rgba(196,153,90,.5);
+  transform: translateY(-6px);
+  box-shadow: inset 0 1px 20px rgba(196,153,90,.08);
 }
 .benefit-card .benefit-card-icon {
   transition: transform .35s ease;
 }
-.benefit-card:hover .benefit-card-icon {
+.benefit-card:hover .benefit-card-icon,
+.benefit-card:active .benefit-card-icon,
+.benefit-card.is-active .benefit-card-icon {
   transform: scale(1.15) rotate(-6deg);
 }
 /* Big watermark number, bleeding off the edge */
@@ -305,30 +385,46 @@ input[type="time"], input[type="date"], input[type="number"] {
 }
 .benefit-card > *:not(.benefit-card-num) { position: relative; z-index: 1; }
 
-@media (min-width: 640px) {
+@media (min-width: 900px) {
   .benefit-bento {
-    grid-template-columns: 2fr 1fr 1fr;
-    grid-template-rows: minmax(220px, auto) minmax(220px, auto);
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: minmax(260px, auto) minmax(300px, auto);
   }
-  /* Asymmetric placement + slight vertical offsets for a "scattered" feel */
-  .benefit-card-1 { grid-column: 1 / 3; grid-row: 1; }
-  .benefit-card-2 { grid-column: 3; grid-row: 1 / 3; display: flex; flex-direction: column; justify-content: center; transform: translateY(1.5rem); }
-  .benefit-card-3 { grid-column: 1; grid-row: 2; transform: translateY(-1.5rem); }
-  .benefit-card-4 { grid-column: 2; grid-row: 2; }
+  /* Asymmetric placement echoing the reference layout */
+  .benefit-card-1 { grid-column: 1 / 8; grid-row: 1; }
+  .benefit-card-2 { grid-column: 8 / 13; grid-row: 1; margin-top: 3rem; }
+  .benefit-card-3 { grid-column: 1 / 6; grid-row: 2; margin-top: -2.5rem; }
+  .benefit-card-4 {
+    grid-column: 6 / 13;
+    grid-row: 2;
+    padding: 2.75rem;
+    border-color: rgba(196,153,90,.3);
+    background: rgba(29,27,25,.8);
+  }
+  .benefit-card-4:hover,
+  .benefit-card-4:active,
+  .benefit-card-4.is-active {
+    border-color: rgba(196,153,90,.6);
+  }
 
-  .benefit-card-2:hover { transform: translateY(1.5rem) translateY(-4px); }
-  .benefit-card-3:hover { transform: translateY(-1.5rem) translateY(-4px); }
+  .benefit-card-1 .benefit-card-num { font-size: 11rem; top: -2.5rem; left: -1rem; }
+  .benefit-card-2 .benefit-card-num { font-size: 8rem; bottom: -1.5rem; right: -1rem; }
+  .benefit-card-3 .benefit-card-num { font-size: 9rem; bottom: -2rem; left: -.5rem; }
+  .benefit-card-4 .benefit-card-num { font-size: 12rem; top: -3rem; right: -1.5rem; }
 
-  .benefit-card-1 .benefit-card-num { font-size: 9rem; top: -2.5rem; left: -1rem; }
-  .benefit-card-2 .benefit-card-num { font-size: 7rem; bottom: -1.5rem; right: -1rem; }
-  .benefit-card-3 .benefit-card-num { font-size: 8rem; bottom: -2rem; left: -.5rem; }
-  .benefit-card-4 .benefit-card-num { font-size: 7rem; top: -2rem; right: -1rem; }
+  .benefit-card-4 h3 { font-size: 2.2rem !important; }
 }
 .benefit-card-num { font-size: 5.5rem; top: -1rem; right: -.5rem; }
 
 /* ── Tap target minimum (solo botones, no links de nav) ── */
 @media (max-width: 640px) {
   button { min-height: 44px; }
+
+  .hero-glow {
+    width: 26rem !important;
+    height: 26rem !important;
+    opacity: .6;
+  }
 }
 
 /* ── Setup page tab bars ── */
