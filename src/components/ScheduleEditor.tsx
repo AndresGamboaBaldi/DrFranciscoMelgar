@@ -4,7 +4,7 @@ import { useStaff } from '../context/StaffContext'
 import { getScheduleSettings, saveScheduleSettings, type ScheduleSettings } from '../lib/supabase'
 
 const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB']
-const SLOT_OPTIONS = [15, 30, 45, 60]
+const SLOT_DURATION = 15
 const ADVANCE_OPTIONS = [
   { v: 0,  l: 'Sin restricción' },
   { v: 1,  l: '1 hora' },
@@ -36,7 +36,6 @@ export default function ScheduleEditor() {
   const [sunStart,   setSunStart]   = useState('10:00')
   const [sunEnd,     setSunEnd]     = useState('15:00')
 
-  const [slotDur,    setSlotDur]    = useState(30)
   const [minAdv,     setMinAdv]     = useState(0)
 
   const [loading, setLoading] = useState(true)
@@ -58,7 +57,6 @@ export default function ScheduleEditor() {
     setSunActive(!!s.sun_start)
     setSunStart(s.sun_start ?? '10:00')
     setSunEnd(s.sun_end   ?? '15:00')
-    setSlotDur(s.slot_duration)
     setMinAdv(s.min_advance)
   }, [])
 
@@ -98,7 +96,7 @@ export default function ScheduleEditor() {
         sun_end:       sunActive ? sunEnd   : null,
         break_start:   pmActive ? amEnd   : null,
         break_end:     pmActive ? pmStart : null,
-        slot_duration: slotDur,
+        slot_duration: SLOT_DURATION,
         min_advance:   minAdv,
       })
       setSaved(true)
@@ -213,20 +211,6 @@ export default function ScheduleEditor() {
       {/* ── 3. Parámetros ── */}
       <Section number="3" title="Parámetros">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div>
-            <Label>Intervalo entre horarios:</Label>
-            <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
-              {SLOT_OPTIONS.map(v => {
-                const active = slotDur === v
-                return (
-                  <button key={v} onClick={() => setSlotDur(v)}
-                    style={{ padding: '.5rem 1.25rem', border: `1px solid ${active ? 'var(--color-gold)' : 'var(--color-rim-l)'}`, background: active ? 'var(--color-gold)' : 'transparent', color: active ? 'var(--color-bg)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 400, cursor: 'pointer', transition: 'all .2s', borderRadius: '4px' }}
-                  >{v} min</button>
-                )
-              })}
-            </div>
-          </div>
-
           <div>
             <Label>Anticipación mínima para reservar:</Label>
            

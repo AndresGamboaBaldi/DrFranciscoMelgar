@@ -38,11 +38,11 @@ const doctor_melgar: Professional = {
   ],
 
   services: [
-    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  durationMins: 120,  icon: '◈', description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
-    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',    icon: '◉', description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
-    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',           icon: '◈', description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
-    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación', icon: '◇', description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
-    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación', icon: '◎', description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
+    { id: 'botox',       name: 'Toxina Botulínica', tag: 'Neuromodulador',  durationMins: 120, description: 'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',  image: '/doctor_melgar/services/toxina.jpg' },
+    { id: 'hialuronico', name: 'Ácido Hialurónico', tag: 'Voluminizador',durationMins: 30, description: 'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',                image: '/doctor_melgar/services/acido.jpeg' },
+    { id: 'labios',      name: 'Diseño de Labios',  tag: 'Diseño',durationMins: 30, description: 'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',                                             image: '/doctor_melgar/services/labios.jpg' },
+    { id: 'colageno',    name: 'Colágeno & PRP',    tag: 'Bioestimulación',durationMins: 30, description: 'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.' },
+    { id: 'radio',       name: 'Radiofrecuencia',   tag: 'Reafirmación',durationMins: 30, description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.' },
   ],
 
   phone:   '59172235604',
@@ -97,12 +97,12 @@ const barber_vip: Professional = {
   ],
 
   services: [
-    { id: 'corte',   name: 'Corte', tag: 'Esencial',   price: 'Bs. 70',durationMins: 45,  icon: '◉', description: 'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.', image: '/barber_vip/services/fade.jpeg' },
-    { id: 'barba',  name: 'Corte y Barba',    tag: 'Clásico',   price: 'Bs. 100',durationMins: 45,  icon: '◈', description: 'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.', image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Bs. 350',durationMins: 180, icon: '◎', description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
-    { id: 'ritual',   name: 'Ritual de Barba', tag: 'Premium',   price: 'Bs. 80',durationMins: 45,  icon: '✦', description: 'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.', image: '/barber_vip/services/clasico.jpeg' },
-    { id: 'ondulacion',  name: 'Ondulación',    tag: 'Estilo',   price: 'Bs. 60',durationMins: 45,  icon: '◇', description: 'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.', image: '/barber_vip/services/diseno.jpeg' },
-    { id: 'limpieza',  name: 'Limpieza Facial',    tag: 'Premium',     price: 'Bs. 150',durationMins: 120, icon: '✺', description: 'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.', image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'corte',   name: 'Corte', tag: 'Esencial',   price: 'Bs. 70',durationMins: 45, description: 'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.', image: '/barber_vip/services/fade.jpeg' },
+    { id: 'barba',  name: 'Corte y Barba',    tag: 'Clásico',   price: 'Bs. 100',durationMins: 45, description: 'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.', image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'tinte',  name: 'Tinte & Color',    tag: 'Color',     price: 'Bs. 350',durationMins: 180,description: 'Coloración profesional con productos de alta calidad. Desde colores naturales hasta transformaciones radicales, con cuidado total del cabello.', image: '/barber_vip/services/tinte.jpeg' },
+    { id: 'ritual',   name: 'Ritual de Barba', tag: 'Premium',   price: 'Bs. 80',durationMins: 60, description: 'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.', image: '/barber_vip/services/clasico.jpeg' },
+    { id: 'ondulacion',  name: 'Ondulación',    tag: 'Estilo',   price: 'Bs. 60',durationMins: 120, description: 'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.', image: '/barber_vip/services/diseno.jpeg' },
+    { id: 'limpieza',  name: 'Limpieza Facial',    tag: 'Premium',     price: 'Bs. 150',durationMins: 120, description: 'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.', image: '/barber_vip/services/tinte.jpeg' },
   ],
 
   phone:   '59177933737',
@@ -193,9 +193,9 @@ const dr_seifert: Professional = {
   ],
 
   services: [
-    { id: 'limpieza',       name: 'Limpieza & Profilaxis',  tag: 'Preventivo', price: 'Desde Bs. 180', icon: '◈', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/dr_seifert//services/limpieza.jpg'  },
-    { id: 'blanqueamiento', name: 'Blanqueamiento Dental',  tag: 'Estético',   price: 'Desde Bs. 450', icon: '◉', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/dr_seifert//services/blanqueamiento.jpg'  },
-    { id: 'carillas',       name: 'Carillas de Porcelana',  tag: 'Diseño',     price: 'Desde Bs. 650', icon: '◇', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/dr_seifert//services/carillas.jpg'  },
+    { id: 'limpieza',       name: 'Limpieza & Profilaxis',  tag: 'Preventivo',durationMins: 60, price: 'Desde Bs. 180', description: 'Limpieza profunda que elimina sarro, placa bacteriana y manchas. Incluye pulido y fluorización para una protección duradera.', image: '/dr_seifert//services/limpieza.jpg'  },
+    { id: 'blanqueamiento', name: 'Blanqueamiento Dental',  tag: 'Estético',durationMins: 120,   price: 'Desde Bs. 450', description: 'Sistema de blanqueamiento profesional en consultorio. Resultados visibles desde la primera sesión, hasta 8 tonos más claro.', image: '/dr_seifert//services/blanqueamiento.jpg'  },
+    { id: 'carillas',       name: 'Carillas de Porcelana',  tag: 'Diseño',durationMins: 120,     price: 'Desde Bs. 650', description: 'Finas láminas de porcelana que transforman la forma, color y alineación de los dientes. Resultado natural y duradero por más de 15 años.', image: '/dr_seifert//services/carillas.jpg'  },
   ],
 
   phone:   '59170788218',

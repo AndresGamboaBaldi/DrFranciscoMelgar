@@ -5,7 +5,6 @@ export interface ProService {
   /** Only set for services with a non-default duration (e.g. tinte=120). Otherwise derived from DB slotDuration. */
   durationMins?: number
   price?: string
-  icon: string
   description: string
   /** Optional image URL shown at the top of the card (e.g. '/services/botox.jpg') */
   image?: string
@@ -18,9 +17,9 @@ export interface ProCredential {
 
 /** Color theme — solo necesitas cambiar el acento y el modo */
 export interface ProfessionalTheme {
-  mode?: 'light' | 'dark'  // 'dark' por defecto
-  accent: string            // color principal: botones, highlights, títulos em
-  accentLight?: string      // hover del acento (si no se pone, se calcula solo)
+  mode?: 'light' | 'dark' // 'dark' por defecto
+  accent: string // color principal: botones, highlights, títulos em
+  accentLight?: string // hover del acento (si no se pone, se calcula solo)
   /**
    * Tipografías personalizadas. Si no se especifica, usa Cormorant Garamond + Jost.
    *
@@ -78,7 +77,7 @@ export interface BookingConfig {
   workDays: number[]
 
   /** Horario general de trabajo */
-  workHours: { start: string; end: string }  // 'HH:MM'
+  workHours: { start: string; end: string } // 'HH:MM'
 
   /** Horario especial del sábado (null = cerrado ese día aunque esté en workDays) */
   satHours?: { start: string; end: string } | null

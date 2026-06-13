@@ -4,7 +4,6 @@ export interface Service {
   tag: string
   durationMins?: number
   price?: string
-  icon: string
 }
 
 export type BookingStep = 1 | 2 | 3 | 4
