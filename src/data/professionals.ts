@@ -49,6 +49,7 @@ const doctor_melgar: Professional = {
       name: 'Consulta de Valoración',
       tag: 'Diagnóstico',
       durationMins: 30,
+      image: '/doctor_melgar/services/consulta.jpeg',
       description:
         'Evaluación personalizada para identificar qué tratamientos se adaptan mejor a tu rostro y objetivos. Ideal si aún no sabes qué necesitas.',
     },
