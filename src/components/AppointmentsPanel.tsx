@@ -4,6 +4,7 @@ import {
   getAppointmentsByDateRange,
   cancelAppointment,
   getScheduleSettings,
+  withTimeout,
 } from '../lib/supabase'
 import BookingDialog from './booking/BookingDialog'
 import type { Appointment } from '../types/booking'
@@ -61,6 +62,7 @@ export default function AppointmentsPanel({
   const [date, setDate] = useState(() => new Date())
   const [appointments, setAppts] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [cancelingId, setCancelingId] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<Appointment | null>(null)
   const [showBooking, setShowBooking] = useState(false)
@@ -97,11 +99,17 @@ export default function AppointmentsPanel({
 
   const load = useCallback(async () => {
     setLoading(true)
-    const data =
-      viewMode === 'day'
-        ? await getAppointmentsByDate(businessId, isoDate)
-        : await getAppointmentsByDateRange(businessId, weekStartIso, weekEndIso)
-    setAppts(data)
+    setLoadError(false)
+    try {
+      const data = await withTimeout(
+        viewMode === 'day'
+          ? getAppointmentsByDate(businessId, isoDate)
+          : getAppointmentsByDateRange(businessId, weekStartIso, weekEndIso)
+      )
+      setAppts(data)
+    } catch {
+      setLoadError(true)
+    }
     setLoading(false)
   }, [businessId, isoDate, viewMode, weekStartIso, weekEndIso])
 
@@ -229,8 +237,8 @@ export default function AppointmentsPanel({
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '.75rem',
-          padding: '1rem 1.25rem',
+          gap: '.1rem',
+          padding: '.5rem 1.25rem',
           background: 'var(--color-surface)',
           border: '1px solid var(--color-rim)',
           borderLeft: `3px solid ${accent}`,
@@ -246,14 +254,23 @@ export default function AppointmentsPanel({
             gap: '1rem',
           }}
         >
-          <div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: '.85rem',
+              flexWrap: 'wrap',
+              minWidth: 0,
+            }}
+          >
             <p
               style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: '1.2rem',
+                fontWeight: 600,
                 letterSpacing: '.1em',
-                color: accent,
-                marginBottom: '.35rem',
+                color: 'var(--color-ink)',
+                flexShrink: 0,
               }}
             >
               {formatTime12h(apt.appointment_time)}
@@ -261,21 +278,19 @@ export default function AppointmentsPanel({
             <p
               style={{
                 fontSize: '1.2rem',
-                fontWeight: 500,
-                color: 'var(--color-ink)',
-                marginBottom: '.2rem',
+                fontWeight: 600,
+                color: 'var(--color-ink-dim)',
               }}
             >
               {apt.name}
             </p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--color-ink-dim)' }}>{apt.service}</p>
             {apt.notes && apt.notes !== 'Sin comentarios especiales' && (
               <p
                 style={{
                   fontSize: '.78rem',
                   color: 'var(--color-ink-ghost)',
-                  marginTop: '.25rem',
                   fontStyle: 'italic',
+                  flexBasis: '100%',
                 }}
               >
                 "{apt.notes}"
@@ -313,25 +328,34 @@ export default function AppointmentsPanel({
 
         {/* Actions */}
         {!aptIsPast && (
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: '.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+            <p
+              style={{
+                flex: 1,
+                minWidth: 0,
+                fontSize: '0.9rem',
+                fontWeight: 400,
+                color: 'var(--color-ink-dim)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {apt.service}
+            </p>
             <a
               href={buildWhatsAppUrl(apt, businessName)}
               target="_blank"
               rel="noopener noreferrer"
+              title="Confirmar por WhatsApp"
               style={{
-                flex: 1,
+                flexShrink: 0,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '.5rem',
                 background: 'var(--color-gold)',
                 border: '1px solid var(--color-gold)',
                 color: 'var(--color-bg)',
-                fontFamily: 'var(--font-body)',
-                fontSize: '.72rem',
-                fontWeight: 500,
-                letterSpacing: '.1em',
-                textTransform: 'uppercase',
                 padding: '.65rem',
                 textDecoration: 'none',
                 transition: 'opacity .2s',
@@ -343,10 +367,9 @@ export default function AppointmentsPanel({
                 e.currentTarget.style.opacity = '1'
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.71.45 3.38 1.3 4.85L2.05 22l5.36-1.4a9.9 9.9 0 0 0 4.63 1.18h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7C17.16 3.03 14.69 2 12.04 2zm0 18.13a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.18.83.85-3.1-.2-.32a8.18 8.18 0 0 1-1.26-4.4c0-4.54 3.7-8.24 8.27-8.24 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.55-3.7 8.25-8.26 8.25zm4.53-6.18c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.56.13-.17.25-.64.8-.78.96-.14.17-.29.18-.54.06-.25-.12-1.04-.38-1.99-1.22-.74-.65-1.23-1.46-1.38-1.7-.14-.25-.02-.39.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.84-.86 2.04s.88 2.37 1 2.53c.12.17 1.74 2.65 4.21 3.72.59.25 1.05.4 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z" />
               </svg>
-              Confirmar por WhatsApp
             </a>
 
             <IconButton
@@ -788,6 +811,34 @@ export default function AppointmentsPanel({
           }}
         >
           Cargando…
+        </div>
+      ) : loadError ? (
+        <div
+          style={{
+            padding: '2.5rem',
+            textAlign: 'center',
+            color: 'var(--color-ink-dim)',
+            fontSize: '.9rem',
+          }}
+        >
+          <p style={{ marginBottom: '1rem' }}>No se pudo cargar la agenda. Revisa tu conexión.</p>
+          <button
+            onClick={load}
+            style={{
+              padding: '.65rem 1.5rem',
+              background: 'none',
+              border: '1px solid var(--color-rim-l)',
+              color: 'var(--color-ink)',
+              fontFamily: 'var(--font-body)',
+              fontSize: '.72rem',
+              fontWeight: 500,
+              letterSpacing: '.12em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            Reintentar
+          </button>
         </div>
       ) : appointments.length === 0 ? (
         <div

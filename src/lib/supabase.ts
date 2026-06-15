@@ -8,6 +8,14 @@ export const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null
 
+/** Rejects after `ms` if `promise` hasn't settled — avoids requests hanging forever on flaky networks. */
+export function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ])
+}
+
 // ─────────────────────────────────────────────────────────────
 //  APPOINTMENTS
 // ─────────────────────────────────────────────────────────────

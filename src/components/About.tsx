@@ -36,8 +36,8 @@ export default function About() {
 
           <Reveal delay={400}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 190px), 1fr))', gap: 1, background: 'var(--color-rim)', marginBottom: '2rem' }}>
-              {pro.credentials.map(c => (
-                <div key={c.label} style={{ background: 'var(--color-bg)', padding: '1.1rem 1.4rem' }}>
+              {pro.credentials.map((c, i) => (
+                <div key={i} style={{ background: 'var(--color-bg)', padding: '1.1rem 1.4rem' }}>
                   <div style={{ fontSize: '.76rem', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)', fontWeight: 500, marginBottom: '.4rem' }}>{c.label}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2 }}>{c.value}</div>
                 </div>

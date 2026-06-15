@@ -13,14 +13,14 @@ import type { Professional } from '../types/professional'
 // ────────────────────────────────────────────────────────────────
 const doctor_melgar: Professional = {
   photos: [
-    '/doctor_melgar/photos/drmelgar_1.jpeg',
+    '/doctor_melgar/photos/drmelgar.jpeg',
     '/doctor_melgar/photos/drmelgar_ofi2.jpeg',
     '/doctor_melgar/photos/drmelgar_ofi3.jpeg',
     '/doctor_melgar/photos/drmelgar_ofi.jpeg',
   ],
   slug: 'doctor_melgar',
   category: 'estetica',
-  heroPhoto: '/doctor_melgar/photos/drmelgar.jpeg',
+  heroPhoto: '/doctor_melgar/photos/drmelgar_1.jpeg',
   name: 'Dr. Francisco Melgar',
   shortName: 'Dr. Melgar',
   title: 'Médico Estético',
@@ -37,53 +37,92 @@ const doctor_melgar: Professional = {
   finalQuote: 'La mejor inversión es en ti mismo.',
   bio: 'Después de años de formación en España y Brasil, dos referentes mundiales en medicina estética, y con experiencia en congresos internacionales junto a los mejores especialistas del mundo, llego a Bolivia para brindarte lo último en estética y salud capilar. Mi consulta nace con la visión de que la medicina estética no debe cambiar quien eres, sino resaltar tu mejor versión con elegancia, naturalidad y confianza. Cada detalle de mi práctica esta pensada para ofrecerte una experiencia personalizada y cercana, porque la verdadera transformación se refleja no solo en tu imagen, sino en la seguridad con la que eliges presentarte al mundo.',
   credentials: [
-    { label: 'Formación', value: 'Universidad Privada del Valle' },
-    { label: 'Fellowship', value: 'Madrid · Medicina Estetica' },
-    { label: 'Especialización', value: 'Medicina Estética y Tricologia' },
+    { label: 'Formación', value: 'Médico Cirujano · Universidad Privada del Valle' },
+    { label: 'Máster', value: 'Tricología y Transpante Capilar · Madrid, España' },
+    { label: 'Máster', value: 'Medicina Estética y Antienvejecimiento · Madrid, España' },
+    { label: 'Máster', value: 'Armonización Facial · São Paulo, Brasil' },
   ],
 
   services: [
     {
-      id: 'botox',
-      name: 'Toxina Botulínica',
-      tag: 'Neuromodulador',
-      durationMins: 120,
+      id: 'consulta',
+      name: 'Consulta de Valoración',
+      tag: 'Diagnóstico',
+      durationMins: 30,
       description:
-        'Suaviza líneas de expresión y previene el envejecimiento prematuro. Resultados completamente naturales que preservan la expresividad del rostro.',
+        'Evaluación personalizada para identificar qué tratamientos se adaptan mejor a tu rostro y objetivos. Ideal si aún no sabes qué necesitas.',
+    },
+    {
+      id: 'botox-facial',
+      name: 'Toxina Botulínica · Rostro',
+      tag: 'Neuromodulador',
+      durationMins: 30,
+      description:
+        'Suaviza líneas de expresión en entrecejo, frente y patas de gallo, previniendo el envejecimiento prematuro con resultados completamente naturales.',
       image: '/doctor_melgar/services/toxina.jpg',
     },
     {
-      id: 'hialuronico',
-      name: 'Ácido Hialurónico',
-      tag: 'Voluminizador',
+      id: 'botox-terapeutico',
+      name: 'Toxina Botulínica · Terapéutica',
+      tag: 'Neuromodulador',
       durationMins: 30,
       description:
-        'Restaura el volumen perdido y define los contornos del rostro. Resultados inmediatos y duraderos de hasta 18 meses.',
-      image: '/doctor_melgar/services/acido.jpeg',
+        'Tratamiento para bruxismo, bandas del cuello e hiperhidrosis (sudoración excesiva) en axilas.',
+      image: '/doctor_melgar/services/bruxismo.jpg',
     },
     {
-      id: 'labios',
-      name: 'Diseño de Labios',
-      tag: 'Diseño',
-      durationMins: 30,
+      id: 'hialuronico-labios',
+      name: 'Ácido Hialurónico · Labios y Contorno',
+      tag: 'Voluminizador',
+      durationMins: 60,
       description:
-        'Perfilado y volumización natural y armónico. Técnica de microcánula para mayor confort.',
+        'Volumiza y define labios, surcos nasogenianos y ojeras con resultados inmediatos y naturales.',
       image: '/doctor_melgar/services/labios.jpg',
     },
     {
-      id: 'colageno',
-      name: 'Colágeno & PRP',
-      tag: 'Bioestimulación',
-      durationMins: 30,
+      id: 'hialuronico-rino',
+      name: 'Ácido Hialurónico · Rinomodelación',
+      tag: 'Voluminizador',
+      durationMins: 60,
       description:
-        'Estimula la producción natural de colágeno. Rejuvenecimiento profundo con resultados progresivos.',
+        'Define el perfil nasal sin cirugía, corrigiendo joroba, punta y proporciones de la nariz.',
+      image: '/doctor_melgar/services/nariz.jpg',
     },
     {
-      id: 'radio',
-      name: 'Radiofrecuencia',
-      tag: 'Reafirmación',
+      id: 'hialuronico-mandibula',
+      name: 'Ácido Hialurónico · Definición Mandibular',
+      tag: 'Voluminizador',
+      durationMins: 60,
+      image: '/doctor_melgar/services/menton.avif',
+      description:
+        'Marca la mandíbula, define el mentón y refuerza los puntos de anclaje facial para un perfil más anguloso y masculino.',
+    },
+    {
+      id: 'capilar',
+      name: 'Salud Capilar',
+      tag: 'Mesoterapia',
       durationMins: 30,
-      description: 'Reafirma y tensa la piel sin cirugía. Efecto lifting completamente natural.',
+      image: '/doctor_melgar/services/capilar.jpg',
+      description:
+        'Fortalece, revitaliza y estimula el crecimiento del cabello mediante mesoterapia capilar, en sesiones individuales o packs.',
+    },
+    {
+      id: 'bioestimuladores',
+      name: 'Bioestimuladores',
+      tag: 'Colágeno',
+      durationMins: 30,
+      image: '/doctor_melgar/services/bioestimuladores.jpg',
+      description:
+        'Estimulan la producción natural de colágeno para una piel más firme y joven, con resultados progresivos y duraderos.',
+    },
+    {
+      id: 'skinboosters',
+      name: 'Calidad de Piel',
+      tag: 'Skinboosters',
+      durationMins: 30,
+      image: '/doctor_melgar/services/piel.jpg',
+      description:
+        'Skinboosters y bioestimulación dérmica para mejorar hidratación, luminosidad y textura de la piel.',
     },
   ],
 
