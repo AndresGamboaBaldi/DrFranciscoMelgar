@@ -1060,9 +1060,7 @@ function SuccessState({
                 </span>
               )}
               {addressDetail && (
-                <p
-                  style={{ fontSize: '.1rem', color: 'var(--color-ink-dim)', marginTop: '.15rem' }}
-                >
+                <p style={{ fontSize: '1rem', color: 'var(--color-ink-dim)', marginTop: '.15rem' }}>
                   {addressDetail}
                 </p>
               )}
