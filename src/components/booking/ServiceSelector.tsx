@@ -84,32 +84,30 @@ function ServiceCard({
         boxShadow: isSelected ? 'inset 0 0 0 1.5px var(--color-gold)' : 'none',
         transition: 'background .25s',
         minHeight: '100px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
       }}
     >
-      {isSelected && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '.75rem',
-            right: '.75rem',
-            width: '1.15rem',
-            height: '1.15rem',
-            background: 'var(--color-gold)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--color-bg)',
-            fontSize: '.55rem',
-            borderRadius: '50%',
-          }}
-        >
-          ✓
-        </div>
-      )}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: isSelected ? '2.2rem' : '0',
+          height: isSelected ? '2.2rem' : '0',
+          background: 'var(--color-gold)',
+          transition:
+            'width .25s cubic-bezier(0.34,1.56,0.64,1), height .25s cubic-bezier(0.34,1.56,0.64,1)',
+          clipPath: 'polygon(100% 0, 0 0, 100% 100%)',
+          overflow: 'hidden',
+        }}
+      />
       <div
         style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.2rem',
+          fontSize: '1rem',
           fontWeight: 400,
           marginBottom: '.3rem',
           color: isSelected ? 'var(--color-gold)' : 'var(--color-ink)',
@@ -126,8 +124,8 @@ function ServiceCard({
       )}
       <div
         style={{
-          fontSize: '.8rem',
-          color: 'var(--color-ink-dim)',
+          fontSize: '.7rem',
+          color: 'var(--color-gold)',
           fontWeight: 500,
           marginTop: '.4rem',
         }}

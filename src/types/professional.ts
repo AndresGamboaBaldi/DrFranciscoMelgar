@@ -142,6 +142,8 @@ export interface Professional {
   phone: string
   email: string
   address: string
+  /** Short location hint shown only in the booking confirmation (e.g. "Piso 1, Of. 8B") */
+  addressDetail?: string
   schedule: string[]
 
   // ── Tema visual ─────────────────────────────────────────────

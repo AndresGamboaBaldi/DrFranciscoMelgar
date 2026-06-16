@@ -111,7 +111,7 @@ const doctor_melgar: Professional = {
       id: 'bioestimuladores',
       name: 'Bioestimuladores',
       tag: 'Colágeno',
-      durationMins: 30,
+      durationMins: 60,
       image: '/doctor_melgar/services/bioestimuladores.jpg',
       description:
         'Estimulan la producción natural de colágeno para una piel más firme y joven, con resultados progresivos y duraderos.',
@@ -129,7 +129,8 @@ const doctor_melgar: Professional = {
 
   phone: '59172235604',
   email: 'melgarbaldi.hf@gmail.com',
-  address: 'Parque Fidel Anze #2345, Of. 8B\nCochabamba, Bolivia',
+  address: 'Edif. Central Park Collection 2',
+  addressDetail: 'Piso 1, Oficina 2',
   schedule: ['Lun — Vie: 9:00 — 21:00', 'Sábados: 9:00 — 14:00'],
 
   theme: {
@@ -216,7 +217,7 @@ const barber_vip: Professional = {
       id: 'ritual',
       name: 'Ritual de Barba',
       tag: 'Premium',
-      price: 'Bs. 80',
+      price: 'Bs. 140',
       durationMins: 60,
       description:
         'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.',
@@ -226,7 +227,7 @@ const barber_vip: Professional = {
       id: 'ondulacion',
       name: 'Ondulación',
       tag: 'Estilo',
-      price: 'Bs. 60',
+      price: 'Bs. 250',
       durationMins: 120,
       description:
         'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',
@@ -236,7 +237,7 @@ const barber_vip: Professional = {
       id: 'limpieza',
       name: 'Limpieza Facial',
       tag: 'Premium',
-      price: 'Bs. 150',
+      price: 'Bs. 160',
       durationMins: 120,
       description:
         'Incluye corte y barba más limpieza facial profunda: exfoliación, vapor y mascarilla para renovar tu piel.',
@@ -246,7 +247,7 @@ const barber_vip: Professional = {
 
   phone: '59177933737',
   email: 'citas@barbervip.bo',
-  address: 'Av Uyuni #1234\nCochabamba, Bolivia',
+  address: 'Av Uyuni #1234',
   schedule: ['Lun — Sáb: 9:00 — 20:00'],
 
   theme: {
@@ -340,7 +341,6 @@ const andres: Professional = {
       id: 'landing',
       name: 'Landing Page',
       tag: 'Web',
-      price: 'Desde Bs. 800',
       durationMins: 60,
       description:
         'Sitio de una sola página, rápido y responsivo, listo para mostrar tu negocio y captar clientes.',
@@ -349,8 +349,7 @@ const andres: Professional = {
       id: 'web-app',
       name: 'Aplicación Web a Medida',
       tag: 'Desarrollo',
-      price: 'Cotización',
-      durationMins: 60,
+      durationMins: 30,
       description:
         'Sistemas a medida en React + TypeScript: reservas, paneles internos, integraciones con bases de datos.',
     },
@@ -358,7 +357,6 @@ const andres: Professional = {
       id: 'dashboard',
       name: 'Dashboard de Datos',
       tag: 'Data Science',
-      price: 'Desde Bs. 600',
       durationMins: 60,
       description:
         'Visualización interactiva de tus datos de negocio — ventas, clientes, operaciones — para tomar decisiones con claridad.',
@@ -376,20 +374,21 @@ const andres: Professional = {
       id: 'consultoria',
       name: 'Consultoría Técnica',
       tag: 'Asesoría',
-      price: 'Bs. 150/hora',
-      durationMins: 60,
+      durationMins: 30,
       description:
         'Sesión de asesoría para definir arquitectura, elegir tecnologías o resolver problemas puntuales de tu proyecto.',
     },
   ],
 
+  mapUrl: 'https://maps.app.goo.gl/eMHRUCNk4ji62wC99?g_st=ic',
   phone: '59172235605',
   email: 'andresgamboabaldi@gmail.com',
-  address: 'Cochabamba, Bolivia',
+  address: 'Edif. Central Park Collection 2',
+  addressDetail: 'Piso 1, Oficina 2',
   schedule: ['Lun — Vie: 9:00 — 18:00'],
 
   theme: {
-    mode: 'dark',
+    mode: 'light',
     accent: '#b07c35',
     accentLight: '#c48c45',
     fonts: {
@@ -472,7 +471,7 @@ const dr_seifert: Professional = {
 
   phone: '59170788218',
   email: 'citas@drseifert.bo',
-  address: 'Av. Salamanca #1234\nCochabamba, Bolivia',
+  address: 'Av. Salamanca #1234',
   schedule: ['Lun — Vie: 8:00 — 18:00', 'Sábados: 9:00 — 13:00'],
 
   theme: {
