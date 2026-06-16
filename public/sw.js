@@ -29,15 +29,10 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api')) return
 
-  // Navigation requests (HTML) are network-first so a new deploy's
-  // hashed JS/CSS references are always fresh — never serve a stale shell.
-  if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req).catch(() => caches.match(req))
-    )
-    return
-  }
-
+  // All GET requests (including HTML navigation) use stale-while-revalidate:
+  // serve from cache instantly, then update in the background.
+  // JS/CSS filenames are content-hashed by Vite so stale HTML + fresh assets
+  // is safe — old chunks stay in cache until evicted.
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache => {
       const cached = await cache.match(req)
