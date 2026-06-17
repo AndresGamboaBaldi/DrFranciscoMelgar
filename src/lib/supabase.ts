@@ -241,7 +241,7 @@ export interface ScheduleSettings {
   break_end:     string | null
   slot_duration: number
   min_advance:   number
-  allow_cancel:  boolean
+  allow_cancel?: boolean | null
 }
 
 const scheduleSettingsCache = new Map<string, Promise<ScheduleSettings | null>>()
