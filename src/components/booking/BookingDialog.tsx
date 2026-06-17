@@ -908,7 +908,7 @@ function SuccessState({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '1.2rem',
         padding: '2rem 1.5rem',
         background: 'var(--color-bg)',
         textAlign: 'center',
@@ -955,7 +955,6 @@ function SuccessState({
             color: 'var(--color-gold)',
             textTransform: 'uppercase',
             letterSpacing: '.04em',
-            marginBottom: '.1rem',
           }}
         >
           ¡Cita confirmada!
@@ -964,19 +963,8 @@ function SuccessState({
 
       {/* ── Greeting ── */}
       <div>
-        <h4
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.5rem',
-            fontWeight: 400,
-            color: 'var(--color-ink)',
-            marginBottom: '.5rem',
-          }}
-        >
-          Gracias{name ? `, ${name.split(' ')[0]}` : ''}
-        </h4>
         <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>
-          Tu espacio ha sido reservado con éxito.
+          Gracias, {name ? `${name.split(' ')[0]}` : ''}. Tu espacio ha sido reservado con éxito.
         </p>
       </div>
 
@@ -1173,6 +1161,20 @@ function SuccessState({
             </svg>
             Añadir a Calendario
           </button>
+        )}
+        {window.matchMedia('(pointer: coarse)').matches && (
+          <p
+            style={{
+              fontSize: '.72rem',
+              color: 'var(--color-ink-ghost)',
+              lineHeight: 1.6,
+              textAlign: 'center',
+            }}
+          >
+            En iPhone, toca{' '}
+            <strong style={{ color: 'var(--color-ink-dim)' }}>"Agregar al calendario"</strong> — no
+            el ✓ de arriba.
+          </p>
         )}
         <div style={{ display: 'flex', gap: '.6rem', marginTop: '1rem' }}>
           <button
