@@ -103,6 +103,8 @@ export default function BookingDialog({ onClose }: Props) {
 
   const businessId = selectedStaff?.businessId ?? pro.businessId
   const phone = selectedStaff?.phone ?? pro.phone
+  const timeSlots = selectedStaff?.timeSlots ?? pro.timeSlots
+  const satTimeSlots = selectedStaff?.satTimeSlots ?? pro.satTimeSlots
 
   // Lock background scroll while the dialog is open so the overlay sits
   // fixed over everything (incl. fixed tab bars) without page scroll bleeding through.
@@ -446,6 +448,8 @@ export default function BookingDialog({ onClose }: Props) {
                   businessId={businessId}
                   serviceDurationMins={service?.durationMins}
                   view="calendar"
+                  timeSlots={timeSlots}
+                  satTimeSlots={satTimeSlots}
                 />
               )}
 
@@ -461,6 +465,8 @@ export default function BookingDialog({ onClose }: Props) {
                   businessId={businessId}
                   serviceDurationMins={service?.durationMins}
                   view="times"
+                  timeSlots={timeSlots}
+                  satTimeSlots={satTimeSlots}
                 />
               )}
 

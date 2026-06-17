@@ -279,6 +279,20 @@ const barber_vip: Professional = {
       calendarFeedUrl:
         'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
       setupPassword: 'jhoel2026',
+      timeSlots: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '18:30'],
+      satTimeSlots: [
+        '08:00',
+        '09:00',
+        '10:00',
+        '11:00',
+        '13:00',
+        '14:00',
+        '15:00',
+        '16:00',
+        '17:00',
+        '18:00',
+        '18:30',
+      ],
     },
     /*{
       id: 'andres',
@@ -386,6 +400,20 @@ const andres: Professional = {
   address: 'Edif. Central Park Collection 2',
   addressDetail: 'Piso 1, Oficina 2',
   schedule: ['Lun — Vie: 9:00 — 18:00'],
+  timeSlots: ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '18:30'],
+  satTimeSlots: [
+    '08:00',
+    '09:00',
+    '10:00',
+    '11:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '18:30',
+  ],
 
   theme: {
     mode: 'light',

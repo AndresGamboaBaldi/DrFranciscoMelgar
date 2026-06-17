@@ -27,6 +27,10 @@ interface Props {
   businessId: string
   serviceDurationMins?: number
   view?: 'calendar' | 'times' | 'both'
+  /** Override: lista manual de horarios desde professionals.ts. Si se define, omite la generación automática. */
+  timeSlots?: string[]
+  /** Override solo para sábados. Si se define, reemplaza timeSlots los sábados. */
+  satTimeSlots?: string[]
 }
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -117,7 +121,7 @@ function findFirstAvailableMonth(cfg: BookingConfig): Date {
   return new Date(y, m, 1)
 }
 
-export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, businessId, serviceDurationMins, view = 'both' }: Props) {
+export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, businessId, serviceDurationMins, view = 'both', timeSlots: manualSlots, satTimeSlots: manualSatSlots }: Props) {
   const [calMonth, setCalMonth]     = useState(() => new Date())
   const [bookedSlots, setBooked]      = useState<string[]>([])
   const [bookedSlotsDate, setBookedSlotsDate] = useState<string | null>(null)
@@ -203,7 +207,9 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
 
   // From here cfg is guaranteed non-null
   const getSlots = (sd: SelectedDate) => {
-    const dow = new Date(sd.y,sd.m,sd.d).getDay()
+    const dow = new Date(sd.y, sd.m, sd.d).getDay()
+    if (dow === 6 && manualSatSlots && manualSatSlots.length > 0) return manualSatSlots
+    if (manualSlots && manualSlots.length > 0) return manualSlots
     const hrs = dow===6 && cfg.satHours!==undefined ? cfg.satHours
               : dow===0 && cfg.sunHours!==undefined ? cfg.sunHours
               : cfg.workHours

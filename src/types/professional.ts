@@ -55,6 +55,11 @@ export interface StaffMember {
 
   /** Contraseña propia para entrar a /:slug/setup/:id */
   setupPassword?: string
+
+  /** Array manual de horarios disponibles. Si se define, sobreescribe la generación automática desde Supabase. */
+  timeSlots?: string[]
+  /** Slots del sábado. Si se define, reemplaza timeSlots solo los sábados. */
+  satTimeSlots?: string[]
 }
 
 /** Configuración del sistema de reservas */
@@ -137,6 +142,15 @@ export interface Professional {
 
   /** Google Maps link — shown in hero as "Ubicación" button */
   mapUrl?: string
+
+  /**
+   * Array manual de horarios disponibles (e.g. ['09:00','09:30','10:00']).
+   * Si se define, CalendarPicker usa estos slots en lugar de generarlos
+   * automáticamente desde workHours + slotDuration en Supabase.
+   */
+  timeSlots?: string[]
+  /** Slots del sábado. Si se define, reemplaza timeSlots solo los sábados. */
+  satTimeSlots?: string[]
 
   // ── Contacto ────────────────────────────────────────────────
   phone: string

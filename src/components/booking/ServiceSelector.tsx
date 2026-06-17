@@ -125,7 +125,7 @@ function ServiceCard({
       <div
         style={{
           fontSize: '.7rem',
-          color: 'var(--color-gold)',
+          color: svc.price ? 'var(--color-ink)' : 'var(--color-gold)',
           fontWeight: 500,
           marginTop: '.4rem',
         }}

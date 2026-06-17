@@ -4,7 +4,6 @@ import { useStaff } from '../context/StaffContext'
 import { getScheduleSettings, saveScheduleSettings, type ScheduleSettings } from '../lib/supabase'
 
 const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB']
-const SLOT_DURATION = 15
 const ADVANCE_OPTIONS = [
   { v: 0,  l: 'Sin restricción' },
   { v: 1,  l: '1 hora' },
@@ -37,6 +36,7 @@ export default function ScheduleEditor() {
   const [sunEnd,     setSunEnd]     = useState('15:00')
 
   const [minAdv,     setMinAdv]     = useState(0)
+  const [slotDuration, setSlotDuration] = useState(30)
 
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
@@ -58,6 +58,7 @@ export default function ScheduleEditor() {
     setSunStart(s.sun_start ?? '10:00')
     setSunEnd(s.sun_end   ?? '15:00')
     setMinAdv(s.min_advance)
+    setSlotDuration(s.slot_duration)
   }, [])
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export default function ScheduleEditor() {
         sun_end:       sunActive ? sunEnd   : null,
         break_start:   pmActive ? amEnd   : null,
         break_end:     pmActive ? pmStart : null,
-        slot_duration: SLOT_DURATION,
+        slot_duration: slotDuration,
         min_advance:   minAdv,
       })
       setSaved(true)
