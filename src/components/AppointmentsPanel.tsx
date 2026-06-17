@@ -8,6 +8,7 @@ import {
 } from '../lib/supabase'
 import BookingDialog from './booking/BookingDialog'
 import type { Appointment } from '../types/booking'
+import type { StaffMember } from '../types/professional'
 
 const MONTHS_ES = [
   'enero',
@@ -55,9 +56,11 @@ function buildWhatsAppUrl(apt: Appointment, businessName: string): string {
 export default function AppointmentsPanel({
   businessId,
   businessName,
+  staffMember,
 }: {
   businessId: string
   businessName: string
+  staffMember?: StaffMember
 }) {
   const [date, setDate] = useState(() => new Date())
   const [appointments, setAppts] = useState<Appointment[]>([])
@@ -1121,6 +1124,7 @@ export default function AppointmentsPanel({
             setShowBooking(false)
             load()
           }}
+          initialStaff={staffMember}
         />
       )}
     </div>

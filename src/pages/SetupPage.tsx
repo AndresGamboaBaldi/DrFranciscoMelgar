@@ -159,15 +159,25 @@ export default function SetupPage() {
 
           {section === 'citas' && (
             <div style={{ paddingBottom: '3rem' }}>
-              <AppointmentsPanel businessId={businessId} businessName={displayName} />
+              <AppointmentsPanel businessId={businessId} businessName={displayName} staffMember={staff ?? undefined} />
             </div>
           )}
 
           {section === 'schedule' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start' }}>
-              <Panel title="Horarios de atención" desc="">
-                <ScheduleEditor />
-              </Panel>
+              {(staff?.timeSlots ?? pro.timeSlots) ? (
+                <Panel title="Horarios de atención" desc="">
+                  <div style={{ padding: '1rem', border: '1px solid var(--color-rim)', background: 'var(--color-surface)', fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 500 }}>Horarios configurados manualmente.</span>
+                    <br />
+                    Los slots de atención están definidos directamente en el sistema y no requieren configuración aquí.
+                  </div>
+                </Panel>
+              ) : (
+                <Panel title="Horarios de atención" desc="">
+                  <ScheduleEditor />
+                </Panel>
+              )}
 
               <Panel title="Bloquear horarios (opcional)" desc="Cuando lo necesites, marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
                 <BlockScheduler />

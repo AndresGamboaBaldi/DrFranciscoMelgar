@@ -4,6 +4,14 @@ import { HelmetProvider } from 'react-helmet-async'
 import './index.css'
 import App from './App.tsx'
 
+// Safety net: hide splash after 4s no matter what (prevents permanent spinner on errors)
+setTimeout(() => {
+  const splash = document.getElementById('splash')
+  if (!splash) return
+  splash.classList.add('hide')
+  splash.addEventListener('transitionend', () => splash.remove(), { once: true })
+}, 4000)
+
 const root = createRoot(document.getElementById('root')!)
 root.render(
   <StrictMode>
@@ -17,11 +25,3 @@ root.render(
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {})
 }
-
-// Hide splash once React has painted
-requestAnimationFrame(() => {
-  const splash = document.getElementById('splash')
-  if (!splash) return
-  splash.classList.add('hide')
-  splash.addEventListener('transitionend', () => splash.remove(), { once: true })
-})

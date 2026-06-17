@@ -4,6 +4,17 @@ import Home             from './pages/Home'
 import ProfessionalPage from './pages/ProfessionalPage'
 import CancelPage       from './pages/CancelPage'
 
+/** Hides the HTML splash screen once React has mounted and painted */
+function HideSplash() {
+  useEffect(() => {
+    const splash = document.getElementById('splash')
+    if (!splash) return
+    splash.classList.add('hide')
+    splash.addEventListener('transitionend', () => splash.remove(), { once: true })
+  }, [])
+  return null
+}
+
 /** Scrolls to top on every route change */
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -14,6 +25,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <BrowserRouter>
+      <HideSplash />
       <ScrollToTop />
       <Routes>
         <Route path="/"                  element={<Home />} />

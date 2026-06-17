@@ -80,9 +80,10 @@ type Step = number
 
 interface Props {
   onClose: () => void
+  initialStaff?: StaffMember
 }
 
-export default function BookingDialog({ onClose }: Props) {
+export default function BookingDialog({ onClose, initialStaff }: Props) {
   const pro = useProfessional()
   const hasStaff = !!pro.staff?.length
 
@@ -91,8 +92,8 @@ export default function BookingDialog({ onClose }: Props) {
     : ['Servicio', 'Fecha', 'Hora', 'Datos']
   const TOTAL_STEPS = STEP_LABELS.length
 
-  const [step, setStep] = useState<Step>(1)
-  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null)
+  const [step, setStep] = useState<Step>(initialStaff ? 2 : 1)
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(initialStaff ?? null)
   const [service, setService] = useState<Service | null>(null)
   const [date, setDate] = useState<SelectedDate | null>(null)
   const [time, setTime] = useState('')
