@@ -241,6 +241,7 @@ export interface ScheduleSettings {
   break_end:     string | null
   slot_duration: number
   min_advance:   number
+  allow_cancel:  boolean
 }
 
 const scheduleSettingsCache = new Map<string, Promise<ScheduleSettings | null>>()
@@ -252,7 +253,7 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
 
   const promise = supabase
     .from('schedule_settings')
-    .select('business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance')
+    .select('business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance,allow_cancel')
     .eq('business_id', businessId)
     .maybeSingle()
     .then(({ data }) => data as ScheduleSettings | null) as Promise<ScheduleSettings | null>
@@ -331,6 +332,15 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
   const raw     = atob(base64)
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
+}
+
+export async function saveAllowCancel(businessId: string, allowCancel: boolean): Promise<void> {
+  if (!supabase) throw new Error('Supabase no configurado')
+  scheduleSettingsCache.delete(businessId)
+  const { error } = await supabase
+    .from('schedule_settings')
+    .upsert([{ business_id: businessId, allow_cancel: allowCancel, updated_at: new Date().toISOString() }], { onConflict: 'business_id' })
+  if (error) throw new Error(error.message)
 }
 
 export async function saveScheduleSettings(settings: ScheduleSettings): Promise<void> {

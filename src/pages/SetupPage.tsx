@@ -6,7 +6,7 @@ import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
-import { subscribeToPush, getPushStatus } from '../lib/supabase'
+import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel } from '../lib/supabase'
 
 type Section = 'citas' | 'schedule' | 'config'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
@@ -57,10 +57,19 @@ export default function SetupPage() {
   const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
   const [showIosSteps, setShowIosSteps] = useState(false)
   const [pushWorking, setPushWorking] = useState(false)
+  const [allowCancel, setAllowCancel] = useState(true)
+  const [cancelSaving, setCancelSaving] = useState(false)
 
   useEffect(() => {
     getPushStatus(businessId).then(setPushStatus)
+    getScheduleSettings(businessId).then(s => { if (s) setAllowCancel(s.allow_cancel ?? true) })
   }, [businessId])
+
+  const toggleAllowCancel = async (val: boolean) => {
+    setAllowCancel(val)
+    setCancelSaving(true)
+    try { await saveAllowCancel(businessId, val) } finally { setCancelSaving(false) }
+  }
 
   // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
   useEffect(() => {
@@ -259,6 +268,30 @@ export default function SetupPage() {
                   Las notificaciones se activan por dispositivo. Si usas varios, actívalas en cada uno.
                 </p>
               </div>
+              </Panel>
+
+              <Panel title="Cancelación de citas" desc="Controla si los clientes pueden cancelar su cita desde el mensaje de WhatsApp que les envías.">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', cursor: 'pointer' }}>
+                    <div>
+                      <p style={{ fontSize: '.95rem', color: 'var(--color-ink)', marginBottom: '.2rem' }}>
+                        Permitir cancelaciones
+                      </p>
+                      <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', lineHeight: 1.5 }}>
+                        {allowCancel
+                          ? 'El mensaje incluye un link para que el cliente cancele su cita.'
+                          : 'El mensaje no incluye opción de cancelar.'}
+                      </p>
+                    </div>
+                    {/* Toggle switch */}
+                    <div onClick={() => toggleAllowCancel(!allowCancel)}
+                      style={{ position: 'relative', width: '2.8rem', height: '1.6rem', borderRadius: '999px', background: allowCancel ? 'var(--color-gold)' : 'var(--color-rim-l)', transition: 'background .2s', flexShrink: 0, cursor: cancelSaving ? 'wait' : 'pointer' }}
+                    >
+                      <div style={{ position: 'absolute', top: '3px', left: allowCancel ? 'calc(100% - 1.3rem)' : '3px', width: '1rem', height: '1rem', borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
+                    </div>
+                  </label>
+                  {cancelSaving && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)' }}>Guardando…</p>}
+                </div>
               </Panel>
             </div>
           )}

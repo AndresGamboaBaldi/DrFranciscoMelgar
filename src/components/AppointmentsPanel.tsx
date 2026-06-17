@@ -41,15 +41,17 @@ function formatTime12h(time: string): string {
   return `${h12}:${String(min).padStart(2, '0')} ${period}`
 }
 
-function buildWhatsAppUrl(apt: Appointment, businessName: string): string {
+function buildWhatsAppUrl(apt: Appointment, businessName: string, allowCancel: boolean): string {
   const phone = apt.phone.replace(/\D/g, '')
   const firstName = apt.name.split(' ')[0]
   const time = formatTime12h(apt.appointment_time)
   const [y, m, d] = apt.appointment_date.split('-').map(Number)
   const dateObj = new Date(y, m - 1, d)
   const dateLabel = `${DAYS_ES[dateObj.getDay()]} ${d} de ${MONTHS_ES[m - 1]}`
-  const cancelUrl = `https://probo.pro/cancel/${apt.id}`
-  const text = `Hola ${firstName}! 👋🏼\nTu cita con ${businessName} es el ${dateLabel} a las ${time}\n\n✅ Te esperamos!\n\nSi no puedes asistir, cancela aquí 👇🏼\n${cancelUrl}`
+  const cancelLine = allowCancel
+    ? `\n\nSi no puedes asistir, cancela aquí 👇🏼\nhttps://probo.pro/cancel/${apt.id}`
+    : ''
+  const text = `Hola ${firstName}! 👋🏼\nTu cita con ${businessName} es el ${dateLabel} a las ${time}\n\n✅ Te esperamos!${cancelLine}`
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
 }
 
@@ -71,6 +73,7 @@ export default function AppointmentsPanel({
   const [showBooking, setShowBooking] = useState(false)
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day')
   const [workDays, setWorkDays] = useState<number[] | null>(null)
+  const [allowCancel, setAllowCancel] = useState(true)
   const [range, setRange] = useState({ start: -60, end: 60 })
   const activeCardRef = useRef<HTMLButtonElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -122,7 +125,10 @@ export default function AppointmentsPanel({
 
   useEffect(() => {
     getScheduleSettings(businessId).then((s) => {
-      if (s) setWorkDays(s.work_days)
+      if (s) {
+        setWorkDays(s.work_days)
+        setAllowCancel(s.allow_cancel ?? true)
+      }
     })
   }, [businessId])
 
@@ -350,7 +356,7 @@ export default function AppointmentsPanel({
               {apt.service}
             </p>
             <a
-              href={buildWhatsAppUrl(apt, businessName)}
+              href={buildWhatsAppUrl(apt, businessName, allowCancel)}
               target="_blank"
               rel="noopener noreferrer"
               title="Confirmar por WhatsApp"
