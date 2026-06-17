@@ -35,7 +35,7 @@ function toISODate(d: Date): string {
 
 function formatTime12h(time: string): string {
   const [h, min] = time.substring(0, 5).split(':').map(Number)
-  const period = h >= 12 ? 'PM' : 'AM'
+  const period = h >= 12 ? 'pm' : 'am'
   const h12 = h % 12 === 0 ? 12 : h % 12
   return `${h12}:${String(min).padStart(2, '0')} ${period}`
 }
@@ -104,7 +104,7 @@ export default function AppointmentsPanel({
       const data = await withTimeout(
         viewMode === 'day'
           ? getAppointmentsByDate(businessId, isoDate)
-          : getAppointmentsByDateRange(businessId, weekStartIso, weekEndIso)
+          : getAppointmentsByDateRange(businessId, weekStartIso, weekEndIso),
       )
       setAppts(data)
     } catch {
@@ -257,8 +257,8 @@ export default function AppointmentsPanel({
           <div
             style={{
               display: 'flex',
-              alignItems: 'baseline',
-              gap: '.85rem',
+              alignItems: 'center',
+              gap: '.6rem',
               flexWrap: 'wrap',
               minWidth: 0,
             }}
@@ -266,8 +266,8 @@ export default function AppointmentsPanel({
             <p
               style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: '1.2rem',
-                fontWeight: 600,
+                fontSize: '1rem',
+                fontWeight: 500,
                 letterSpacing: '.1em',
                 color: 'var(--color-ink)',
                 flexShrink: 0,
@@ -275,10 +275,13 @@ export default function AppointmentsPanel({
             >
               {formatTime12h(apt.appointment_time)}
             </p>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: accent, flexShrink: 0 }} />
             <p
               style={{
-                fontSize: '1.2rem',
-                fontWeight: 600,
+                fontFamily: 'var(--font-body)',
+                fontSize: '1rem',
+                fontWeight: 500,
+                letterSpacing: '.1em',
                 color: 'var(--color-ink-dim)',
               }}
             >

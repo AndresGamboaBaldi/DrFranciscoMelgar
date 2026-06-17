@@ -188,7 +188,7 @@ const barber_vip: Professional = {
       name: 'Corte',
       tag: 'Esencial',
       price: 'Bs. 70',
-      durationMins: 45,
+      durationMins: 60,
       description:
         'Low fade, mid fade o high fade. Técnica de precisión para un acabado limpio y moderno.',
       image: '/barber_vip/services/corte.jpeg',
@@ -198,7 +198,7 @@ const barber_vip: Professional = {
       name: 'Corte y Barba',
       tag: 'Clásico',
       price: 'Bs. 100',
-      durationMins: 45,
+      durationMins: 60,
       description:
         'Corte a tu estilo más perfilado de barba con navaja. El combo completo para un look impecable de pies a cabeza.',
       image: '/barber_vip/services/fade.jpeg',
