@@ -39,7 +39,7 @@ function buildWhatsAppMessage({
 }): string {
   const lines = [
     `*Nueva Cita*\n`,
-    `*Paciente:* ${patientName}`,
+    `*Nombre:* ${patientName}`,
     `*Servicio:* ${service}`,
     `*Duración:* ${duration}`,
     `*Fecha:* ${date}`,
