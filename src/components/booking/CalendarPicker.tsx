@@ -122,7 +122,7 @@ function findFirstAvailableMonth(cfg: BookingConfig): Date {
 }
 
 export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, businessId, serviceDurationMins, view = 'both', timeSlots: manualSlots, satTimeSlots: manualSatSlots }: Props) {
-  const [calMonth, setCalMonth]     = useState(() => new Date())
+  const [calMonth, setCalMonth]     = useState(() => selectedDate ? new Date(selectedDate.y, selectedDate.m, 1) : new Date())
   const [bookedSlots, setBooked]      = useState<string[]>([])
   const [bookedSlotsDate, setBookedSlotsDate] = useState<string | null>(null)
   const [monthBlocks, setBlocks]      = useState<BlockedSlot[]>([])
