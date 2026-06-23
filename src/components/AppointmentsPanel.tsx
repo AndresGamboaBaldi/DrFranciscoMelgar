@@ -274,10 +274,10 @@ export default function AppointmentsPanel({
           >
             <p
               style={{
-                fontFamily: 'var(--font-body)',
+                fontFamily: "'Inter', sans-serif",
                 fontSize: '1rem',
                 fontWeight: 500,
-                letterSpacing: '.1em',
+                letterSpacing: '.02em',
                 color: 'var(--color-ink)',
                 flexShrink: 0,
               }}
@@ -287,10 +287,10 @@ export default function AppointmentsPanel({
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: accent, flexShrink: 0 }} />
             <p
               style={{
-                fontFamily: 'var(--font-body)',
+                fontFamily: "'Inter', sans-serif",
                 fontSize: '1rem',
-                fontWeight: 500,
-                letterSpacing: '.1em',
+                fontWeight: 400,
+                letterSpacing: '.02em',
                 color: 'var(--color-ink-dim)',
               }}
             >
@@ -345,6 +345,7 @@ export default function AppointmentsPanel({
               style={{
                 flex: 1,
                 minWidth: 0,
+                fontFamily: "'Inter', sans-serif",
                 fontSize: '0.9rem',
                 fontWeight: 400,
                 color: 'var(--color-ink-dim)',
