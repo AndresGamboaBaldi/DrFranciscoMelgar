@@ -1,12 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Appointment } from '../types/booking'
 
-const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL  as string
-const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
-export const supabase = supabaseUrl && supabaseKey
-  ? createClient(supabaseUrl, supabaseKey)
-  : null
+export const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null
 
 /** Rejects after `ms` if `promise` hasn't settled — avoids requests hanging forever on flaky networks. */
 export function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
@@ -20,8 +18,13 @@ export function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
 //  APPOINTMENTS
 // ─────────────────────────────────────────────────────────────
 
-export async function createAppointment(data: Omit<Appointment, 'id' | 'created_at' | 'status'> & { duration_mins?: number; setup_url?: string }) {
-  if (!supabase) { console.warn('[Supabase] not configured'); return null }
+export async function createAppointment(
+  data: Omit<Appointment, 'id' | 'created_at' | 'status'> & { duration_mins?: number },
+) {
+  if (!supabase) {
+    console.warn('[Supabase] not configured')
+    return null
+  }
   const { error } = await supabase.from('appointments').insert([{ ...data, status: 'pending' }])
   if (error) throw error
 
@@ -31,7 +34,20 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
     const FUNCTIONS_URL = import.meta.env.DEV
       ? 'http://127.0.0.1:54321/functions/v1'
       : `${SUPABASE_URL}/functions/v1`
-    const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+    const MONTHS = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ]
     const [y, mo, d] = data.appointment_date.split('-').map(Number)
     const currentYear = new Date().getFullYear()
     const dateLabel = `${d} de ${MONTHS[mo - 1]}${y !== currentYear ? ` de ${y}` : ''}`
@@ -39,14 +55,22 @@ export async function createAppointment(data: Omit<Appointment, 'id' | 'created_
     fetch(`${FUNCTIONS_URL}/send-push`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ business_id: data.business_id, title: '📅 Nueva Cita', body, url: data.setup_url ?? `/${data.business_id}/setup` }),
+      body: JSON.stringify({
+        business_id: data.business_id,
+        title: '📅 Nueva Cita',
+        body,
+        url: `/${data.business_id}/setup`,
+      }),
     }).catch(() => {}) // silently ignore errors
   }
 
   return null
 }
 
-function expandBookedSlots(rows: { appointment_time: string; duration_mins: number | null }[], slotDuration: number): string[] {
+function expandBookedSlots(
+  rows: { appointment_time: string; duration_mins: number | null }[],
+  slotDuration: number,
+): string[] {
   const blocked = new Set<string>()
   for (const r of rows) {
     // Normalize "HH:MM:SS" → "HH:MM"
@@ -55,13 +79,19 @@ function expandBookedSlots(rows: { appointment_time: string; duration_mins: numb
     const totalMins = r.duration_mins ?? slotDuration
     for (let offset = 0; offset < totalMins; offset += slotDuration) {
       const t = startMins + offset
-      blocked.add(`${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`)
+      blocked.add(
+        `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`,
+      )
     }
   }
   return [...blocked]
 }
 
-export async function getBookedSlots(date: string, businessId: string, slotDuration = 30): Promise<string[]> {
+export async function getBookedSlots(
+  date: string,
+  businessId: string,
+  slotDuration = 30,
+): Promise<string[]> {
   if (!supabase) return []
   const { data, error } = await supabase
     .from('appointments')
@@ -77,12 +107,17 @@ export async function getBookedSlots(date: string, businessId: string, slotDurat
       .eq('appointment_date', date)
       .eq('business_id', businessId)
       .in('status', ['pending', 'confirmed'])
-    return (fallback ?? []).map((r: { appointment_time: string }) => r.appointment_time.substring(0, 5))
+    return (fallback ?? []).map((r: { appointment_time: string }) =>
+      r.appointment_time.substring(0, 5),
+    )
   }
   return expandBookedSlots(data ?? [], slotDuration)
 }
 
-export async function getAppointmentsByDate(businessId: string, date: string): Promise<Appointment[]> {
+export async function getAppointmentsByDate(
+  businessId: string,
+  date: string,
+): Promise<Appointment[]> {
   if (!supabase) return []
   const { data, error } = await supabase
     .from('appointments')
@@ -91,11 +126,18 @@ export async function getAppointmentsByDate(businessId: string, date: string): P
     .eq('appointment_date', date)
     .neq('status', 'cancelled')
     .order('appointment_time', { ascending: true })
-  if (error) { console.error('[getAppointmentsByDate]', error); return [] }
+  if (error) {
+    console.error('[getAppointmentsByDate]', error)
+    return []
+  }
   return (data ?? []) as Appointment[]
 }
 
-export async function getAppointmentsByDateRange(businessId: string, startDate: string, endDate: string): Promise<Appointment[]> {
+export async function getAppointmentsByDateRange(
+  businessId: string,
+  startDate: string,
+  endDate: string,
+): Promise<Appointment[]> {
   if (!supabase) return []
   const { data, error } = await supabase
     .from('appointments')
@@ -106,7 +148,10 @@ export async function getAppointmentsByDateRange(businessId: string, startDate: 
     .neq('status', 'cancelled')
     .order('appointment_date', { ascending: true })
     .order('appointment_time', { ascending: true })
-  if (error) { console.error('[getAppointmentsByDateRange]', error); return [] }
+  if (error) {
+    console.error('[getAppointmentsByDateRange]', error)
+    return []
+  }
   return (data ?? []) as Appointment[]
 }
 
@@ -136,7 +181,20 @@ export async function cancelAppointment(id: string, notify = true): Promise<void
     const FUNCTIONS_URL = import.meta.env.DEV
       ? 'http://127.0.0.1:54321/functions/v1'
       : `${SUPABASE_URL}/functions/v1`
-    const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+    const MONTHS = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ]
     const [y, mo, d] = apt.appointment_date.split('-').map(Number)
     const currentYear = new Date().getFullYear()
     const dateLabel = `${d} de ${MONTHS[mo - 1]}${y !== currentYear ? ` de ${y}` : ''}`
@@ -144,7 +202,12 @@ export async function cancelAppointment(id: string, notify = true): Promise<void
     fetch(`${FUNCTIONS_URL}/send-push`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ business_id: apt.business_id, title: '❌ Cita cancelada', body, url: `/${apt.business_id}/setup` }),
+      body: JSON.stringify({
+        business_id: apt.business_id,
+        title: '❌ Cita cancelada',
+        body,
+        url: `/${apt.business_id}/setup`,
+      }),
     }).catch(() => {})
   }
 }
@@ -158,7 +221,7 @@ export interface BlockedSlot {
   business_id: string
   date: string
   start_time: string | null
-  end_time:   string | null
+  end_time: string | null
   reason?: string | null
   created_at?: string
 }
@@ -172,14 +235,18 @@ export function prefetchMonthBlocks(businessId: string, year: number, month: num
   getMonthBlocks(businessId, year, month)
 }
 
-export async function getMonthBlocks(businessId: string, year: number, month: number): Promise<BlockedSlot[]> {
+export async function getMonthBlocks(
+  businessId: string,
+  year: number,
+  month: number,
+): Promise<BlockedSlot[]> {
   if (!supabase) return []
   const key = `${businessId}:${year}-${month}`
   const cached = monthBlocksCache.get(key)
   if (cached) return cached
 
-  const from = `${year}-${String(month+1).padStart(2,'0')}-01`
-  const to   = `${year}-${String(month+1).padStart(2,'0')}-${new Date(year, month+1, 0).getDate()}`
+  const from = `${year}-${String(month + 1).padStart(2, '0')}-01`
+  const to = `${year}-${String(month + 1).padStart(2, '0')}-${new Date(year, month + 1, 0).getDate()}`
   const promise = supabase
     .from('blocked_slots')
     .select('*')
@@ -229,18 +296,18 @@ export async function getUpcomingBlocks(businessId: string): Promise<BlockedSlot
 // ─────────────────────────────────────────────────────────────
 
 export interface ScheduleSettings {
-  business_id:     string
-  work_days:     number[]
-  work_start:    string
-  work_end:      string
-  sat_start:     string | null
-  sat_end:       string | null
-  sun_start:     string | null
-  sun_end:       string | null
-  break_start:   string | null
-  break_end:     string | null
+  business_id: string
+  work_days: number[]
+  work_start: string
+  work_end: string
+  sat_start: string | null
+  sat_end: string | null
+  sun_start: string | null
+  sun_end: string | null
+  break_start: string | null
+  break_end: string | null
   slot_duration: number
-  min_advance:   number
+  min_advance: number
   allow_cancel?: boolean | null
 }
 
@@ -253,7 +320,9 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
 
   const promise = supabase
     .from('schedule_settings')
-    .select('business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance,allow_cancel')
+    .select(
+      'business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance,allow_cancel',
+    )
     .eq('business_id', businessId)
     .maybeSingle()
     .then(({ data }) => data as ScheduleSettings | null) as Promise<ScheduleSettings | null>
@@ -269,9 +338,18 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
 
-export async function subscribeToPush(businessId: string): Promise<'subscribed' | 'already' | 'denied' | 'unsupported'> {
+export async function subscribeToPush(
+  businessId: string,
+): Promise<'subscribed' | 'already' | 'denied' | 'unsupported'> {
   if (!supabase || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('[Push] unsupported — supabase:', !!supabase, 'sw:', 'serviceWorker' in navigator, 'push:', 'PushManager' in window)
+    console.warn(
+      '[Push] unsupported — supabase:',
+      !!supabase,
+      'sw:',
+      'serviceWorker' in navigator,
+      'push:',
+      'PushManager' in window,
+    )
     return 'unsupported'
   }
   if (!VAPID_PUBLIC_KEY) {
@@ -305,10 +383,12 @@ export async function subscribeToPush(businessId: string): Promise<'subscribed' 
     return 'unsupported'
   }
 
-  const { error } = await supabase.from('push_subscriptions').insert([{
-    business_id: businessId,
-    subscription: sub.toJSON(),
-  }])
+  const { error } = await supabase.from('push_subscriptions').insert([
+    {
+      business_id: businessId,
+      subscription: sub.toJSON(),
+    },
+  ])
 
   if (error) {
     console.error('[Push] failed to save subscription:', error)
@@ -319,7 +399,9 @@ export async function subscribeToPush(businessId: string): Promise<'subscribed' 
   return 'subscribed'
 }
 
-export async function getPushStatus(_businessId: string): Promise<'active' | 'inactive' | 'unsupported'> {
+export async function getPushStatus(
+  _businessId: string,
+): Promise<'active' | 'inactive' | 'unsupported'> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
   const reg = await navigator.serviceWorker.getRegistration('/sw.js')
   if (!reg) return 'inactive'
@@ -328,18 +410,25 @@ export async function getPushStatus(_businessId: string): Promise<'active' | 'in
 }
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4)
-  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const raw     = atob(base64)
-  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const raw = atob(base64)
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)))
 }
 
 export async function saveAllowCancel(businessId: string, allowCancel: boolean): Promise<void> {
   if (!supabase) throw new Error('Supabase no configurado')
   scheduleSettingsCache.delete(businessId)
-  const { error } = await supabase
-    .from('schedule_settings')
-    .upsert([{ business_id: businessId, allow_cancel: allowCancel, updated_at: new Date().toISOString() }], { onConflict: 'business_id' })
+  const { error } = await supabase.from('schedule_settings').upsert(
+    [
+      {
+        business_id: businessId,
+        allow_cancel: allowCancel,
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    { onConflict: 'business_id' },
+  )
   if (error) throw new Error(error.message)
 }
 
