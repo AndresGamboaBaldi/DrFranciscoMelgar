@@ -1240,7 +1240,7 @@ function SuccessState({
           marginTop: '.5rem',
         }}
       >
-        Pro<em style={{ fontStyle: 'italic', color: '#c4995a' }}>bo</em>.pro
+        Pro<em style={{ fontStyle: 'italic', color: '#4d8fff' }}>bo</em>.pro
       </p>
     </div>
   )

@@ -6,7 +6,7 @@ export default function Footer() {
   const pro = useProfessional()
   const openBooking = useOpenBooking()
 
-  const GOLD   = '#c4995a'
+  const GOLD   = '#4d8fff'
 
   // Load Playfair Display for the Probo.pro brand mark
   useEffect(() => {

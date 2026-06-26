@@ -3,8 +3,8 @@ import { HomeSEOHead } from '../components/SEOHead'
 import Reveal from '../components/Reveal'
 import { Bell, CalendarDays, MessageCircle, Palette } from 'lucide-react'
 
-const GOLD = '#c4995a'
-const GOLD_L = '#d4b078'
+const GOLD = '#4d8fff'
+const GOLD_L = '#6aa3ff'
 
 // TODO: reemplaza por el número real de WhatsApp de ventas (formato 591XXXXXXXX)
 const SALES_WHATSAPP = '59172235605'
@@ -173,7 +173,7 @@ export default function Home() {
               gap: '.6rem',
               padding: 'clamp(.7rem,2.5vw,1rem) clamp(1.4rem,5vw,2.25rem)',
               background: GOLD,
-              color: '#0a0907',
+              color: '#ffffff',
               fontFamily: 'var(--font-body)',
               fontSize: 'clamp(.8rem,2.5vw,1rem)',
               fontWeight: 500,
@@ -218,7 +218,7 @@ export default function Home() {
           <div>
             <h2 className="s-title">
               Todo lo que necesitas para recibir citas{' '}
-              <em style={{ color: GOLD, fontStyle: 'normal' }}>profesionalmente</em>
+              <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>profesionalmente</em>
             </h2>
           </div>
         </Reveal>
@@ -261,7 +261,7 @@ export default function Home() {
       <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
           <h2 className="s-title">
-            Empieza en <em style={{ color: GOLD, fontStyle: 'normal' }}>minutos.</em>
+            Empieza en <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>minutos.</em>
           </h2>
         </Reveal>
 
@@ -418,7 +418,7 @@ export default function Home() {
       <section id="planes" className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
           <h2 className="s-title">
-            Una inversión <em style={{ color: GOLD, fontStyle: 'normal' }}>en tu negocio</em>
+            Una inversión <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>en tu negocio</em>
           </h2>
           <p
             style={{
@@ -460,7 +460,7 @@ export default function Home() {
                       top: '-.7rem',
                       left: '2rem',
                       background: GOLD,
-                      color: '#0a0907',
+                      color: '#ffffff',
                       fontSize: '.8rem',
                       fontWeight: 500,
                       letterSpacing: '.14em',
@@ -605,7 +605,7 @@ export default function Home() {
               marginBottom: '1.25rem',
             }}
           >
-            La experiencia que esperan tus clientes
+            <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>La experiencia</em> que esperan tus clientes
           </h2>
           <p
             style={{
@@ -626,7 +626,7 @@ export default function Home() {
               gap: '.6rem',
               padding: 'clamp(.7rem,2.5vw,1.1rem) clamp(1.4rem,5vw,2.5rem)',
               background: GOLD,
-              color: '#0a0907',
+              color: '#ffffff',
               fontFamily: 'var(--font-body)',
               fontSize: 'clamp(.8rem,2.5vw,1rem)',
               fontWeight: 500,
