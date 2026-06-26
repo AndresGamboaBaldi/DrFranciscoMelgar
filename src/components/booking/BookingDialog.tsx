@@ -193,7 +193,6 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
         notes: form.notes.trim() || 'Sin comentarios especiales',
         business_id: businessId,
         duration_mins: service.durationMins ?? slotDuration,
-        setup_url: selectedStaff ? `/${pro.slug}/setup/${selectedStaff.id}` : `/${pro.slug}/setup`,
       })
       const waMessage = buildWhatsAppMessage({
         patientName: form.name.trim(),
