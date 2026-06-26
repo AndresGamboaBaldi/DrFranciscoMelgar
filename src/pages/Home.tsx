@@ -218,7 +218,9 @@ export default function Home() {
           <div>
             <h2 className="s-title">
               Todo lo que necesitas para recibir citas{' '}
-              <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>profesionalmente</em>
+              <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>
+                profesionalmente
+              </em>
             </h2>
           </div>
         </Reveal>
@@ -261,7 +263,10 @@ export default function Home() {
       <section className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
           <h2 className="s-title">
-            Empieza en <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>minutos.</em>
+            Empieza en{' '}
+            <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>
+              minutos.
+            </em>
           </h2>
         </Reveal>
 
@@ -286,13 +291,13 @@ export default function Home() {
                 n: '01',
                 title: 'Cuéntanos de tu negocio',
                 desc: 'Nos compartes tus servicios, horarios y fotos — nosotros armamos tu página.',
-                image: '/steps/step1.jpeg',
+                image: '/steps/step1.png',
               },
               {
                 n: '02',
                 title: 'Recibe tu página lista para compartir',
                 desc: 'Diseñada con tu marca, optimizada para móviles y lista para enviar por WhatsApp y redes.',
-                image: '/steps/step2.jpeg',
+                image: '/steps/step2.png',
               },
               {
                 n: '03',
@@ -418,7 +423,10 @@ export default function Home() {
       <section id="planes" className="s-pad" style={{ maxWidth: '1320px', margin: '0 auto' }}>
         <Reveal as="div" style={{ textAlign: 'center', marginBottom: '4rem' } as never}>
           <h2 className="s-title">
-            Una inversión <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>en tu negocio</em>
+            Una inversión{' '}
+            <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>
+              en tu negocio
+            </em>
           </h2>
           <p
             style={{
@@ -605,7 +613,10 @@ export default function Home() {
               marginBottom: '1.25rem',
             }}
           >
-            <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>La experiencia</em> que esperan tus clientes
+            <em className="hero-shimmer" style={{ fontStyle: 'normal' }}>
+              La experiencia
+            </em>{' '}
+            que esperan tus clientes
           </h2>
           <p
             style={{
