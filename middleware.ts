@@ -6,10 +6,14 @@ export const config = {
 
 const SITE_URL = 'https://probo.pro'
 
-const BOT_UA = /facebookexternalhit|whatsapp|Twitterbot|LinkedInBot|TelegramBot|Slackbot|Discordbot|WhatsApp|vkShare|W3C_Validator|redditbot|Pinterest|Applebot/i
+const BOT_UA =
+  /facebookexternalhit|whatsapp|Twitterbot|LinkedInBot|TelegramBot|Slackbot|Discordbot|WhatsApp|vkShare|W3C_Validator|redditbot|Pinterest|Applebot/i
 
 function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]!))
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+  )
 }
 
 export default function middleware(req: Request) {
@@ -23,7 +27,7 @@ export default function middleware(req: Request) {
 
   const pageUrl = `${SITE_URL}/${pro.slug}`
   const image = pro.heroPhoto ?? pro.photos?.[0]
-  const imageUrl = image ? `${SITE_URL}${image}` : `${SITE_URL}/logo.jpeg`
+  const imageUrl = image ? `${SITE_URL}${image}` : `${SITE_URL}/LogoProbo.png`
   const title = `${pro.name} — ${pro.title}`
   const description = `${pro.specialty}. Reserva tu cita online en segundos con Probo.pro.`
 
