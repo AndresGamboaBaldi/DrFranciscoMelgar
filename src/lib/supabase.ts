@@ -19,13 +19,15 @@ export function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
 // ─────────────────────────────────────────────────────────────
 
 export async function createAppointment(
-  data: Omit<Appointment, 'id' | 'created_at' | 'status'> & { duration_mins?: number },
+  data: Omit<Appointment, 'id' | 'created_at' | 'status'> & { duration_mins?: number; setup_url?: string },
 ) {
   if (!supabase) {
     console.warn('[Supabase] not configured')
     return null
   }
-  const { error } = await supabase.from('appointments').insert([{ ...data, status: 'pending' }])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { setup_url, ...dbData } = data
+  const { error } = await supabase.from('appointments').insert([{ ...dbData, status: 'pending' }])
   if (error) throw error
 
   // Fire-and-forget push notification — non-blocking
@@ -59,7 +61,7 @@ export async function createAppointment(
         business_id: data.business_id,
         title: '📅 Nueva Cita',
         body,
-        url: `/${data.business_id}/setup`,
+        url: setup_url ?? `/${data.business_id}/setup`,
       }),
     }).catch(() => {}) // silently ignore errors
   }

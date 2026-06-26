@@ -62,6 +62,7 @@ export default function BookingSection() {
         notes: form.notes.trim() || 'Sin comentarios especiales',
         duration_mins: service?.durationMins ?? slotDuration,
         business_id: pro.businessId,
+        setup_url: `/${pro.slug}/setup`,
       })
       // Build the calendar sync URL dynamically (works in dev and production)
       const calendarPageUrl = pro.calendarFeedUrl
