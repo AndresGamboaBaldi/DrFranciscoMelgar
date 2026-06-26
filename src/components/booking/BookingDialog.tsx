@@ -433,7 +433,10 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                 <ServiceSelector
                   services={pro.services}
                   selected={service}
-                  onSelect={setService}
+                  onSelect={(s) => {
+                    setService(s)
+                    goNext()
+                  }}
                   slotDuration={slotDuration}
                 />
               )}
@@ -445,6 +448,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                   onDateChange={(d) => {
                     setDate(d)
                     setTime('')
+                    goNext()
                   }}
                   onTimeChange={setTime}
                   businessId={businessId}
@@ -463,7 +467,10 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                     setDate(d)
                     setTime('')
                   }}
-                  onTimeChange={setTime}
+                  onTimeChange={(t) => {
+                    setTime(t)
+                    goNext()
+                  }}
                   businessId={businessId}
                   serviceDurationMins={service?.durationMins}
                   view="times"
