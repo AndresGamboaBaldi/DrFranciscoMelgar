@@ -2,7 +2,7 @@
  * Service Worker — Web Push Notifications + asset caching
  */
 
-const CACHE_NAME = 'probo-assets-v3'
+const CACHE_NAME = 'probo-assets-v4'
 
 self.addEventListener('install', event => {
   self.skipWaiting()
