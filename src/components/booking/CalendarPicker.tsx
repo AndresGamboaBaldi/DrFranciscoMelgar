@@ -227,6 +227,38 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
   const lacksSpace = (slot: string, allSlots: string[], blocked: string[], adminBlocks: BlockedSlot[]) => {
     const svcMins = serviceDurationMins ?? cfg.slotDuration
     if (svcMins <= cfg.slotDuration) return false
+
+    const startMins = timeToMins(slot)
+    const endMins   = startMins + svcMins
+
+    // For manual slots: check by actual time range, not array indices.
+    // This correctly catches services that span across a break or past end of day.
+    if (manualSlots && manualSlots.length > 0) {
+      // Overlaps with break?
+      if (cfg.breakHours) {
+        const bStart = timeToMins(cfg.breakHours.start)
+        const bEnd   = timeToMins(cfg.breakHours.end)
+        if (startMins < bEnd && endMins > bStart) return true
+      }
+      // Past end of work day (last slot + slot duration)?
+      const lastSlotMins = timeToMins(allSlots[allSlots.length - 1])
+      if (endMins > lastSlotMins + cfg.slotDuration) return true
+      // Any booked appointment overlaps the service window?
+      for (const b of blocked) {
+        const bMins = timeToMins(b)
+        if (bMins >= startMins && bMins < endMins) return true
+      }
+      // Any admin block overlaps?
+      for (const ab of adminBlocks) {
+        if (!ab.start_time || !ab.end_time) return true
+        const abStart = timeToMins(ab.start_time)
+        const abEnd   = timeToMins(ab.end_time)
+        if (startMins < abEnd && endMins > abStart) return true
+      }
+      return false
+    }
+
+    // Auto-generated slots: original consecutive-slot logic
     const slotsNeeded = Math.ceil(svcMins / cfg.slotDuration)
     const idx = allSlots.indexOf(slot)
     for (let i = 0; i < slotsNeeded; i++) {

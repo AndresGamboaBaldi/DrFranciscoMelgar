@@ -204,6 +204,16 @@ const barber_vip: Professional = {
       image: '/barber_vip/services/fade.jpeg',
     },
     {
+      id: 'corte-tinte-barba',
+      name: 'Corte y Tinte de Barba',
+      tag: 'Color',
+      price: 'Bs. 160',
+      durationMins: 120,
+      description:
+        'Corte a tu estilo más tinte profesional de barba. Coloración precisa con productos de alta calidad para un look completo y personalizado.',
+      image: '/barber_vip/services/tintebarba.webp',
+    },
+    {
       id: 'tinte',
       name: 'Tinte & Color',
       tag: 'Color',
@@ -392,7 +402,7 @@ const andres: Professional = {
       name: 'Automatización & Análisis',
       tag: 'Data Science',
       price: 'Cotización',
-      durationMins: 60,
+      durationMins: 120,
       description:
         'Limpieza, procesamiento y análisis de datos con Python. Automatiza tareas repetitivas y obtén reportes recurrentes.',
     },
