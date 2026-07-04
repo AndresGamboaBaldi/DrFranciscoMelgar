@@ -108,7 +108,7 @@ export default function BookingSection() {
               <StepNav step={step} />
               {step === 1 && <ServiceSelector services={pro.services} selected={service} onSelect={setService} slotDuration={slotDuration} />}
               {step === 2 && <CalendarPicker selectedDate={date} selectedTime={time} onDateChange={d => { setDate(d); setTime('') }} onTimeChange={setTime} businessId={pro.businessId} timeSlots={pro.timeSlots} satTimeSlots={pro.satTimeSlots} />}
-              {step === 3 && service && date && time && <ContactForm summary={{ service, date, time, slotDuration }} data={form} onChange={updateForm} errors={errors} />}
+              {step === 3 && service && date && time && <ContactForm summary={{ service, date, time, slotDuration }} data={form} onChange={updateForm} errors={errors} businessId={pro.businessId} />}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid var(--color-rim)' }}>
                 {step > 1 ? <BackBtn onClick={() => setStep(s => Math.max(s-1,1) as BookingStep)} /> : <span />}
                 {step < 3

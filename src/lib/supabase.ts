@@ -116,6 +116,7 @@ export async function getBookedSlots(
   return expandBookedSlots(data ?? [], slotDuration)
 }
 
+
 export async function getAppointmentsByDate(
   businessId: string,
   date: string,

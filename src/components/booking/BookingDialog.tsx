@@ -485,6 +485,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                   data={form}
                   onChange={updateForm}
                   errors={errors}
+                  businessId={businessId}
                 />
               )}
             </>
