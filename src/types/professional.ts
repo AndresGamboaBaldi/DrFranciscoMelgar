@@ -60,6 +60,9 @@ export interface StaffMember {
   timeSlots?: string[]
   /** Slots del sábado. Si se define, reemplaza timeSlots solo los sábados. */
   satTimeSlots?: string[]
+
+  /** Servicios propios del staff. Si se define, reemplaza los servicios del profesional en el booking. */
+  services?: ProService[]
 }
 
 /** Configuración del sistema de reservas */

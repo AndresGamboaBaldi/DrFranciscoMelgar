@@ -323,16 +323,21 @@ const barber_vip: Professional = {
       businessId: 'andres',
       calendarFeedUrl:
         'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
+      services: [
+        { id: 'corte', name: 'Corte', tag: 'Esencial', price: 'Bs. 60', durationMins: 60, description: 'Corte clásico o moderno a tu estilo.', image: '/barber_vip/services/corte.jpeg' },
+        { id: 'barba', name: 'Corte y Barba', tag: 'Clásico', price: 'Bs. 90', durationMins: 60, description: 'Corte más perfilado de barba con navaja.', image: '/barber_vip/services/fade.jpeg' },
+      ],
     },
-     {
-      id:       'jheison',
-      name:     'jheison',
-      shortName:'jheison',
-      title:    'Barbero & Estilista',
-      photo:    '/barber_vip/photos/jheison.jpeg',
-      phone:    '59177933737',
-      businessId:      'jheison',
-      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=ec7c7937994c8f1c8c506afb809432318770a2f382a190bd61575fffa1a736ed',
+    {
+      id: 'jheison',
+      name: 'jheison',
+      shortName: 'jheison',
+      title: 'Barbero & Estilista',
+      photo: '/barber_vip/photos/jheison.jpeg',
+      phone: '59177933737',
+      businessId: 'jheison',
+      calendarFeedUrl:
+        'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=ec7c7937994c8f1c8c506afb809432318770a2f382a190bd61575fffa1a736ed',
     },*/
   ],
 }

@@ -431,7 +431,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
               {stepKind === 'Servicio' && (
                 <ServiceSelector
-                  services={pro.services}
+                  services={selectedStaff?.services ?? pro.services}
                   selected={service}
                   onSelect={(s) => {
                     setService(s)
