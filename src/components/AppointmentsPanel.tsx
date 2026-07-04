@@ -815,15 +815,10 @@ export default function AppointmentsPanel({
 
       {/* List */}
       {loading ? (
-        <div
-          style={{
-            padding: '2.5rem',
-            textAlign: 'center',
-            color: 'var(--color-ink-ghost)',
-            fontSize: '.9rem',
-          }}
-        >
-          Cargando…
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', padding: '1.25rem' }}>
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} style={{ borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 18%, transparent)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 80}ms`, height: '5rem' }} />
+          ))}
         </div>
       ) : loadError ? (
         <div

@@ -149,7 +149,6 @@ const doctor_melgar: Professional = {
   businessId: 'doctor_melgar',
   calendarFeedUrl:
     'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=cdebf6a18fc4c3be2c64acffa23b946165c8c5c1ba50981dee6ad5d70df5c5c7',
-  setupPassword: 'melgar2026',
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -276,7 +275,6 @@ const barber_vip: Professional = {
   businessId: 'barber_vip',
   calendarFeedUrl:
     'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=12d9f83cca937e8db7996811bfafff18bb0e725efacce7c76cad8029bf96fb3e',
-  setupPassword: 'barbervip2026',
   staff: [
     {
       id: 'jhoel',
@@ -288,7 +286,6 @@ const barber_vip: Professional = {
       businessId: 'jhoel_cuts',
       calendarFeedUrl:
         'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=48878751185480866b8822fd28a7e6da2618541ae38a5c8e61596856145b5be8',
-      setupPassword: 'jhoel2026',
       timeSlots: [
         '09:30',
         '10:00',
@@ -326,7 +323,6 @@ const barber_vip: Professional = {
       businessId: 'andres',
       calendarFeedUrl:
         'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=fb0f68548b06253112812fb0f6847c983711f15fb849b83bd7a8f6e3c9b8d90a',
-      setupPassword: 'andres2026',
     },
      {
       id:       'jheison',
@@ -337,7 +333,6 @@ const barber_vip: Professional = {
       phone:    '59177933737',
       businessId:      'jheison',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=ec7c7937994c8f1c8c506afb809432318770a2f382a190bd61575fffa1a736ed',
-      setupPassword:   'jheison2026',
     },*/
   ],
 }
@@ -551,7 +546,6 @@ const dr_seifert: Professional = {
   businessId: 'dr_seifert',
   calendarFeedUrl:
     'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=260c5ffb85568bb46747195dee3d3abb4b8a09775b835d1d268fbe47fa8cfa4f',
-  setupPassword: 'seifert2026',
 }
 
 // ────────────────────────────────────────────────────────────────

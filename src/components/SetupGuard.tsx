@@ -11,6 +11,10 @@ import { useStaff } from '../context/StaffContext'
 
 const TOKEN_PREFIX = 'probo_setup_token_'
 
+function Skeleton({ style, delay = 0 }: { style?: React.CSSProperties; delay?: number }) {
+  return <div style={{ borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 18%, transparent)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${delay}ms`, ...style }} />
+}
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string
 const FUNCTIONS_URL = import.meta.env.DEV
   ? 'http://127.0.0.1:54321/functions/v1'
@@ -114,8 +118,14 @@ export default function SetupGuard({ children }: { children: React.ReactNode }) 
 
   if (checking) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-        Verificando acceso…
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg)', padding: '2rem' }}>
+        <Skeleton style={{ height: '3rem', maxWidth: '12rem', marginBottom: '3rem' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '48rem' }}>
+          {[100, 60, 80, 40].map((w, i) => <Skeleton key={i} style={{ height: '1.2rem', maxWidth: `${w}%` }} delay={i * 80} />)}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', maxWidth: '48rem', marginTop: '2.5rem' }}>
+          {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} style={{ height: '5rem' }} delay={i * 60} />)}
+        </div>
       </div>
     )
   }

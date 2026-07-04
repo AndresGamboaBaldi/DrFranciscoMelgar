@@ -111,8 +111,10 @@ export default function ScheduleEditor() {
   }
 
   if (loading) return (
-    <div style={{ padding: '2rem 0', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-      Cargando configuración…
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} style={{ borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 18%, transparent)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 80}ms`, height: '3.5rem' }} />
+      ))}
     </div>
   )
 
