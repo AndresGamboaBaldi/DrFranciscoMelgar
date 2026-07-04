@@ -64,7 +64,7 @@ export default function CancelPage() {
         {apt === undefined && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
             {[60, 40, 80, 40].map((w, i) => (
-              <div key={i} style={{ height: i === 0 ? '2rem' : '1rem', maxWidth: `${w}%`, margin: '0 auto', borderRadius: 2, background: 'rgba(255,255,255,.08)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 80}ms` }} />
+              <div key={i} className="skeleton" style={{ height: i === 0 ? '2rem' : '1rem', maxWidth: `${w}%`, margin: '0 auto', animationDelay: `${i * 80}ms` }} />
             ))}
           </div>
         )}

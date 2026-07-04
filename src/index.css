@@ -138,6 +138,22 @@ body::after {
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
+
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--color-gold) 10%, var(--color-surface));
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--color-gold) 18%, var(--color-bg)), transparent);
+  animation: shimmer 1.2s infinite;
+}
 @keyframes scrollBob {
   0%,100% { transform: scaleY(1); opacity: .4; }
   50%     { transform: scaleY(.55); opacity: .9; }

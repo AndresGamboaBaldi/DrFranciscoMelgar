@@ -817,7 +817,7 @@ export default function AppointmentsPanel({
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', padding: '1.25rem' }}>
           {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} style={{ borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 18%, transparent)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 80}ms`, height: '5rem' }} />
+            <div key={i} className="skeleton" style={{ height: '5rem', animationDelay: `${i * 80}ms` }} />
           ))}
         </div>
       ) : loadError ? (

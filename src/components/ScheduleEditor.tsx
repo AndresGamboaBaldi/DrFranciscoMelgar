@@ -113,7 +113,7 @@ export default function ScheduleEditor() {
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
       {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} style={{ borderRadius: 2, background: 'color-mix(in srgb, var(--color-ink-ghost) 18%, transparent)', animation: 'pulse 1.4s ease-in-out infinite', animationDelay: `${i * 80}ms`, height: '3.5rem' }} />
+        <div key={i} className="skeleton" style={{ height: '3.5rem', animationDelay: `${i * 80}ms` }} />
       ))}
     </div>
   )
