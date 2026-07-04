@@ -115,7 +115,7 @@ export default function BlockScheduler() {
 
   const handleDelete = async (ids: string[]) => {
     setDeleting(ids)
-    try { await Promise.all(ids.map(deleteBlock)); await loadBlocks() }
+    try { await Promise.all(ids.map(id => deleteBlock(id, businessId))); await loadBlocks() }
     catch { alert('Error al eliminar') }
     finally { setDeleting(null) }
   }

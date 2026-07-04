@@ -15,6 +15,25 @@ export function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  ADMIN WRITE — via Edge Function (bypasses RLS with service role)
+// ─────────────────────────────────────────────────────────────
+
+async function adminWrite(payload: Record<string, unknown>): Promise<void> {
+  const FUNCTIONS_URL = import.meta.env.DEV
+    ? 'http://127.0.0.1:54321/functions/v1'
+    : `${supabaseUrl}/functions/v1`
+  const res = await fetch(`${FUNCTIONS_URL}/admin-write`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.error ?? `admin-write failed (${res.status})`)
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 //  APPOINTMENTS
 // ─────────────────────────────────────────────────────────────
 
@@ -264,21 +283,16 @@ export async function getMonthBlocks(
 }
 
 export async function addBlock(block: Omit<BlockedSlot, 'id' | 'created_at'>): Promise<void> {
-  if (!supabase) throw new Error('Supabase no configurado')
-  const { error } = await supabase.from('blocked_slots').insert([block])
-  if (error) throw new Error(error.message)
+  await adminWrite({ action: 'add-block', business_id: block.business_id, block })
 }
 
 export async function addBlocks(blocks: Omit<BlockedSlot, 'id' | 'created_at'>[]): Promise<void> {
-  if (!supabase) throw new Error('Supabase no configurado')
-  const { error } = await supabase.from('blocked_slots').insert(blocks)
-  if (error) throw new Error(error.message)
+  if (!blocks.length) return
+  await adminWrite({ action: 'add-blocks', business_id: blocks[0].business_id, blocks })
 }
 
-export async function deleteBlock(id: string): Promise<void> {
-  if (!supabase) throw new Error('Supabase no configurado')
-  const { error } = await supabase.from('blocked_slots').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+export async function deleteBlock(id: string, businessId: string): Promise<void> {
+  await adminWrite({ action: 'delete-block', business_id: businessId, id })
 }
 
 export async function getUpcomingBlocks(businessId: string): Promise<BlockedSlot[]> {
@@ -420,25 +434,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export async function saveAllowCancel(businessId: string, allowCancel: boolean): Promise<void> {
-  if (!supabase) throw new Error('Supabase no configurado')
   scheduleSettingsCache.delete(businessId)
-  const { error } = await supabase.from('schedule_settings').upsert(
-    [
-      {
-        business_id: businessId,
-        allow_cancel: allowCancel,
-        updated_at: new Date().toISOString(),
-      },
-    ],
-    { onConflict: 'business_id' },
-  )
-  if (error) throw new Error(error.message)
+  await adminWrite({ action: 'save-allow-cancel', business_id: businessId, allow_cancel: allowCancel })
 }
 
 export async function saveScheduleSettings(settings: ScheduleSettings): Promise<void> {
-  if (!supabase) throw new Error('Supabase no configurado')
-  const { error } = await supabase
-    .from('schedule_settings')
-    .upsert([{ ...settings, updated_at: new Date().toISOString() }], { onConflict: 'business_id' })
-  if (error) throw new Error(error.message)
+  scheduleSettingsCache.delete(settings.business_id)
+  await adminWrite({ action: 'save-schedule', business_id: settings.business_id, settings })
 }
