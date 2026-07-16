@@ -234,9 +234,19 @@ const barber_vip: Professional = {
     },
     {
       id: 'ondulacion',
-      name: 'Ondulación + Corte',
+      name: 'Ondulación Parte Superior + Corte',
       tag: 'Estilo',
-      price: 'Bs. 250 - 300',
+      price: 'Bs. 250',
+      durationMins: 120,
+      description:
+        'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',
+      image: '/barber_vip/services/ondulacion.jpeg',
+    },
+     {
+      id: 'ondulacion',
+      name: 'Ondulación Global + Corte',
+      tag: 'Estilo',
+      price: 'Bs. 300',
       durationMins: 120,
       description:
         'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',

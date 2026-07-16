@@ -44,6 +44,24 @@ function formatTimeStart(time: string): string {
 export default function ContactForm({ summary, data, onChange, errors, paymentNotice }: Props) {
   return (
     <div style={{ paddingTop: '.25rem' }}>
+      {/* ── Payment notice ── */}
+      {paymentNotice && (
+        <div style={{
+          marginBottom: '.75rem',
+          padding: '.65rem .85rem',
+          background: 'rgba(196,160,48,0.08)',
+          border: '1px solid rgba(196,160,48,0.3)',
+          display: 'flex', alignItems: 'flex-start', gap: '.5rem',
+        }}>
+          <svg style={{ flexShrink: 0, marginTop: '.1rem' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4a030" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', lineHeight: 1.5, margin: 0 }}>
+            Para confirmar se requerirá un pago del <strong style={{ color: 'var(--color-ink)' }}>{paymentNotice.pct}%</strong> vía QR al finalizar.
+          </p>
+        </div>
+      )}
+
       {/* ── Summary ── */}
       <div style={{ marginBottom: '1.25rem' }}>
         {/* Tab / orejita */}
@@ -76,24 +94,6 @@ export default function ContactForm({ summary, data, onChange, errors, paymentNo
           ))}
         </div>
       </div>
-
-      {/* ── Payment notice ── */}
-      {paymentNotice && (
-        <div style={{
-          marginBottom: '1rem',
-          padding: '.65rem .85rem',
-          background: 'rgba(196,160,48,0.08)',
-          border: '1px solid rgba(196,160,48,0.3)',
-          display: 'flex', alignItems: 'flex-start', gap: '.5rem',
-        }}>
-          <svg style={{ flexShrink: 0, marginTop: '.1rem' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4a030" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', lineHeight: 1.5, margin: 0 }}>
-            Para confirmar se requerirá un pago del <strong style={{ color: 'var(--color-ink)' }}>{paymentNotice.pct}%</strong> vía QR al finalizar.
-          </p>
-        </div>
-      )}
 
       {/* ── Fields ── */}
       <div

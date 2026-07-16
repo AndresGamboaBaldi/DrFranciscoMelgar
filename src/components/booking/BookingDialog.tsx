@@ -268,6 +268,26 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
   const confirmAndSend = async () => {
     if (!service || !date || !time) return
+
+    // Open WA window immediately (in the click handler) before any await,
+    // so browsers don't treat it as a blocked popup.
+    const proPhoneClean = phone.replace(/\D/g, '')
+    const dur = service.durationMins ?? slotDuration
+    const durationLabel = dur >= 60
+      ? `${Math.floor(dur / 60)}h${dur % 60 ? ` ${dur % 60}min` : ''}`
+      : `${dur}min`
+    const waLines = [
+      `*Hola! Soy ${form.name.trim()} reserve una cita:*`,
+      `*Servicio:* ${service.name}`,
+      `*Duración:* ${durationLabel}`,
+      `*Fecha:* ${formatDate(date)}`,
+      `*Hora:* ${time}`,
+      `*Telefono:* ${form.phone.trim()}`,
+      `Te envio el comprobante de pago (${paymentSettings?.payment_percentage ?? 50}%) 📎`,
+    ]
+    const waUrl = `https://wa.me/${proPhoneClean}?text=${encodeURIComponent(waLines.join('\n'))}`
+    window.open(waUrl, '_blank')
+
     setLoading(true)
     try {
       const isoDate = `${date.y}-${String(date.m + 1).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`
@@ -283,21 +303,6 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
         setup_url: selectedStaff ? `/${pro.slug}/setup/${selectedStaff.id}` : `/${pro.slug}/setup`,
         initialStatus: 'pending_payment',
       })
-      const proPhoneClean = phone.replace(/\D/g, '')
-      const dur = service.durationMins ?? slotDuration
-      const durationLabel = dur >= 60
-        ? `${Math.floor(dur / 60)}h${dur % 60 ? ` ${dur % 60}min` : ''}`
-        : `${dur}min`
-      const waLines = [
-        `*Hola! Soy ${form.name.trim()} reserve una cita:*`,
-        `*Servicio:* ${service.name}`,
-        `*Duración:* ${durationLabel}`,
-        `*Fecha:* ${formatDate(date)}`,
-        `*Hora:* ${time}`,
-        `*Telefono:* ${form.phone.trim()}`,
-        `Te envio el comprobante de pago (${paymentSettings?.payment_percentage ?? 50}%) 📎`,
-      ]
-      window.open(`https://wa.me/${proPhoneClean}?text=${encodeURIComponent(waLines.join('\n'))}`, '_blank')
       sessionStorage.removeItem('pendingQrPayment')
       setPaidByQr(true)
       setShowQrStep(false)
@@ -1414,18 +1419,11 @@ function SuccessState({
         </div>
       </div>
 
-      {/* ── Footer brand (always gold, regardless of professional theme) ── */}
-      <p
-        style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: '1.1rem',
-          letterSpacing: '.08em',
-          color: 'var(--color-ink-ghost)',
-          marginTop: '.5rem',
-        }}
-      >
-        Pro<em style={{ fontStyle: 'italic', color: '#4d8fff' }}>bo</em>.pro
-      </p>
+      {/* ── Footer brand ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.45rem', marginTop: '.5rem', width: '100%' }}>
+        <span style={{ fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', opacity: 0.6 }}>powered by</span>
+        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: 'var(--color-ink-ghost)', letterSpacing: '.02em' }}>Probo</span>
+      </div>
     </div>
   )
 }

@@ -6,9 +6,7 @@ export default function Footer() {
   const pro = useProfessional()
   const openBooking = useOpenBooking()
 
-  const GOLD   = '#4d8fff'
-
-  // Load Playfair Display for the Probo.pro brand mark
+  // Load Playfair Display for the brand mark
   useEffect(() => {
     const id = 'gf-playfair-display'
     if (document.getElementById(id)) return
@@ -65,12 +63,10 @@ export default function Footer() {
 
       </div>
 
-      {/* Copyright */}
-      <div style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.75rem' }}>
-        <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)' }}>© 2026 Probo.pro — Reservas online para profesionales en Bolivia</p>
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: 'var(--color-ink-ghost)' }}>
-          Pro<em style={{ fontStyle: 'italic', color: GOLD }}>bo</em>.pro
-        </p>
+      {/* Brand */}
+      <div style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.45rem' }}>
+        <span style={{ fontSize: '.6rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', opacity: 0.6 }}>powered by</span>
+        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', color: 'var(--color-ink-ghost)', letterSpacing: '.02em' }}>Probo</span>
       </div>
 
     </footer>
