@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, QrCode, Upload } from 'lucide-react'
+import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, QrCode, Upload, Briefcase } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useStaff } from '../context/StaffContext'
 import ScheduleEditor from '../components/ScheduleEditor'
