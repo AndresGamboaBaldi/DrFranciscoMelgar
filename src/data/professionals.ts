@@ -184,7 +184,7 @@ const barber_vip: Professional = {
   services: [
     {
       id: 'corte',
-      name: 'Corte',
+      name: 'Corte + Cejas y Lavado',
       tag: 'Esencial',
       price: 'Bs. 70',
       durationMins: 60,
@@ -204,7 +204,7 @@ const barber_vip: Professional = {
     },
     {
       id: 'corte-tinte-barba',
-      name: 'Corte y Tinte de Barba',
+      name: 'Corte + Tinte de Barba',
       tag: 'Color',
       price: 'Bs. 160',
       durationMins: 120,
@@ -214,7 +214,7 @@ const barber_vip: Professional = {
     },
     {
       id: 'tinte',
-      name: 'Tinte & Color',
+      name: 'Tinte & Color + Corte',
       tag: 'Color',
       price: 'Bs. 350',
       durationMins: 180,
@@ -224,7 +224,7 @@ const barber_vip: Professional = {
     },
     {
       id: 'ritual',
-      name: 'Ritual de Barba',
+      name: 'Corte + Ritual de Barba',
       tag: 'Premium',
       price: 'Bs. 140',
       durationMins: 60,
@@ -234,9 +234,9 @@ const barber_vip: Professional = {
     },
     {
       id: 'ondulacion',
-      name: 'Ondulación',
+      name: 'Ondulación + Corte',
       tag: 'Estilo',
-      price: 'Bs. 250',
+      price: 'Bs. 250 - 300',
       durationMins: 120,
       description:
         'Incluye corte y barba más tratamiento de ondulación, para un cabello con textura, volumen y rizo definido.',
@@ -244,7 +244,7 @@ const barber_vip: Professional = {
     },
     {
       id: 'limpieza',
-      name: 'Limpieza Facial',
+      name: 'Limpieza Facial + Corte',
       tag: 'Premium',
       price: 'Bs. 160',
       durationMins: 120,
