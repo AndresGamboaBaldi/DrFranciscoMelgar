@@ -360,7 +360,7 @@ const andres: Professional = {
   photos: ['/barber_vip/photos/andres.jpeg'],
   slug: 'andres',
   category: 'otro',
-  name: 'Andres Gamboa',
+  name: 'Andres Gamboa Baldi',
   shortName: 'Andres',
   title: 'Desarrollador Frontend & Data Science',
   specialty: 'Desarrollo web a medida, dashboards y análisis de datos',
