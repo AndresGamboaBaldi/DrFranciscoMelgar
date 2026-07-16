@@ -113,7 +113,7 @@ export default function SetupPage() {
     setQrUploading(true)
     try {
       const url = await uploadQrImage(businessId, file)
-      setQrImageUrl(url)
+      setQrImageUrl(`${url}?t=${Date.now()}`)
       await saveQr({ qr_image_url: url })
     } catch { alert('Error al subir la imagen. Intenta de nuevo.') }
     finally { setQrUploading(false) }
