@@ -37,6 +37,6 @@ export interface Appointment {
   phone: string
   notes?: string | null
   business_id?: string
-  status?: 'pending' | 'confirmed' | 'cancelled'
+  status?: 'pending' | 'pending_payment' | 'confirmed' | 'cancelled'
   created_at?: string
 }

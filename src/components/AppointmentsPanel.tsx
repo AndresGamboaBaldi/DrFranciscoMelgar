@@ -3,6 +3,7 @@ import {
   getAppointmentsByDate,
   getAppointmentsByDateRange,
   cancelAppointment,
+  confirmAppointment,
   getScheduleSettings,
   withTimeout,
 } from '../lib/supabase'
@@ -69,6 +70,7 @@ export default function AppointmentsPanel({
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [cancelingId, setCancelingId] = useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<Appointment | null>(null)
   const [showBooking, setShowBooking] = useState(false)
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day')
@@ -164,6 +166,19 @@ export default function AppointmentsPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const handleConfirm = async (apt: Appointment) => {
+    if (!apt.id) return
+    setConfirmingId(apt.id)
+    try {
+      await confirmAppointment(apt.id, businessId)
+      setAppts((prev) => prev.map((a) => a.id === apt.id ? { ...a, status: 'confirmed' } : a))
+    } catch (e) {
+      alert('No se pudo confirmar la cita.')
+      console.error(e)
+    }
+    setConfirmingId(null)
+  }
+
   const handleCancel = async (apt: Appointment) => {
     if (!apt.id) return
     setCancelingId(apt.id)
@@ -232,6 +247,7 @@ export default function AppointmentsPanel({
 
   const renderCard = (apt: Appointment) => {
     const confirmed = apt.status === 'confirmed'
+    const pendingPayment = apt.status === 'pending_payment'
     const aptIsPast =
       apt.appointment_date < todayIso ||
       (apt.appointment_date === todayIso && apt.appointment_time.substring(0, 5) <= nowTime)
@@ -239,7 +255,9 @@ export default function AppointmentsPanel({
       ? 'var(--color-ink-ghost)'
       : confirmed
         ? 'var(--color-gold)'
-        : 'var(--color-gold-l)'
+        : pendingPayment
+          ? '#c4a030'
+          : 'var(--color-gold-l)'
     return (
       <div
         key={apt.id}
@@ -341,21 +359,27 @@ export default function AppointmentsPanel({
         {/* Actions */}
         {!aptIsPast && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-            <p
-              style={{
-                flex: 1,
-                minWidth: 0,
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '0.9rem',
-                fontWeight: 400,
-                color: 'var(--color-ink-dim)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {apt.service}
-            </p>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+              <p
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '0.9rem',
+                  fontWeight: 400,
+                  color: 'var(--color-ink-dim)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  minWidth: 0,
+                }}
+              >
+                {apt.service}
+              </p>
+              {pendingPayment && (
+                <span style={{ flexShrink: 0, fontSize: '.65rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '.15rem .5rem', whiteSpace: 'nowrap' }}>
+                  Pago pendiente
+                </span>
+              )}
+            </div>
             <a
               href={buildWhatsAppUrl(apt, businessName, allowCancel)}
               target="_blank"
@@ -385,6 +409,27 @@ export default function AppointmentsPanel({
               </svg>
             </a>
 
+            {pendingPayment && (
+              <IconButton
+                as="button"
+                onClick={() => handleConfirm(apt)}
+                disabled={confirmingId === apt.id}
+                title="Confirmar pago recibido"
+                style={{
+                  background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)',
+                  borderColor: '#c4a030',
+                  color: '#c4a030',
+                  cursor: confirmingId === apt.id ? 'wait' : 'pointer',
+                  opacity: confirmingId === apt.id ? 0.5 : 1,
+                }}
+                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.background = 'rgba(196,160,48,.3)' }}
+                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.background = 'rgba(196,160,48,.15)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </IconButton>
+            )}
             <IconButton
               as="button"
               onClick={() => setConfirmTarget(apt)}

@@ -3,6 +3,7 @@ import ServiceSelector from './ServiceSelector'
 import CalendarPicker from './CalendarPicker'
 import ContactForm from './ContactForm'
 import { createAppointment, getScheduleSettings, prefetchMonthBlocks } from '../../lib/supabase'
+import type { ScheduleSettings } from '../../lib/supabase'
 import { useProfessional } from '../../context/ProfessionalContext'
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
 import type { StaffMember } from '../../types/professional'
@@ -87,10 +88,10 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
   const pro = useProfessional()
   const hasStaff = !!pro.staff?.length
 
-  const STEP_LABELS = hasStaff
+  const BASE_LABELS = hasStaff
     ? ['Profesional', 'Servicio', 'Fecha', 'Hora', 'Datos']
     : ['Servicio', 'Fecha', 'Hora', 'Datos']
-  const TOTAL_STEPS = STEP_LABELS.length
+  const TOTAL_STEPS = BASE_LABELS.length
 
   const [step, setStep] = useState<Step>(initialStaff ? 2 : 1)
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(initialStaff ?? null)
@@ -100,6 +101,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
   const [form, setForm] = useState<BookingFormData>(EMPTY_FORM)
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({})
   const [slotDuration, setSlotDuration] = useState(30)
+  const [paymentSettings, setPaymentSettings] = useState<Pick<ScheduleSettings, 'require_payment' | 'qr_image_url' | 'payment_percentage'> | null>(null)
   const [loading, setLoading] = useState(false)
 
   const businessId = selectedStaff?.businessId ?? pro.businessId
@@ -118,7 +120,14 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
   useEffect(() => {
     getScheduleSettings(businessId).then((s) => {
-      if (s) setSlotDuration(s.slot_duration)
+      if (s) {
+        setSlotDuration(s.slot_duration)
+        setPaymentSettings({
+          require_payment: s.require_payment,
+          qr_image_url: s.qr_image_url,
+          payment_percentage: s.payment_percentage,
+        })
+      }
     })
     const now = new Date()
     prefetchMonthBlocks(businessId, now.getFullYear(), now.getMonth())
@@ -134,6 +143,30 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
     })
   }, [pro.staff])
   const [success, setSuccess] = useState(false)
+  const [showQrStep, setShowQrStep] = useState(false)
+  const [paidByQr, setPaidByQr] = useState(false)
+
+  // Restore pending QR payment if user left the page mid-flow
+  useEffect(() => {
+    const raw = sessionStorage.getItem('pendingQrPayment')
+    if (!raw) return
+    try {
+      const saved = JSON.parse(raw)
+      if (saved.businessId !== businessId) return
+      setForm((f) => ({ ...f, name: saved.name, phone: saved.phone }))
+      setService(saved.service)
+      setDate(saved.date)
+      setTime(saved.time)
+      setPaymentSettings({
+        require_payment: true,
+        qr_image_url: saved.qrImageUrl,
+        payment_percentage: saved.pct,
+      })
+      setSlotDuration(saved.slotDuration)
+      setShowQrStep(true)
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [waUrl, setWaUrl] = useState('') // WhatsApp URL shown after success
 
   // Load Playfair Display for the footer brand mark
@@ -159,7 +192,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
   // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !loading) onClose()
+      if (e.key === 'Escape' && !loading && !showQrStep) onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -178,8 +211,27 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
     return Object.keys(e).length === 0
   }
 
+  const requirePayment = !!(paymentSettings?.require_payment && paymentSettings.qr_image_url)
+
   const submit = async () => {
     if (!validate() || !service || !date || !time) return
+
+    if (requirePayment) {
+      sessionStorage.setItem('pendingQrPayment', JSON.stringify({
+        businessId,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        service: { name: service.name, durationMins: service.durationMins },
+        date,
+        time,
+        pct: paymentSettings?.payment_percentage ?? 50,
+        qrImageUrl: paymentSettings?.qr_image_url ?? '',
+        proPhone: phone,
+        slotDuration,
+      }))
+      setShowQrStep(true)
+      return
+    }
 
     setLoading(true)
     try {
@@ -194,6 +246,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
         business_id: businessId,
         duration_mins: service.durationMins ?? slotDuration,
         setup_url: selectedStaff ? `/${pro.slug}/setup/${selectedStaff.id}` : `/${pro.slug}/setup`,
+        initialStatus: 'pending',
       })
       const waMessage = buildWhatsAppMessage({
         patientName: form.name.trim(),
@@ -203,8 +256,51 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
         time,
         phone: form.phone.trim(),
       })
-      const waFinalUrl = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`
-      setWaUrl(waFinalUrl)
+      setWaUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`)
+      setSuccess(true)
+    } catch (err) {
+      console.error(err)
+      alert('Ocurrió un error. Por favor intenta de nuevo o contáctanos directamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const confirmAndSend = async () => {
+    if (!service || !date || !time) return
+    setLoading(true)
+    try {
+      const isoDate = `${date.y}-${String(date.m + 1).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`
+      await createAppointment({
+        service: service.name,
+        appointment_date: isoDate,
+        appointment_time: time,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        notes: form.notes.trim() || 'Sin comentarios especiales',
+        business_id: businessId,
+        duration_mins: service.durationMins ?? slotDuration,
+        setup_url: selectedStaff ? `/${pro.slug}/setup/${selectedStaff.id}` : `/${pro.slug}/setup`,
+        initialStatus: 'pending_payment',
+      })
+      const proPhoneClean = phone.replace(/\D/g, '')
+      const dur = service.durationMins ?? slotDuration
+      const durationLabel = dur >= 60
+        ? `${Math.floor(dur / 60)}h${dur % 60 ? ` ${dur % 60}min` : ''}`
+        : `${dur}min`
+      const waLines = [
+        `*Hola! Soy ${form.name.trim()} reserve una cita:*`,
+        `*Servicio:* ${service.name}`,
+        `*Duración:* ${durationLabel}`,
+        `*Fecha:* ${formatDate(date)}`,
+        `*Hora:* ${time}`,
+        `*Telefono:* ${form.phone.trim()}`,
+        `Te envio el comprobante de pago (${paymentSettings?.payment_percentage ?? 50}%) 📎`,
+      ]
+      window.open(`https://wa.me/${proPhoneClean}?text=${encodeURIComponent(waLines.join('\n'))}`, '_blank')
+      sessionStorage.removeItem('pendingQrPayment')
+      setPaidByQr(true)
+      setShowQrStep(false)
       setSuccess(true)
     } catch (err) {
       console.error(err)
@@ -217,6 +313,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
   const goNext = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS))
   const goBack = () => setStep((s) => Math.max(s - 1, 1))
   const reset = () => {
+    sessionStorage.removeItem('pendingQrPayment')
     setStep(1)
     setSelectedStaff(null)
     setService(null)
@@ -225,10 +322,15 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
     setForm(EMPTY_FORM)
     setErrors({})
     setSuccess(false)
+    setShowQrStep(false)
+    setPaidByQr(false)
     setWaUrl('')
   }
 
-  const stepKind = STEP_LABELS[step - 1]
+  const STEP_LABELS = requirePayment ? [...BASE_LABELS, 'Pago'] : BASE_LABELS
+  const ALL_STEPS = STEP_LABELS.length
+  const displayStep = showQrStep ? ALL_STEPS : step
+  const stepKind = BASE_LABELS[step - 1]
   const canNext =
     stepKind === 'Profesional'
       ? !!selectedStaff
@@ -242,7 +344,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
   return (
     /* Backdrop — click to close */
-    <div className="booking-dialog-overlay" onClick={() => !loading && onClose()}>
+    <div className="booking-dialog-overlay" onClick={() => !loading && !showQrStep && onClose()}>
       {/* Panel — stop propagation so clicking inside doesn't close */}
       <div className="booking-dialog-panel" onClick={(e) => e.stopPropagation()}>
         {/* ── Header ── */}
@@ -272,7 +374,15 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
             {/* Cancel — only shown before success */}
             <button
-              onClick={() => !loading && onClose()}
+              onClick={() => {
+                if (loading) return
+                if (showQrStep) {
+                  const ok = window.confirm('¿Estás seguro que deseas cancelar? Aún no se ha reservado tu espacio.')
+                  if (!ok) return
+                  sessionStorage.removeItem('pendingQrPayment')
+                }
+                onClose()
+              }}
               disabled={loading}
               style={{
                 display: 'inline-flex',
@@ -338,7 +448,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                 style={{
                   height: '100%',
                   background: 'var(--color-gold)',
-                  width: `${((step - 1) / (TOTAL_STEPS - 1)) * 100}%`,
+                  width: `${((displayStep - 1) / (ALL_STEPS - 1)) * 100}%`,
                   transition: 'width .4s cubic-bezier(0.16,1,0.3,1)',
                   borderRadius: 1,
                 }}
@@ -348,8 +458,8 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
             <div style={{ display: 'flex' }}>
               {STEP_LABELS.map((label, i) => {
                 const n = (i + 1) as Step
-                const active = n === step
-                const done = n < step
+                const active = n === displayStep
+                const done = n < displayStep
                 return (
                   <div
                     key={n}
@@ -404,7 +514,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
         )}
 
         {/* ── Scrollable content ── */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: success ? 0 : '1.25rem', minHeight: 0 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: success ? 0 : '1.25rem', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {success ? (
             <SuccessState
               name={form.name}
@@ -416,8 +526,15 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
               address={pro.address}
               addressDetail={pro.addressDetail}
               mapUrl={pro.mapUrl}
+              pendingPayment={paidByQr}
               onClose={onClose}
               onReset={reset}
+            />
+          ) : showQrStep ? (
+            <QRPaymentState
+              name={form.name}
+              pct={paymentSettings?.payment_percentage ?? 50}
+              qrImageUrl={paymentSettings?.qr_image_url ?? ''}
             />
           ) : (
             <>
@@ -486,6 +603,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                   onChange={updateForm}
                   errors={errors}
                   businessId={businessId}
+                  paymentNotice={requirePayment ? { pct: paymentSettings?.payment_percentage ?? 50 } : undefined}
                 />
               )}
             </>
@@ -505,15 +623,41 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
               gap: '1rem',
             }}
           >
-            {step > 1 ? <BackBtn onClick={goBack} /> : <span />}
-            {step < TOTAL_STEPS ? (
-              <NextBtn disabled={!canNext} onClick={goNext}>
-                Continuar
-              </NextBtn>
+            {showQrStep ? (
+              <>
+                <span />
+                <button
+                  onClick={confirmAndSend}
+                  disabled={loading}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '.6rem',
+                    padding: '.85rem 1.5rem',
+                    background: loading ? '#1ea854' : '#25D366',
+                    border: 'none', color: '#fff',
+                    fontFamily: 'var(--font-body)', fontSize: '.82rem', fontWeight: 500,
+                    letterSpacing: '.08em', textTransform: 'uppercase',
+                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                  }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.71.45 3.38 1.3 4.85L2.05 22l5.36-1.4a9.9 9.9 0 0 0 4.63 1.18h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7C17.16 3.03 14.69 2 12.04 2zm0 18.13a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.18.83.85-3.1-.2-.32a8.18 8.18 0 0 1-1.26-4.4c0-4.54 3.7-8.24 8.27-8.24 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 0 1 2.42 5.83c0 4.55-3.7 8.25-8.26 8.25zm4.53-6.18c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.56.13-.17.25-.64.8-.78.96-.14.17-.29.18-.54.06-.25-.12-1.04-.38-1.99-1.22-.74-.65-1.23-1.46-1.38-1.7-.14-.25-.02-.39.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.84-.86 2.04s.88 2.37 1 2.53c.12.17 1.74 2.65 4.21 3.72.59.25 1.05.4 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/>
+                  </svg>
+                  {loading ? 'Reservando…' : 'Enviar comprobante'}
+                </button>
+              </>
             ) : (
-              <NextBtn disabled={loading} onClick={submit}>
-                {loading ? 'Enviando…' : 'Confirmar Cita'}
-              </NextBtn>
+              <>
+                {step > 1 ? <BackBtn onClick={goBack} /> : <span />}
+                {step < TOTAL_STEPS ? (
+                  <NextBtn disabled={!canNext} onClick={goNext}>
+                    Continuar
+                  </NextBtn>
+                ) : (
+                  <NextBtn disabled={loading} onClick={submit}>
+                    {loading ? 'Enviando…' : 'Confirmar Cita'}
+                  </NextBtn>
+                )}
+              </>
             )}
           </div>
         )}
@@ -848,9 +992,74 @@ function buildICS(
   ].join('\r\n')
 }
 
+function QRPaymentState({
+  name,
+  pct,
+  qrImageUrl,
+}: {
+  name: string
+  pct: number
+  qrImageUrl: string
+}) {
+  const firstName = name.split(' ')[0]
+  const pctLabel = pct === 100 ? 'el total' : `el ${pct}%`
+
+  const downloadQr = async () => {
+    try {
+      const res = await fetch(qrImageUrl)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'qr-pago.png'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      window.open(qrImageUrl, '_blank')
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem', textAlign: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+          ¡Casi listo, {firstName}!
+        </h2>
+        <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, maxWidth: '26rem' }}>
+          Escanea el QR y paga {pctLabel}.
+        </p>
+      </div>
+
+      {/* QR with download overlay */}
+      <div style={{ position: 'relative', display: 'inline-block', padding: '1rem', background: '#fff', border: '1px solid var(--color-rim)' }}>
+        <img src={qrImageUrl} alt="QR de cobro" style={{ width: 'min(14rem, 70vw)', height: 'min(14rem, 70vw)', objectFit: 'contain', display: 'block' }} />
+        <button
+          onClick={downloadQr}
+          title="Guardar imagen"
+          style={{
+            position: 'absolute', bottom: '0.4rem', right: '0.4rem',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '2.2rem', height: '2.2rem',
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            color: '#fff', border: 'none', borderRadius: '6px',
+            cursor: 'pointer', padding: 0,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3v13M7 11l5 5 5-5M3 21h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <p style={{ fontSize: '.9rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, maxWidth: '22rem' }}>
+       Luego toca <strong style={{ color: 'var(--color-ink)' }}>Enviar Comprobante</strong> y envíanos el comprobante de tu pago.
+      </p>
+    </div>
+  )
+}
+
 function SuccessState({
   name,
-  waUrl,
   service,
   date,
   time,
@@ -858,6 +1067,7 @@ function SuccessState({
   address,
   addressDetail,
   mapUrl,
+  pendingPayment,
   onClose,
   onReset,
 }: {
@@ -870,6 +1080,7 @@ function SuccessState({
   address?: string
   addressDetail?: string
   mapUrl?: string
+  pendingPayment?: boolean
   onClose: () => void
   onReset: () => void
 }) {
@@ -966,14 +1177,16 @@ function SuccessState({
             letterSpacing: '.04em',
           }}
         >
-          ¡Cita confirmada!
+          {pendingPayment ? 'Reserva enviada!' : '¡Cita confirmada!'}
         </h3>
       </div>
 
       {/* ── Greeting ── */}
       <div>
         <p style={{ fontSize: '.9rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>
-          Gracias, {name ? `${name.split(' ')[0]}` : ''}. Tu espacio ha sido reservado con éxito.
+          {pendingPayment
+            ? `Gracias, ${name ? name.split(' ')[0] : ''}. Tu cita está reservada y el profesional la confirmará cuando verifique tu pago.`
+            : `Gracias, ${name ? name.split(' ')[0] : ''}. Tu espacio ha sido reservado con éxito.`}
         </p>
       </div>
 
@@ -1087,44 +1300,6 @@ function SuccessState({
 
       {/* ── Action buttons ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
-        {waUrl && (
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '.6rem',
-              padding: '.85rem 1rem',
-              background: 'none',
-              border: '1.5px solid var(--color-gold)',
-              color: 'var(--color-gold)',
-              fontFamily: 'var(--font-body)',
-              fontSize: '.75rem',
-              fontWeight: 500,
-              letterSpacing: '.08em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'all .3s',
-              borderRadius: '4px',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(196,153,90,.1)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'none'
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L.057 23.5l5.799-1.52A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.659-.493-5.19-1.355l-.371-.221-3.845 1.008 1.025-3.741-.242-.385A9.947 9.947 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-            </svg>
-            Enviar por WhatsApp
-          </a>
-        )}
         {window.matchMedia('(pointer: coarse)').matches && (
           <button
             onClick={downloadICS}

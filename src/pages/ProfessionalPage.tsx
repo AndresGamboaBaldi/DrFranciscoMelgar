@@ -84,7 +84,14 @@ export default function ProfessionalPage() {
   const { slug, staffId } = useParams<{ slug: string; staffId?: string }>()
   const pro = getProfessional(slug ?? '')
   const staffMember = staffId ? pro?.staff?.find(s => s.id === staffId) ?? null : null
-  const [bookingOpen, setBookingOpen] = useState(false)
+  const [bookingOpen, setBookingOpen] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('pendingQrPayment')
+      if (!saved) return false
+      const { businessId } = JSON.parse(saved)
+      return businessId === (pro?.businessId ?? '')
+    } catch { return false }
+  })
 
   if (!pro) {
     return (

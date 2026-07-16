@@ -100,5 +100,41 @@ Deno.serve(async (req: Request) => {
     return ok({ success: true })
   }
 
+  // ── upload-qr ─────────────────────────────────────────────────
+  if (action === 'upload-qr') {
+    const { file_base64, content_type, ext } = body
+    if (!file_base64 || typeof file_base64 !== 'string') return err('Missing file_base64')
+    const bytes = Uint8Array.from(atob(file_base64 as string), c => c.charCodeAt(0))
+    const path = `${business_id}/qr.${ext ?? 'png'}`
+    const { error } = await supabase.storage
+      .from('qr-images')
+      .upload(path, bytes, { upsert: true, contentType: (content_type as string) ?? 'image/png' })
+    if (error) return err(error.message, 500)
+    const { data } = supabase.storage.from('qr-images').getPublicUrl(path)
+    return ok({ url: data.publicUrl })
+  }
+
+  // ── save-payment-settings ────────────────────────────────────
+  if (action === 'save-payment-settings') {
+    const { require_payment, payment_percentage, qr_image_url } = body
+    const { error } = await supabase
+      .from('schedule_settings')
+      .upsert([{ business_id, require_payment, payment_percentage, qr_image_url, updated_at: new Date().toISOString() }], { onConflict: 'business_id' })
+    if (error) return err(error.message, 500)
+    return ok({ success: true })
+  }
+
+  // ── confirm-appointment ───────────────────────────────────────
+  if (action === 'confirm-appointment') {
+    const { id } = body
+    if (!id || typeof id !== 'string') return err('Missing id')
+    const { error } = await supabase
+      .from('appointments')
+      .update({ status: 'confirmed' })
+      .eq('id', id)
+    if (error) return err(error.message, 500)
+    return ok({ success: true })
+  }
+
   return err('Unknown action')
 })

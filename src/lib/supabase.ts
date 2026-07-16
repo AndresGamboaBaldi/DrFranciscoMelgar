@@ -19,9 +19,7 @@ export function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
 // ─────────────────────────────────────────────────────────────
 
 async function adminWrite(payload: Record<string, unknown>): Promise<void> {
-  const FUNCTIONS_URL = import.meta.env.DEV
-    ? 'http://127.0.0.1:54321/functions/v1'
-    : `${supabaseUrl}/functions/v1`
+  const FUNCTIONS_URL = `${supabaseUrl}/functions/v1`
   const res = await fetch(`${FUNCTIONS_URL}/admin-write`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -38,15 +36,21 @@ async function adminWrite(payload: Record<string, unknown>): Promise<void> {
 // ─────────────────────────────────────────────────────────────
 
 export async function createAppointment(
-  data: Omit<Appointment, 'id' | 'created_at' | 'status'> & { duration_mins?: number; setup_url?: string },
+  data: Omit<Appointment, 'id' | 'created_at' | 'status'> & {
+    duration_mins?: number
+    setup_url?: string
+    initialStatus?: 'pending' | 'pending_payment'
+  },
 ) {
   if (!supabase) {
     console.warn('[Supabase] not configured')
     return null
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { setup_url, ...dbData } = data
-  const { error } = await supabase.from('appointments').insert([{ ...dbData, status: 'pending' }])
+  const { setup_url, initialStatus, ...dbData } = data
+  const { error } = await supabase
+    .from('appointments')
+    .insert([{ ...dbData, status: initialStatus ?? 'pending' }])
   if (error) throw error
 
   // Fire-and-forget push notification — non-blocking
@@ -119,7 +123,7 @@ export async function getBookedSlots(
     .select('appointment_time, duration_mins')
     .eq('appointment_date', date)
     .eq('business_id', businessId)
-    .in('status', ['pending', 'confirmed'])
+    .in('status', ['pending', 'pending_payment', 'confirmed'])
   if (error) {
     // duration_mins column may not exist yet — fall back to blocking only start time
     const { data: fallback } = await supabase
@@ -127,7 +131,7 @@ export async function getBookedSlots(
       .select('appointment_time')
       .eq('appointment_date', date)
       .eq('business_id', businessId)
-      .in('status', ['pending', 'confirmed'])
+      .in('status', ['pending', 'pending_payment', 'confirmed'])
     return (fallback ?? []).map((r: { appointment_time: string }) =>
       r.appointment_time.substring(0, 5),
     )
@@ -326,6 +330,9 @@ export interface ScheduleSettings {
   slot_duration: number
   min_advance: number
   allow_cancel?: boolean | null
+  require_payment?: boolean | null
+  qr_image_url?: string | null
+  payment_percentage?: number | null
 }
 
 const scheduleSettingsCache = new Map<string, Promise<ScheduleSettings | null>>()
@@ -338,7 +345,7 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
   const promise = supabase
     .from('schedule_settings')
     .select(
-      'business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance,allow_cancel',
+      'business_id,work_days,work_start,work_end,sat_start,sat_end,sun_start,sun_end,break_start,break_end,slot_duration,min_advance,allow_cancel,require_payment,qr_image_url,payment_percentage',
     )
     .eq('business_id', businessId)
     .maybeSingle()
@@ -441,4 +448,52 @@ export async function saveAllowCancel(businessId: string, allowCancel: boolean):
 export async function saveScheduleSettings(settings: ScheduleSettings): Promise<void> {
   scheduleSettingsCache.delete(settings.business_id)
   await adminWrite({ action: 'save-schedule', business_id: settings.business_id, settings })
+}
+
+export async function savePaymentSettings(
+  businessId: string,
+  requirePayment: boolean,
+  paymentPercentage: number,
+  qrImageUrl: string | null,
+): Promise<void> {
+  scheduleSettingsCache.delete(businessId)
+  await adminWrite({
+    action: 'save-payment-settings',
+    business_id: businessId,
+    require_payment: requirePayment,
+    payment_percentage: paymentPercentage,
+    qr_image_url: qrImageUrl,
+  })
+}
+
+export async function confirmAppointment(id: string, businessId: string): Promise<void> {
+  await adminWrite({ action: 'confirm-appointment', id, business_id: businessId })
+}
+
+export async function uploadQrImage(businessId: string, file: File): Promise<string> {
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve((reader.result as string).split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+  const ext = file.name.split('.').pop() ?? 'png'
+  const FUNCTIONS_URL = `${supabaseUrl}/functions/v1`
+  const res = await fetch(`${FUNCTIONS_URL}/admin-write`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'upload-qr',
+      business_id: businessId,
+      file_base64: base64,
+      content_type: file.type,
+      ext,
+    }),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.error ?? `upload failed (${res.status})`)
+  }
+  const { url } = await res.json()
+  return url
 }

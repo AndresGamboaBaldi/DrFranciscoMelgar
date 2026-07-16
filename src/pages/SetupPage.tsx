@@ -1,12 +1,12 @@
-import { useState, useEffect, type CSSProperties } from 'react'
-import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, Briefcase } from 'lucide-react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
+import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, QrCode, Upload } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useStaff } from '../context/StaffContext'
 import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
-import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel } from '../lib/supabase'
+import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage } from '../lib/supabase'
 
 type Section = 'citas' | 'schedule' | 'config'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
@@ -59,10 +59,23 @@ export default function SetupPage() {
   const [pushWorking, setPushWorking] = useState(false)
   const [allowCancel, setAllowCancel] = useState(true)
   const [cancelSaving, setCancelSaving] = useState(false)
+  const [requirePayment, setRequirePayment] = useState(false)
+  const [paymentPct, setPaymentPct] = useState(50)
+  const [qrImageUrl, setQrImageUrl] = useState<string | null>(null)
+  const [qrSaving, setQrSaving] = useState(false)
+  const [qrUploading, setQrUploading] = useState(false)
+  const qrFileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getPushStatus(businessId).then(setPushStatus)
-    getScheduleSettings(businessId).then(s => { if (s) setAllowCancel(s.allow_cancel ?? true) })
+    getScheduleSettings(businessId).then(s => {
+      if (s) {
+        setAllowCancel(s.allow_cancel ?? true)
+        setRequirePayment(s.require_payment ?? false)
+        setPaymentPct(s.payment_percentage ?? 50)
+        setQrImageUrl(s.qr_image_url ?? null)
+      }
+    })
   }, [businessId])
 
   const toggleAllowCancel = async (val: boolean) => {
@@ -81,6 +94,30 @@ export default function SetupPage() {
     link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap'
     document.head.appendChild(link)
   }, [])
+
+  const saveQr = async (overrides?: { require_payment?: boolean; payment_percentage?: number; qr_image_url?: string | null }) => {
+    setQrSaving(true)
+    try {
+      await savePaymentSettings(
+        businessId,
+        overrides?.require_payment ?? requirePayment,
+        overrides?.payment_percentage ?? paymentPct,
+        overrides?.qr_image_url !== undefined ? overrides.qr_image_url : qrImageUrl,
+      )
+    } finally { setQrSaving(false) }
+  }
+
+  const handleQrFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setQrUploading(true)
+    try {
+      const url = await uploadQrImage(businessId, file)
+      setQrImageUrl(url)
+      await saveQr({ qr_image_url: url })
+    } catch { alert('Error al subir la imagen. Intenta de nuevo.') }
+    finally { setQrUploading(false) }
+  }
 
   const handleSubscribe = async () => {
     setPushWorking(true)
@@ -268,6 +305,80 @@ export default function SetupPage() {
                   Las notificaciones se activan por dispositivo. Si usas varios, actívalas en cada uno.
                 </p>
               </div>
+              </Panel>
+
+              <Panel title="Cobro por QR" desc="Solicita un pago parcial o total al momento de reservar. El cliente paga escaneando tu QR y envía el comprobante por WhatsApp.">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                  {/* Toggle */}
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', cursor: 'pointer' }}>
+                    <div>
+                      <p style={{ fontSize: '.95rem', color: 'var(--color-ink)', marginBottom: '.2rem' }}>Activar cobro por QR</p>
+                      <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', lineHeight: 1.5 }}>
+                        {requirePayment ? 'Los clientes deben pagar para confirmar su cita.' : 'Los clientes reservan sin pago previo.'}
+                      </p>
+                    </div>
+                    <div onClick={async () => { const v = !requirePayment; setRequirePayment(v); await saveQr({ require_payment: v }) }}
+                      style={{ position: 'relative', width: '2.8rem', height: '1.6rem', borderRadius: '999px', background: requirePayment ? 'var(--color-gold)' : 'var(--color-rim-l)', transition: 'background .2s', flexShrink: 0, cursor: qrSaving ? 'wait' : 'pointer' }}
+                    >
+                      <div style={{ position: 'absolute', top: '3px', left: requirePayment ? 'calc(100% - 1.3rem)' : '3px', width: '1rem', height: '1rem', borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
+                    </div>
+                  </label>
+
+                  {requirePayment && (<>
+                    {/* Percentage */}
+                    <div>
+                      <p style={{ fontSize: '.8rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', marginBottom: '.75rem' }}>Porcentaje a cobrar</p>
+                      <div style={{ display: 'flex', gap: '.5rem' }}>
+                        {[25, 50, 100].map(pct => (
+                          <button key={pct}
+                            onClick={async () => { setPaymentPct(pct); await saveQr({ payment_percentage: pct }) }}
+                            style={{
+                              flex: 1, padding: '.75rem', border: `1px solid ${paymentPct === pct ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+                              background: paymentPct === pct ? 'rgba(196,153,90,.1)' : 'transparent',
+                              color: paymentPct === pct ? 'var(--color-gold)' : 'var(--color-ink-dim)',
+                              fontFamily: 'var(--font-display)', fontSize: '1.4rem', cursor: 'pointer', transition: 'all .2s',
+                            }}
+                          >
+                            {pct}%
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* QR Upload */}
+                    <div>
+                      <p style={{ fontSize: '.8rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', marginBottom: '.75rem' }}>Imagen de tu QR</p>
+                      <input ref={qrFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleQrFileChange} />
+                      {qrImageUrl ? (
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                          <img src={qrImageUrl} alt="QR de cobro" style={{ width: '8rem', height: '8rem', objectFit: 'contain', border: '1px solid var(--color-rim)', background: '#fff', padding: '.5rem' }} />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+                            <button onClick={() => qrFileRef.current?.click()} disabled={qrUploading}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.65rem 1.25rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+                            >
+                              <Upload size={13} /> {qrUploading ? 'Subiendo…' : 'Cambiar imagen'}
+                            </button>
+                            <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)' }}>Sube una imagen clara del QR de tu billetera digital.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => qrFileRef.current?.click()} disabled={qrUploading}
+                          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '.75rem', width: '100%', padding: '2rem', border: '1px dashed var(--color-rim-l)', background: 'transparent', cursor: 'pointer', color: 'var(--color-ink-ghost)', transition: 'border-color .2s' }}
+                          onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-gold)'}
+                          onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--color-rim-l)'}
+                        >
+                          <QrCode size={28} color="var(--color-gold)" />
+                          <span style={{ fontFamily: 'var(--font-body)', fontSize: '.78rem', letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                            {qrUploading ? 'Subiendo…' : 'Subir imagen del QR'}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+
+                    {qrSaving && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)' }}>Guardando…</p>}
+                  </>)}
+                </div>
               </Panel>
 
               <Panel title="Cancelación de citas" desc="Controla si los clientes pueden cancelar su cita desde el mensaje de WhatsApp que les envías.">
