@@ -27,7 +27,7 @@ export default function middleware(req: Request) {
 
   const pageUrl = `${SITE_URL}/${pro.slug}`
   const image = pro.heroPhoto ?? pro.photos?.[0]
-  const imageUrl = image ? `${SITE_URL}${image}` : `${SITE_URL}/Probo.png`
+  const imageUrl = image ? `${SITE_URL}${image}` : `${SITE_URL}/ProboLogoOficial.png`
   const title = `${pro.name} — ${pro.title}`
   const description = `${pro.specialty}. Reserva tu cita online en segundos con Probo.pro.`
 
