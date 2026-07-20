@@ -69,8 +69,8 @@ self.addEventListener('push', (event) => {
   const title = data.title ?? 'Nueva Cita'
   const options = {
     body: data.body ?? '',
-    icon: '/LogoProbo.png',
-    badge: '/LogoProbo.png',
+    icon: '/Probo.png',
+    badge: '/Probo.png',
     tag: 'nueva-cita',
     renotify: true,
     data: { url: data.url ?? '/' },
