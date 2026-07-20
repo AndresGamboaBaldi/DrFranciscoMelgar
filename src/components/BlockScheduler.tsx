@@ -192,7 +192,7 @@ export default function BlockScheduler() {
         {/* Section header — clearly visible */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '.75rem', borderBottom: '2px solid var(--color-gold)', gap: '1rem' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.3rem,2.5vw,1.6rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
-            Próximos bloqueos
+            Próximas vacaciones/feriados
           </h3>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-ink-dim)', flexShrink: 0 }}>
             {loading ? '…' : blocks.length === 0 ? 'ninguno' : `${blocks.length} ${blocks.length === 1 ? 'bloqueo' : 'bloqueos'}`}
@@ -202,7 +202,7 @@ export default function BlockScheduler() {
         {!loading && blocks.length === 0 && (
           <div style={{ padding: '1.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-ink-dim)' }}>
-              Sin bloqueos programados
+              Sin vacaciones programadas
             </p>
             <p style={{ fontSize: '.82rem', color: 'var(--color-ink-ghost)', marginTop: '.4rem' }}>
               Todos los horarios configurados están disponibles

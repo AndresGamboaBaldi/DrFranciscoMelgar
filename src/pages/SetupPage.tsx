@@ -225,7 +225,7 @@ export default function SetupPage() {
                 </Panel>
               )}
 
-              <Panel title="Bloquear horarios (opcional)" desc="Cuando lo necesites, marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
+              <Panel title="Vacaciones/Feriados (opcional)" desc="Cuando lo necesites, marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
                 <BlockScheduler />
               </Panel>
             </div>
