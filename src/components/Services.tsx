@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Reveal from './Reveal'
 import { useProfessional } from '../context/ProfessionalContext'
+import { useOpenBooking } from '../context/BookingDialogContext'
 import { getScheduleSettings } from '../lib/supabase'
 
 const IS_HOVER_DEVICE =
@@ -9,6 +10,7 @@ const IS_HOVER_DEVICE =
 
 export default function Services() {
   const pro = useProfessional()
+  const openBooking = useOpenBooking()
   const [expandedId, setExpanded] = useState<string | null>(pro.services[0]?.id ?? null)
   const [slotDuration, setSlotDuration] = useState(30)
 
@@ -44,6 +46,7 @@ export default function Services() {
                 expanded={expanded}
                 onExpand={() => setExpanded(svc.id)}
                 onCollapse={() => setExpanded(null)}
+                onBook={openBooking}
               />
             )
           })}
@@ -57,9 +60,9 @@ export default function Services() {
 
 interface Svc { id: string; tag: string; name: string; description: string; durationMins?: number; price?: string; image?: string }
 
-function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }: {
+function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse, onBook }: {
   svc: Svc; slotDuration: number; num: string; expanded: boolean
-  onExpand: () => void; onCollapse: () => void
+  onExpand: () => void; onCollapse: () => void; onBook: () => void
 }) {
   const FALLBACK_COLORS = [
     'linear-gradient(135deg, #1a1815 0%, #2d2820 100%)',
@@ -119,8 +122,11 @@ function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }
 
       {/* Bottom content */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: expanded ? '1.75rem 1.5rem' : '1.25rem 1.25rem',
+        position: 'absolute',
+        ...(expanded || IS_HOVER_DEVICE
+          ? { bottom: 0, left: 0, right: 0, padding: expanded ? '1.75rem 1.5rem' : '1.25rem 1.25rem' }
+          : { top: '50%', left: 0, right: 0, transform: 'translateY(-50%)', padding: '0 1.25rem' }
+        ),
         transition: 'padding 0.4s',
       }}>
         {/* Tag — pill with backdrop */}
@@ -131,13 +137,14 @@ function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }
           background: 'rgba(255,255,255,.88)',
           backdropFilter: 'blur(6px)',
           padding: '.2rem .6rem',
-          marginBottom: '.6rem',
+          marginBottom: expanded ? '.6rem' : 0,
+          maxHeight: expanded ? '2rem' : 0,
+          overflow: 'hidden',
           opacity: expanded ? 1 : 0,
           transform: expanded ? 'translateY(0)' : 'translateY(6px)',
-          transition: 'opacity 0.3s 0.1s, transform 0.3s 0.1s',
+          transition: 'opacity 0.3s 0.1s, transform 0.3s 0.1s, margin 0.3s, max-height 0.3s',
         }}>{svc.tag}</span>
 
-        {/* Title — hidden on mobile when collapsed (no space in 80px strip) */}
         <h3 style={{
           fontFamily: 'var(--font-display)',
           fontSize: expanded ? 'clamp(1.4rem,2.5vw,1.9rem)' : 'clamp(1rem,1.5vw,1.3rem)',
@@ -167,10 +174,20 @@ function ServicePanel({ svc, slotDuration, num, expanded, onExpand, onCollapse }
           marginBottom: expanded ? '.75rem' : 0,
         }}>{svc.description}</p>
 
-        {/* Price + duration row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s' }}>
+        {/* Price + duration + book row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flexWrap: 'wrap', opacity: expanded ? 1 : 0, maxHeight: expanded ? '4rem' : 0, overflow: 'hidden', transform: expanded ? 'translateY(0)' : 'translateY(6px)', transition: 'opacity 0.3s 0.2s, transform 0.3s 0.2s, max-height 0.3s' }}>
           {svc.price && <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'var(--color-gold)', padding: '.25rem .75rem' }}>{svc.price}</span>}
           <span style={{ display: 'inline-block', fontSize: '.78rem', color: '#fff', fontWeight: 500, background: 'rgba(255,255,255,.15)', padding: '.25rem .75rem' }}>⏱ {svc.durationMins ?? slotDuration} min</span>
+          <button
+            onClick={e => { e.stopPropagation(); onBook() }}
+            disabled={!expanded}
+            aria-hidden={!expanded}
+            style={{ marginLeft: 'auto', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-bg)', background: 'var(--color-gold)', border: 'none', padding: '.35rem 1rem', cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'background .2s', pointerEvents: expanded ? 'auto' : 'none' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-gold-l)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-gold)')}
+          >
+            Reservar
+          </button>
         </div>
       </div>
     </div>
