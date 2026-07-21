@@ -156,7 +156,7 @@ const doctor_melgar: Professional = {
 // ────────────────────────────────────────────────────────────────
 const barber_vip: Professional = {
   heroPhoto: '/barber_vip/photos/barberia.webp',
-  photos: ['/barber_vip/photos/jhoel.jpeg'],
+  photos: ['/barber_vip/photos/barberia.webp'],
   slug: 'barber_vip',
   category: 'barbero',
   name: 'VIP Barber Studio',
@@ -200,7 +200,7 @@ const barber_vip: Professional = {
       durationMins: 60,
       description:
         'Incluye corte y barba, más toalla caliente y masaje facial. La experiencia completa para relajarte y salir con un estilo impecable.',
-      image: '/barber_vip/services/tintebarba.webp',
+      image: '/barber_vip/services/toallaritual.jpg',
     },
     {
       id: 'barba2',
@@ -210,7 +210,7 @@ const barber_vip: Professional = {
       durationMins: 60,
       description:
         'Perfilado, degradado y definición de barba con navaja.',
-      image: '/barber_vip/services/fade.jpeg',
+      image: '/barber_vip/services/solobarba.webp',
     },
     {
       id: 'barba',
@@ -291,7 +291,7 @@ const barber_vip: Professional = {
       name: 'Jhoel Cuts',
       shortName: 'Jhoel Cuts',
       title: 'Barbero Especialista en Colorimetría',
-      photo: '/barber_vip/photos/jhoel.jpeg',
+      photo: '/barber_vip/photos/jhoelcuts.png',
       phone: '59177933737',
       businessId: 'jhoel_cuts',
       calendarFeedUrl:
@@ -329,7 +329,7 @@ const barber_vip: Professional = {
       name: 'Jheison Barber',
       shortName: 'Jheison Barber',
       title: 'Barbero Profesional',
-      photo: '/barber_vip/photos/jheison.jpeg',
+      photo: '/barber_vip/photos/jheison.PNG',
       phone: '59175485316',
       businessId: 'jheison_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=99a5271bb817593998d4a50ec75253ee900be9e7a59378d622f158ca3573def4',
@@ -339,7 +339,7 @@ const barber_vip: Professional = {
       name: 'Lgsus Barber',
       shortName: 'Lgsus Barber',
       title: 'Barbero Profesional',
-      photo: '/barber_vip/photos/barber.png',
+      photo: '/barber_vip/photos/lgsus.PNG',
       phone: '59179396260',
       businessId: 'lgsus_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=03f5e521de8ac7c060c7921814a40bfd75388356d9df7057121c950de306a3fb',
@@ -359,7 +359,7 @@ const barber_vip: Professional = {
       name: 'Rey Barber',
       shortName: 'Rey Barber',
       title: 'Barbero Profesional',
-      photo: '/barber_vip/photos/rey.png',
+      photo: '/barber_vip/photos/reybarber.png',
       phone: '59177425356',
       businessId: 'rey_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=7abea0d35c896c53f56ef88ad2d8b4d749da2a3f5e380877fcf355ba665a6cc6',
