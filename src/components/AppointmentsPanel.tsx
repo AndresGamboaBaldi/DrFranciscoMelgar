@@ -302,121 +302,37 @@ export default function AppointmentsPanel({
           transition: 'opacity .2s',
         }}
       >
-        {pendingPayment && !aptIsPast && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '.4rem', marginBottom: '.5rem' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', height: '1.5rem', fontSize: '.6rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '0 .45rem', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
-              Pago pendiente
-            </span>
-            <span
-              role="button"
-              onClick={() => { if (confirmingId !== apt.id) handleConfirm(apt) }}
-              title="Confirmar pago recibido"
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: '1.5rem', height: '1.5rem', minWidth: '1.5rem', boxSizing: 'border-box', background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)', border: '1px solid #c4a030', color: '#c4a030', cursor: confirmingId === apt.id ? 'wait' : 'pointer', opacity: confirmingId === apt.id ? 0.5 : 1, borderRadius: 0, transition: 'background .2s', userSelect: 'none', WebkitUserSelect: 'none' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(196,160,48,.3)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(196,160,48,.15)' }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-          </div>
-        )}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: '1rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '.5rem',
-              minWidth: 0,
-            }}
-          >
+        {/* Row 1: time + staff name (agency) + pending badge */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', minWidth: 0 }}>
             {staffMap && apt.business_id && staffMap[apt.business_id] && (
-              <p style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '1rem',
-                fontWeight: 500,
-                letterSpacing: '.02em',
-                color: accent,
-                flexBasis: '100%',
-              }}>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', fontWeight: 500, letterSpacing: '.02em', color: accent, flexShrink: 0 }}>
                 {staffMap[apt.business_id]}
               </p>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap' }}>
-            <p
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '1rem',
-                fontWeight: 500,
-                letterSpacing: '.02em',
-                color: 'var(--color-ink)',
-                flexShrink: 0,
-              }}
-            >
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', fontWeight: 500, letterSpacing: '.02em', color: 'var(--color-ink)', flexShrink: 0 }}>
               {formatTime12h(apt.appointment_time)}
             </p>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: accent, flexShrink: 0 }} />
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', minWidth: 0 }}>
-              <p
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '1rem',
-                  fontWeight: 400,
-                  letterSpacing: '.02em',
-                  color: 'var(--color-ink-dim)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  minWidth: 0,
-                }}
-              >
-                {apt.name}
-              </p>
+          </div>
+          {pendingPayment && !aptIsPast && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', flexShrink: 0 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', height: '1.5rem', fontSize: '.6rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '0 .45rem', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
+                Pago pendiente
+              </span>
               <span
                 role="button"
-                onClick={e => { e.stopPropagation(); handleShowClient(apt) }}
-                style={{
-                  flexShrink: 0,
-                  width: '1rem', height: '1rem',
-                  borderRadius: '50%',
-                  background: 'var(--color-gold)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  fontSize: '.6rem',
-                  fontWeight: 700,
-                  fontFamily: 'Georgia, serif',
-                  fontStyle: 'italic',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                }}
+                onClick={() => { if (confirmingId !== apt.id) handleConfirm(apt) }}
+                title="Confirmar pago recibido"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: '1.5rem', height: '1.5rem', minWidth: '1.5rem', boxSizing: 'border-box', background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)', border: '1px solid #c4a030', color: '#c4a030', cursor: confirmingId === apt.id ? 'wait' : 'pointer', opacity: confirmingId === apt.id ? 0.5 : 1, borderRadius: 0, transition: 'background .2s', userSelect: 'none', WebkitUserSelect: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(196,160,48,.3)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(196,160,48,.15)' }}
               >
-                i
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </span>
-            </span>
-            {apt.notes && apt.notes !== 'Sin comentarios especiales' && (
-              <p
-                style={{
-                  fontSize: '.78rem',
-                  color: 'var(--color-ink-ghost)',
-                  fontStyle: 'italic',
-                  flexBasis: '100%',
-                }}
-              >
-                "{apt.notes}"
-              </p>
-            )}
             </div>
-          </div>
+          )}
           {aptIsPast && (
             <span
               style={{
@@ -444,6 +360,20 @@ export default function AppointmentsPanel({
               Completada
             </span>
           )}
+        </div>
+
+        {/* Row 2: name + i button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', minWidth: 0 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', fontWeight: 400, letterSpacing: '.02em', color: 'var(--color-ink-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+            {apt.name}
+          </p>
+          <span
+            role="button"
+            onClick={e => { e.stopPropagation(); handleShowClient(apt) }}
+            style={{ flexShrink: 0, width: '1rem', height: '1rem', borderRadius: '50%', background: 'var(--color-gold)', color: '#fff', cursor: 'pointer', fontSize: '.6rem', fontWeight: 700, fontFamily: 'Georgia, serif', fontStyle: 'italic', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none', WebkitUserSelect: 'none' }}
+          >
+            i
+          </span>
         </div>
 
         {/* Actions */}
