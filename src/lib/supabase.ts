@@ -362,6 +362,27 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
   return promise
 }
 
+export interface ClientVisit {
+  appointment_date: string
+  appointment_time: string
+  service: string
+  status: string
+}
+
+export async function getClientHistory(phone: string, businessIds: string[]): Promise<ClientVisit[]> {
+  if (!supabase || !phone || !businessIds.length) return []
+  const clean = phone.replace(/\D/g, '')
+  const { data } = await supabase
+    .from('appointments')
+    .select('appointment_date, appointment_time, service, status')
+    .in('business_id', businessIds)
+    .or(`phone.eq.${phone},phone.eq.${clean}`)
+    .neq('status', 'cancelled')
+    .order('appointment_date', { ascending: false })
+    .limit(50)
+  return (data ?? []) as ClientVisit[]
+}
+
 export async function getHiddenStaffIds(businessIds: string[]): Promise<Set<string>> {
   if (!supabase || !businessIds.length) return new Set()
   const { data } = await supabase

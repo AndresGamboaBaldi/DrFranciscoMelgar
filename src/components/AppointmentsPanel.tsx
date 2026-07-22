@@ -5,8 +5,10 @@ import {
   cancelAppointment,
   confirmAppointment,
   getScheduleSettings,
+  getClientHistory,
   withTimeout,
 } from '../lib/supabase'
+import type { ClientVisit } from '../lib/supabase'
 import BookingDialog from './booking/BookingDialog'
 import type { Appointment } from '../types/booking'
 import type { StaffMember } from '../types/professional'
@@ -87,6 +89,7 @@ export default function AppointmentsPanel({
   const [workDays, setWorkDays] = useState<number[] | null>(null)
   const [allowCancel, setAllowCancel] = useState(true)
   const [range, setRange] = useState({ start: -60, end: 60 })
+  const [clientInfo, setClientInfo] = useState<{ apt: Appointment; history: ClientVisit[]; loading: boolean } | null>(null)
   const activeCardRef = useRef<HTMLButtonElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
 
@@ -179,21 +182,19 @@ export default function AppointmentsPanel({
 
   const handleConfirm = async (apt: Appointment) => {
     if (!apt.id) return
-    const waWindow = window.open('', '_blank')
+    const phone = apt.phone.replace(/\D/g, '')
+    const firstName = apt.name.split(' ')[0]
+    const [y, m, d] = apt.appointment_date.split('-').map(Number)
+    const dateLabel = `${DAYS_ES[new Date(y, m - 1, d).getDay()]} ${d} de ${MONTHS_ES[m - 1]}`
+    const time = formatTime12h(apt.appointment_time)
+    const text = `Hola ${firstName}! ✅ Tu pago ha sido confirmado.\n\nTe espero el ${dateLabel} a las ${time}. ¡Hasta pronto!`
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
+    window.open(waUrl, '_blank')
     setConfirmingId(apt.id)
     try {
       await confirmAppointment(apt.id, apt.business_id ?? businessId)
       setAppts((prev) => prev.map((a) => a.id === apt.id ? { ...a, status: 'confirmed' } : a))
-      const phone = apt.phone.replace(/\D/g, '')
-      const firstName = apt.name.split(' ')[0]
-      const [y, m, d] = apt.appointment_date.split('-').map(Number)
-      const dateObj = new Date(y, m - 1, d)
-      const dateLabel = `${DAYS_ES[dateObj.getDay()]} ${d} de ${MONTHS_ES[m - 1]}`
-      const time = formatTime12h(apt.appointment_time)
-      const text = `Hola ${firstName}! ✅ Tu pago ha sido confirmado.\n\nTe espero el ${dateLabel} a las ${time}. ¡Hasta pronto!`
-      if (waWindow) waWindow.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
     } catch (e) {
-      if (waWindow) waWindow.close()
       alert('No se pudo confirmar la cita.')
       console.error(e)
     }
@@ -211,6 +212,12 @@ export default function AppointmentsPanel({
       console.error(e)
     }
     setCancelingId(null)
+  }
+
+  const handleShowClient = async (apt: Appointment) => {
+    setClientInfo({ apt, history: [], loading: true })
+    const history = await getClientHistory(apt.phone, allBusinessIds)
+    setClientInfo({ apt, history, loading: false })
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -347,6 +354,31 @@ export default function AppointmentsPanel({
             >
               {apt.name}
             </p>
+            <button
+              onClick={e => { e.stopPropagation(); handleShowClient(apt) }}
+              title="Info del cliente"
+              style={{
+                flexShrink: 0,
+                width: '1.3rem', height: '1.3rem',
+                borderRadius: '50%',
+                background: accent,
+                border: 'none',
+                color: 'var(--color-bg)',
+                cursor: 'pointer',
+                fontSize: '.65rem',
+                fontWeight: 700,
+                fontFamily: 'serif',
+                fontStyle: 'italic',
+                lineHeight: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                opacity: 0.85,
+                transition: 'opacity .2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '.85')}
+            >
+              i
+            </button>
             {apt.notes && apt.notes !== 'Sin comentarios especiales' && (
               <p
                 style={{
@@ -1142,6 +1174,83 @@ export default function AppointmentsPanel({
           })}
         </div>
       )}
+
+      {/* Client info popover */}
+      {clientInfo && (() => {
+        const { apt, history, loading } = clientInfo
+        const today = toISODate(new Date())
+        const past = history.filter(h => h.appointment_date < today || (h.appointment_date === today && h.appointment_time.substring(0,5) <= toISODate(new Date()).substring(0,5)))
+        const lastVisit = history.find(h => h.appointment_date <= today)
+        const daysSince = lastVisit ? Math.round((new Date(today).getTime() - new Date(lastVisit.appointment_date).getTime()) / 86400000) : null
+        const upcoming = history.filter(h => h.appointment_date > today)
+        return (
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}
+            onClick={() => setClientInfo(null)}
+          >
+            <div
+              style={{ width: '100%', maxWidth: '28rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim)', borderBottom: 'none', padding: '1.75rem 1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                <div>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--color-ink)', fontWeight: 400 }}>{apt.name}</p>
+                  <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', marginTop: '.2rem' }}>{apt.phone}</p>
+                </div>
+                <button onClick={() => setClientInfo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-ink-ghost)', padding: '.25rem', lineHeight: 1 }}>
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </button>
+              </div>
+
+              {loading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+                  {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: '2.5rem', animationDelay: `${i*80}ms` }} />)}
+                </div>
+              ) : (
+                <>
+                  {/* Stats */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.6rem' }}>
+                    {[
+                      { label: 'Total citas', value: String(history.length) },
+                      { label: daysSince === null ? 'Sin visitas' : daysSince === 0 ? 'Última visita' : 'Días sin visitar', value: daysSince === null ? '—' : daysSince === 0 ? 'Hoy' : String(daysSince) },
+                    ].map(s => (
+                      <div key={s.label} style={{ padding: '.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', textAlign: 'center' }}>
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--color-gold)', lineHeight: 1 }}>{s.value}</p>
+                        <p style={{ fontSize: '.58rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginTop: '.3rem' }}>{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Visit history */}
+                  {history.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', maxHeight: '12rem', overflowY: 'auto' }}>
+                      <p style={{ fontSize: '.62rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginBottom: '.2rem' }}>Historial</p>
+                      {history.map((h, i) => {
+                        const [hy, hm, hd] = h.appointment_date.split('-').map(Number)
+                        const dateLabel = `${DAYS_ES[new Date(hy, hm-1, hd).getDay()]} ${hd} de ${MONTHS_ES[hm-1]}`
+                        const isPast = h.appointment_date < today
+                        return (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', padding: '.5rem .75rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: isPast ? 0.65 : 1 }}>
+                            <span style={{ fontSize: '.82rem', color: 'var(--color-ink-dim)', textTransform: 'capitalize' }}>{dateLabel}</span>
+                            <span style={{ fontSize: '.78rem', color: 'var(--color-ink-ghost)', textAlign: 'right', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.service}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {upcoming.length > 0 && (
+                    <p style={{ fontSize: '.75rem', color: 'var(--color-gold)', letterSpacing: '.05em' }}>
+                      {upcoming.length} cita{upcoming.length > 1 ? 's' : ''} próxima{upcoming.length > 1 ? 's' : ''} pendiente{upcoming.length > 1 ? 's' : ''}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Custom cancel-confirmation dialog */}
       {confirmTarget && (
