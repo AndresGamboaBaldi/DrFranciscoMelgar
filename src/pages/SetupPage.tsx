@@ -6,7 +6,7 @@ import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
-import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden } from '../lib/supabase'
+import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden, getHiddenStaffIds } from '../lib/supabase'
 
 type Section = 'citas' | 'schedule' | 'config' | 'profesionales'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
@@ -85,6 +85,13 @@ export default function SetupPage() {
         setQrImageUrl(s.qr_image_url ?? null)
       }
     })
+    if (isAgency && pro.staff?.length) {
+      getHiddenStaffIds(pro.staff.map(s => s.businessId)).then(hiddenSet => {
+        const map: Record<string, boolean> = {}
+        pro.staff!.forEach(s => { map[s.businessId] = hiddenSet.has(s.businessId) })
+        setStaffHidden(map)
+      })
+    }
   }, [businessId])
 
   const toggleAllowCancel = async (val: boolean) => {
