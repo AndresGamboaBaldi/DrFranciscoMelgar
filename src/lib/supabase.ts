@@ -362,6 +362,16 @@ export async function getScheduleSettings(businessId: string): Promise<ScheduleS
   return promise
 }
 
+export async function getHiddenStaffIds(businessIds: string[]): Promise<Set<string>> {
+  if (!supabase || !businessIds.length) return new Set()
+  const { data } = await supabase
+    .from('schedule_settings')
+    .select('business_id')
+    .in('business_id', businessIds)
+    .eq('hidden', true)
+  return new Set((data ?? []).map((r: { business_id: string }) => r.business_id))
+}
+
 // ─────────────────────────────────────────────────────────────
 //  PUSH NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────

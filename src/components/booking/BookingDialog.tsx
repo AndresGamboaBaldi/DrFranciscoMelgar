@@ -2,7 +2,7 @@
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker from './CalendarPicker'
 import ContactForm from './ContactForm'
-import { createAppointment, getScheduleSettings, prefetchMonthBlocks } from '../../lib/supabase'
+import { createAppointment, getScheduleSettings, prefetchMonthBlocks, getHiddenStaffIds } from '../../lib/supabase'
 import type { ScheduleSettings } from '../../lib/supabase'
 import { useProfessional } from '../../context/ProfessionalContext'
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
@@ -86,7 +86,16 @@ interface Props {
 
 export default function BookingDialog({ onClose, initialStaff }: Props) {
   const pro = useProfessional()
-  const hasStaff = !!pro.staff?.length
+  const [hiddenStaffIds, setHiddenStaffIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (pro.staff?.length) {
+      getHiddenStaffIds(pro.staff.map(s => s.businessId)).then(setHiddenStaffIds)
+    }
+  }, [pro.staff])
+
+  const visibleStaff = pro.staff?.filter(s => !hiddenStaffIds.has(s.businessId))
+  const hasStaff = !!visibleStaff?.length
 
   const BASE_LABELS = hasStaff
     ? ['Profesional', 'Servicio', 'Fecha', 'Hora', 'Datos']
@@ -135,7 +144,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
   // Preload staff photos immediately so the carousel doesn't show blank/loading images
   useEffect(() => {
-    pro.staff?.forEach((s) => {
+    visibleStaff?.forEach((s) => {
       if (s.photo) {
         const img = new Image()
         img.src = s.photo
@@ -543,9 +552,9 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
             />
           ) : (
             <>
-              {stepKind === 'Profesional' && pro.staff && (
+              {stepKind === 'Profesional' && visibleStaff && (
                 <StaffSelector
-                  staff={pro.staff}
+                  staff={visibleStaff}
                   selected={selectedStaff}
                   onSelect={setSelectedStaff}
                 />
