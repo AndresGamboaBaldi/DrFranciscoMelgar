@@ -6,15 +6,20 @@ import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
-import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage } from '../lib/supabase'
+import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden } from '../lib/supabase'
 
-type Section = 'citas' | 'schedule' | 'config'
+type Section = 'citas' | 'schedule' | 'config' | 'profesionales'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
 
 const NAV: { id: Section; label: string; desc: string; icon: typeof CalendarDays }[] = [
   { id: 'citas',    label: 'Citas',                 desc: 'Agenda del día',                  icon: CalendarDays },
   { id: 'schedule', label: 'Horarios',              desc: 'Días y horas de atención',         icon: Clock },
   { id: 'config',   label: 'Configuración inicial', desc: 'Calendario y notificaciones',      icon: Settings },
+]
+
+const NAV_AGENCY: { id: Section; label: string; desc: string; icon: typeof CalendarDays }[] = [
+  { id: 'citas',          label: 'Citas',           desc: 'Agenda combinada',  icon: CalendarDays },
+  { id: 'profesionales',  label: 'Profesionales',   desc: 'Gestión del equipo', icon: Briefcase },
 ]
 
 const STEPS_IPHONE = [
@@ -51,9 +56,13 @@ const STEPS_PUSH_IOS = [
 export default function SetupPage() {
   const pro = useProfessional()
   const staff = useStaff()
+  const isAgency = !staff && !!pro.staff?.length
   const businessId  = staff?.businessId ?? pro.businessId
   const displayName = staff?.name ?? pro.name
+  const activeNav = isAgency ? NAV_AGENCY : NAV
   const [section, setSection]       = useState<Section>('citas')
+  const [staffHidden, setStaffHidden] = useState<Record<string, boolean>>({})
+  const [staffHiddenSaving, setStaffHiddenSaving] = useState<string | null>(null)
   const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
   const [showIosSteps, setShowIosSteps] = useState(false)
   const [pushWorking, setPushWorking] = useState(false)
@@ -82,6 +91,13 @@ export default function SetupPage() {
     setAllowCancel(val)
     setCancelSaving(true)
     try { await saveAllowCancel(businessId, val) } finally { setCancelSaving(false) }
+  }
+
+  const toggleStaffHidden = async (staffBusinessId: string, hidden: boolean) => {
+    setStaffHidden(prev => ({ ...prev, [staffBusinessId]: hidden }))
+    setStaffHiddenSaving(staffBusinessId)
+    try { await saveStaffHidden(staffBusinessId, hidden) } catch { /* ignore */ }
+    finally { setStaffHiddenSaving(null) }
   }
 
   // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
@@ -173,7 +189,7 @@ export default function SetupPage() {
       {/* ── Tab bar (desktop/tablet) ── */}
       <div className="setup-tabbar-top" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
         <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
-          {NAV.map(n => {
+          {activeNav.map(n => {
             const active = section === n.id
             return (
               <button key={n.id} onClick={() => setSection(n.id)}
@@ -205,7 +221,47 @@ export default function SetupPage() {
 
           {section === 'citas' && (
             <div style={{ paddingBottom: '3rem' }}>
-              <AppointmentsPanel businessId={businessId} businessName={displayName} staffMember={staff ?? undefined} />
+              <AppointmentsPanel
+                businessId={businessId}
+                businessName={displayName}
+                staffMember={staff ?? undefined}
+                staffMembers={isAgency ? pro.staff : undefined}
+              />
+            </div>
+          )}
+
+          {section === 'profesionales' && isAgency && (
+            <div style={{ maxWidth: '38rem' }}>
+              <Panel title="Profesionales" desc="Activa o desactiva cada profesional. Los desactivados no aparecerán como opción al reservar.">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+                  {pro.staff!.map(s => {
+                    const hidden = staffHidden[s.businessId] ?? false
+                    const saving = staffHiddenSaving === s.businessId
+                    return (
+                      <div key={s.businessId} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '.85rem 1rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: saving ? 0.6 : 1, transition: 'opacity .2s' }}>
+                        {s.photo && <img src={s.photo} alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: '50%', flexShrink: 0, border: '1px solid var(--color-rim-l)' }} />}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '.9rem', fontWeight: 500, color: 'var(--color-ink)' }}>{s.name}</p>
+                          {s.title && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>{s.title}</p>}
+                        </div>
+                        <button
+                          onClick={() => toggleStaffHidden(s.businessId, !hidden)}
+                          disabled={saving}
+                          title={hidden ? 'Activar' : 'Desactivar'}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', padding: '.45rem .9rem', background: hidden ? 'none' : 'rgba(196,153,90,.12)', border: `1px solid ${hidden ? 'var(--color-rim-l)' : 'var(--color-gold)'}`, color: hidden ? 'var(--color-ink-ghost)' : 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', cursor: saving ? 'wait' : 'pointer', transition: 'all .2s', flexShrink: 0 }}
+                        >
+                          {hidden ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                          ) : (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                          )}
+                          {hidden ? 'Oculto' : 'Visible'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Panel>
             </div>
           )}
 
@@ -413,7 +469,7 @@ export default function SetupPage() {
 
       {/* ── Tab bar (mobile, fixed bottom) ── */}
       <nav className="setup-tabbar-bottom">
-        {NAV.map(n => {
+        {activeNav.map(n => {
           const active = section === n.id
           const Icon = n.icon
           return (

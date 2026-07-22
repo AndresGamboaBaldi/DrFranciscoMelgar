@@ -141,14 +141,15 @@ export async function getBookedSlots(
 
 
 export async function getAppointmentsByDate(
-  businessId: string,
+  businessId: string | string[],
   date: string,
 ): Promise<Appointment[]> {
   if (!supabase) return []
+  const ids = Array.isArray(businessId) ? businessId : [businessId]
   const { data, error } = await supabase
     .from('appointments')
-    .select('id, name, phone, service, appointment_date, appointment_time, notes, status')
-    .eq('business_id', businessId)
+    .select('id, name, phone, service, appointment_date, appointment_time, notes, status, business_id')
+    .in('business_id', ids)
     .eq('appointment_date', date)
     .neq('status', 'cancelled')
     .order('appointment_time', { ascending: true })
@@ -160,15 +161,16 @@ export async function getAppointmentsByDate(
 }
 
 export async function getAppointmentsByDateRange(
-  businessId: string,
+  businessId: string | string[],
   startDate: string,
   endDate: string,
 ): Promise<Appointment[]> {
   if (!supabase) return []
+  const ids = Array.isArray(businessId) ? businessId : [businessId]
   const { data, error } = await supabase
     .from('appointments')
-    .select('id, name, phone, service, appointment_date, appointment_time, notes, status')
-    .eq('business_id', businessId)
+    .select('id, name, phone, service, appointment_date, appointment_time, notes, status, business_id')
+    .in('business_id', ids)
     .gte('appointment_date', startDate)
     .lte('appointment_date', endDate)
     .neq('status', 'cancelled')
@@ -179,6 +181,10 @@ export async function getAppointmentsByDateRange(
     return []
   }
   return (data ?? []) as Appointment[]
+}
+
+export async function saveStaffHidden(businessId: string, hidden: boolean): Promise<void> {
+  await adminWrite({ action: 'save-hidden', business_id: businessId, hidden })
 }
 
 export async function getAppointmentById(id: string): Promise<Appointment | null> {

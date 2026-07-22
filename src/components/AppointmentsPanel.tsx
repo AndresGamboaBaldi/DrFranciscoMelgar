@@ -60,11 +60,21 @@ export default function AppointmentsPanel({
   businessId,
   businessName,
   staffMember,
+  staffMembers,
 }: {
   businessId: string
   businessName: string
   staffMember?: StaffMember
+  staffMembers?: StaffMember[]
 }) {
+  const [staffFilter, setStaffFilter] = useState<string | null>(null)
+  const filteredStaff = staffFilter && staffMembers?.length
+    ? staffMembers.filter(s => s.businessId === staffFilter)
+    : staffMembers
+  const allBusinessIds = filteredStaff?.length ? filteredStaff.map(s => s.businessId) : [businessId]
+  const staffMap: Record<string, string> | null = staffMembers?.length
+    ? Object.fromEntries(staffMembers.map(s => [s.businessId, s.shortName ?? s.name]))
+    : null
   const [date, setDate] = useState(() => new Date())
   const [appointments, setAppts] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
@@ -111,15 +121,16 @@ export default function AppointmentsPanel({
     try {
       const data = await withTimeout(
         viewMode === 'day'
-          ? getAppointmentsByDate(businessId, isoDate)
-          : getAppointmentsByDateRange(businessId, weekStartIso, weekEndIso),
+          ? getAppointmentsByDate(allBusinessIds, isoDate)
+          : getAppointmentsByDateRange(allBusinessIds, weekStartIso, weekEndIso),
       )
       setAppts(data)
     } catch {
       setLoadError(true)
     }
     setLoading(false)
-  }, [businessId, isoDate, viewMode, weekStartIso, weekEndIso])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(allBusinessIds), isoDate, viewMode, weekStartIso, weekEndIso])
 
   useEffect(() => {
     load()
@@ -170,7 +181,7 @@ export default function AppointmentsPanel({
     if (!apt.id) return
     setConfirmingId(apt.id)
     try {
-      await confirmAppointment(apt.id, businessId)
+      await confirmAppointment(apt.id, apt.business_id ?? businessId)
       setAppts((prev) => prev.map((a) => a.id === apt.id ? { ...a, status: 'confirmed' } : a))
     } catch (e) {
       alert('No se pudo confirmar la cita.')
@@ -284,12 +295,27 @@ export default function AppointmentsPanel({
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
-              gap: '.6rem',
-              flexWrap: 'wrap',
+              flexDirection: 'column',
+              gap: '.5rem',
               minWidth: 0,
             }}
           >
+            {staffMap && apt.business_id && staffMap[apt.business_id] && (
+              <span style={{
+                fontSize: '.6rem',
+                fontWeight: 600,
+                letterSpacing: '.12em',
+                textTransform: 'uppercase',
+                color: accent,
+                background: '#fff',
+                border: `1px solid ${accent}`,
+                padding: '.1rem .45rem',
+                alignSelf: 'flex-start',
+              }}>
+                {staffMap[apt.business_id]}
+              </span>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap' }}>
             <p
               style={{
                 fontFamily: "'Inter', sans-serif",
@@ -326,6 +352,7 @@ export default function AppointmentsPanel({
                 "{apt.notes}"
               </p>
             )}
+            </div>
           </div>
           {aptIsPast && (
             <span
@@ -754,6 +781,59 @@ export default function AppointmentsPanel({
               })}
         </div>
       </div>
+
+      {/* Staff filter chips */}
+      {staffMembers && staffMembers.length > 1 && (
+        <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setStaffFilter(null)}
+            style={{
+              padding: '.3rem .8rem',
+              background: staffFilter === null ? 'var(--color-gold)' : 'var(--color-surface)',
+              border: `1px solid ${staffFilter === null ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+              color: staffFilter === null ? 'var(--color-bg)' : 'var(--color-ink-dim)',
+              fontFamily: 'var(--font-body)',
+              fontSize: '.68rem',
+              fontWeight: staffFilter === null ? 600 : 400,
+              letterSpacing: '.08em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              borderRadius: '999px',
+              transition: 'all .2s',
+            }}
+          >
+            Todos
+          </button>
+          {staffMembers.map(s => {
+            const active = staffFilter === s.businessId
+            return (
+              <button
+                key={s.businessId}
+                onClick={() => setStaffFilter(active ? null : s.businessId)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '.35rem',
+                  padding: '.3rem .8rem',
+                  background: active ? 'var(--color-gold)' : 'var(--color-surface)',
+                  border: `1px solid ${active ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+                  color: active ? 'var(--color-bg)' : 'var(--color-ink-dim)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '.68rem',
+                  fontWeight: active ? 600 : 400,
+                  letterSpacing: '.08em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  borderRadius: '999px',
+                  transition: 'all .2s',
+                }}
+              >
+                {s.shortName ?? s.name}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* Stats row */}
       {!loading && appointments.length > 0 && (

@@ -139,5 +139,16 @@ Deno.serve(async (req: Request) => {
     return ok({ success: true })
   }
 
+  // ── save-hidden ───────────────────────────────────────────────
+  if (action === 'save-hidden') {
+    const { hidden } = body
+    if (typeof hidden !== 'boolean') return err('Missing hidden')
+    const { error } = await supabase
+      .from('schedule_settings')
+      .upsert([{ business_id, hidden, updated_at: new Date().toISOString() }], { onConflict: 'business_id' })
+    if (error) return err(error.message, 500)
+    return ok({ success: true })
+  }
+
   return err('Unknown action')
 })
