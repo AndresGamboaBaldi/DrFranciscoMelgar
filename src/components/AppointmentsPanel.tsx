@@ -221,7 +221,7 @@ export default function AppointmentsPanel({
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (showBooking || confirmTarget || window.scrollY > 0) {
+    if (showBooking || confirmTarget || clientInfo || window.scrollY > 0) {
       touchStartY.current = null
       return
     }
@@ -290,6 +290,7 @@ export default function AppointmentsPanel({
       <div
         key={apt.id}
         style={{
+          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           gap: '.1rem',
@@ -343,42 +344,46 @@ export default function AppointmentsPanel({
               {formatTime12h(apt.appointment_time)}
             </p>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: accent, flexShrink: 0 }} />
-            <p
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '1rem',
-                fontWeight: 400,
-                letterSpacing: '.02em',
-                color: 'var(--color-ink-dim)',
-              }}
-            >
-              {apt.name}
-            </p>
-            <button
-              onClick={e => { e.stopPropagation(); handleShowClient(apt) }}
-              title="Info del cliente"
-              style={{
-                flexShrink: 0,
-                width: '1.3rem', height: '1.3rem',
-                borderRadius: '50%',
-                background: accent,
-                border: 'none',
-                color: 'var(--color-bg)',
-                cursor: 'pointer',
-                fontSize: '.65rem',
-                fontWeight: 700,
-                fontFamily: 'serif',
-                fontStyle: 'italic',
-                lineHeight: 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                opacity: 0.85,
-                transition: 'opacity .2s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '.85')}
-            >
-              i
-            </button>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', minWidth: 0 }}>
+              <p
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '1rem',
+                  fontWeight: 400,
+                  letterSpacing: '.02em',
+                  color: 'var(--color-ink-dim)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  minWidth: 0,
+                }}
+              >
+                {apt.name}
+              </p>
+              <span
+                role="button"
+                onClick={e => { e.stopPropagation(); handleShowClient(apt) }}
+                style={{
+                  flexShrink: 0,
+                  width: '1rem', height: '1rem',
+                  borderRadius: '50%',
+                  background: 'var(--color-gold)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '.6rem',
+                  fontWeight: 700,
+                  fontFamily: 'Georgia, serif',
+                  fontStyle: 'italic',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                }}
+              >
+                i
+              </span>
+            </span>
             {apt.notes && apt.notes !== 'Sin comentarios especiales' && (
               <p
                 style={{
@@ -420,6 +425,25 @@ export default function AppointmentsPanel({
               Completada
             </span>
           )}
+          {pendingPayment && !aptIsPast && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', flexShrink: 0 }}>
+              <button
+                onClick={() => handleConfirm(apt)}
+                disabled={confirmingId === apt.id}
+                title="Confirmar pago recibido"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: '1.6rem', height: '1.6rem', minWidth: '1.6rem', boxSizing: 'border-box', background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)', border: '1px solid #c4a030', color: '#c4a030', cursor: confirmingId === apt.id ? 'wait' : 'pointer', opacity: confirmingId === apt.id ? 0.5 : 1, padding: 0, borderRadius: 0, transition: 'background .2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,160,48,.3)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(196,160,48,.15)' }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <span style={{ display: 'inline-flex', alignItems: 'center', height: '1.6rem', fontSize: '.6rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '0 .45rem', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
+                Pago pendiente
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -440,11 +464,6 @@ export default function AppointmentsPanel({
               >
                 {apt.service}
               </p>
-              {pendingPayment && (
-                <span style={{ flexShrink: 0, fontSize: '.65rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '.15rem .5rem', whiteSpace: 'nowrap' }}>
-                  Pago pendiente
-                </span>
-              )}
             </div>
             <a
               href={buildWhatsAppUrl(apt, businessName, allowCancel)}
@@ -475,27 +494,6 @@ export default function AppointmentsPanel({
               </svg>
             </a>
 
-            {pendingPayment && (
-              <IconButton
-                as="button"
-                onClick={() => handleConfirm(apt)}
-                disabled={confirmingId === apt.id}
-                title="Confirmar pago recibido"
-                style={{
-                  background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)',
-                  borderColor: '#c4a030',
-                  color: '#c4a030',
-                  cursor: confirmingId === apt.id ? 'wait' : 'pointer',
-                  opacity: confirmingId === apt.id ? 0.5 : 1,
-                }}
-                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.background = 'rgba(196,160,48,.3)' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.background = 'rgba(196,160,48,.15)' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </IconButton>
-            )}
             <IconButton
               as="button"
               onClick={() => setConfirmTarget(apt)}
@@ -529,6 +527,7 @@ export default function AppointmentsPanel({
             </IconButton>
           </div>
         )}
+
       </div>
     )
   }
@@ -1184,11 +1183,11 @@ export default function AppointmentsPanel({
         const upcoming = history.filter(h => h.appointment_date > today)
         return (
           <div
-            style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}
+            style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)', padding: '1.5rem' }}
             onClick={() => setClientInfo(null)}
           >
             <div
-              style={{ width: '100%', maxWidth: '28rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim)', borderBottom: 'none', padding: '1.75rem 1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+              style={{ width: '100%', maxWidth: '28rem', background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.75rem 1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
@@ -1223,7 +1222,11 @@ export default function AppointmentsPanel({
 
                   {/* Visit history */}
                   {history.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', maxHeight: '12rem', overflowY: 'auto' }}>
+                    <div
+                      style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', maxHeight: '12rem', overflowY: 'auto' }}
+                      onTouchStart={e => e.stopPropagation()}
+                      onTouchMove={e => e.stopPropagation()}
+                    >
                       <p style={{ fontSize: '.62rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginBottom: '.2rem' }}>Historial</p>
                       {history.map((h, i) => {
                         const [hy, hm, hd] = h.appointment_date.split('-').map(Number)
