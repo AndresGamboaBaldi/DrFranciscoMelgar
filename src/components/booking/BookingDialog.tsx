@@ -533,6 +533,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
             <SuccessState
               name={form.name}
               waUrl={waUrl}
+              staffName={selectedStaff ? (selectedStaff.shortName ?? selectedStaff.name) : undefined}
               service={service}
               date={date}
               time={time}
@@ -1075,6 +1076,7 @@ function QRPaymentState({
 function SuccessState({
   name,
   waUrl,
+  staffName,
   service,
   date,
   time,
@@ -1088,6 +1090,7 @@ function SuccessState({
 }: {
   name: string
   waUrl: string
+  staffName?: string
   service: Service | null
   date: SelectedDate | null
   time: string
@@ -1332,7 +1335,7 @@ function SuccessState({
           <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
             <path d="M16 0C7.163 0 0 7.163 0 16c0 2.83.738 5.485 2.027 7.793L0 32l8.418-2.007A15.93 15.93 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 0 1-6.77-1.847l-.485-.288-5.003 1.193 1.215-4.871-.317-.5A13.267 13.267 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.27-9.873c-.398-.2-2.355-1.163-2.72-1.295-.365-.133-.631-.2-.896.2-.265.398-1.029 1.295-1.261 1.56-.232.265-.465.299-.863.1-.398-.2-1.682-.62-3.203-1.979-1.184-1.057-1.984-2.363-2.217-2.762-.232-.398-.025-.614.175-.812.18-.179.398-.465.598-.698.199-.232.265-.398.398-.664.133-.265.066-.498-.033-.698-.1-.2-.896-2.163-1.228-2.962-.323-.777-.651-.672-.896-.684l-.763-.013c-.265 0-.697.1-.1063.498-.365.398-1.394 1.362-1.394 3.323 0 1.96 1.428 3.855 1.627 4.12.2.265 2.808 4.287 6.804 6.014.951.41 1.693.655 2.272.839.954.303 1.823.26 2.509.158.765-.114 2.355-.963 2.688-1.893.332-.93.332-1.728.232-1.893-.099-.166-.365-.265-.763-.465z"/>
           </svg>
-          Contactar a {pro.shortName ?? pro.name}
+          Contactar a {staffName ?? pro.shortName ?? pro.name}
         </a>
       )}
 
