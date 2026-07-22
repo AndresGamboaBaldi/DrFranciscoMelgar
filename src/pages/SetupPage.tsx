@@ -165,7 +165,7 @@ export default function SetupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', colorScheme: 'inherit', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
+    <div style={{ height: '100dvh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden', colorScheme: 'inherit', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
 
       {/* ── Sticky header ── */}
       <header style={{
@@ -223,7 +223,7 @@ export default function SetupPage() {
       </div>
 
       {/* ── Content ── */}
-      <main className="setup-main-mobile-pad" style={{ flex: 1, padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
+      <main className="setup-main-mobile-pad" style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
         <div style={{ maxWidth: (section === 'schedule' || section === 'config') ? '100rem' : '48rem', margin: '0 auto' }}>
 
           {section === 'citas' && (
