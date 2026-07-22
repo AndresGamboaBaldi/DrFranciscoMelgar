@@ -179,11 +179,21 @@ export default function AppointmentsPanel({
 
   const handleConfirm = async (apt: Appointment) => {
     if (!apt.id) return
+    const waWindow = window.open('', '_blank')
     setConfirmingId(apt.id)
     try {
       await confirmAppointment(apt.id, apt.business_id ?? businessId)
       setAppts((prev) => prev.map((a) => a.id === apt.id ? { ...a, status: 'confirmed' } : a))
+      const phone = apt.phone.replace(/\D/g, '')
+      const firstName = apt.name.split(' ')[0]
+      const [y, m, d] = apt.appointment_date.split('-').map(Number)
+      const dateObj = new Date(y, m - 1, d)
+      const dateLabel = `${DAYS_ES[dateObj.getDay()]} ${d} de ${MONTHS_ES[m - 1]}`
+      const time = formatTime12h(apt.appointment_time)
+      const text = `Hola ${firstName}! ✅ Tu pago ha sido confirmado.\n\nTe espero el ${dateLabel} a las ${time}. ¡Hasta pronto!`
+      if (waWindow) waWindow.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
     } catch (e) {
+      if (waWindow) waWindow.close()
       alert('No se pudo confirmar la cita.')
       console.error(e)
     }
