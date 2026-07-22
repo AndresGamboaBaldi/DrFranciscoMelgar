@@ -301,19 +301,16 @@ export default function AppointmentsPanel({
             }}
           >
             {staffMap && apt.business_id && staffMap[apt.business_id] && (
-              <span style={{
-                fontSize: '.6rem',
-                fontWeight: 600,
-                letterSpacing: '.12em',
-                textTransform: 'uppercase',
+              <p style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '1rem',
+                fontWeight: 500,
+                letterSpacing: '.02em',
                 color: accent,
-                background: '#fff',
-                border: `1px solid ${accent}`,
-                padding: '.1rem .45rem',
-                alignSelf: 'flex-start',
+                flexBasis: '100%',
               }}>
                 {staffMap[apt.business_id]}
-              </span>
+              </p>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap' }}>
             <p
