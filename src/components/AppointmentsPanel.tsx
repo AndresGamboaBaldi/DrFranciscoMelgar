@@ -294,7 +294,7 @@ export default function AppointmentsPanel({
           display: 'flex',
           flexDirection: 'column',
           gap: '.1rem',
-          padding: '.5rem 1.25rem',
+          padding: '1rem 1.25rem',
           background: 'var(--color-surface)',
           border: '1px solid var(--color-rim)',
           borderLeft: `3px solid ${accent}`,
@@ -302,6 +302,25 @@ export default function AppointmentsPanel({
           transition: 'opacity .2s',
         }}
       >
+        {pendingPayment && !aptIsPast && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '.4rem', marginBottom: '.5rem' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', height: '1.5rem', fontSize: '.6rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '0 .45rem', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
+              Pago pendiente
+            </span>
+            <span
+              role="button"
+              onClick={() => { if (confirmingId !== apt.id) handleConfirm(apt) }}
+              title="Confirmar pago recibido"
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: '1.5rem', height: '1.5rem', minWidth: '1.5rem', boxSizing: 'border-box', background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)', border: '1px solid #c4a030', color: '#c4a030', cursor: confirmingId === apt.id ? 'wait' : 'pointer', opacity: confirmingId === apt.id ? 0.5 : 1, borderRadius: 0, transition: 'background .2s', userSelect: 'none', WebkitUserSelect: 'none' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(196,160,48,.3)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(196,160,48,.15)' }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </div>
+        )}
         <div
           style={{
             display: 'flex',
@@ -424,25 +443,6 @@ export default function AppointmentsPanel({
               </svg>
               Completada
             </span>
-          )}
-          {pendingPayment && !aptIsPast && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', flexShrink: 0 }}>
-              <button
-                onClick={() => handleConfirm(apt)}
-                disabled={confirmingId === apt.id}
-                title="Confirmar pago recibido"
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, width: '1.6rem', height: '1.6rem', minWidth: '1.6rem', boxSizing: 'border-box', background: confirmingId === apt.id ? 'var(--color-surface)' : 'rgba(196,160,48,.15)', border: '1px solid #c4a030', color: '#c4a030', cursor: confirmingId === apt.id ? 'wait' : 'pointer', opacity: confirmingId === apt.id ? 0.5 : 1, padding: 0, borderRadius: 0, transition: 'background .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,160,48,.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(196,160,48,.15)' }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-              <span style={{ display: 'inline-flex', alignItems: 'center', height: '1.6rem', fontSize: '.6rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: '#c4a030', background: 'rgba(196,160,48,.1)', border: '1px solid rgba(196,160,48,.3)', padding: '0 .45rem', whiteSpace: 'nowrap', boxSizing: 'border-box' }}>
-                Pago pendiente
-              </span>
-            </div>
           )}
         </div>
 
