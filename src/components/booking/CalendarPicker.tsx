@@ -258,7 +258,15 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
       return false
     }
 
-    // Auto-generated slots: original consecutive-slot logic
+    // Auto-generated slots: check break + end-of-day by time range, then consecutive slots
+    if (cfg.breakHours) {
+      const bStart = timeToMins(cfg.breakHours.start)
+      const bEnd   = timeToMins(cfg.breakHours.end)
+      if (startMins < bEnd && endMins > bStart) return true
+    }
+    const lastSlotMins = timeToMins(allSlots[allSlots.length - 1])
+    if (endMins > lastSlotMins + cfg.slotDuration) return true
+
     const slotsNeeded = Math.ceil(svcMins / cfg.slotDuration)
     const idx = allSlots.indexOf(slot)
     for (let i = 0; i < slotsNeeded; i++) {
@@ -269,10 +277,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
     return false
   }
 
-  const hasPartialBlock = (d: number) => {
-    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-    return monthBlocks.some(b => b.date === dateStr && b.start_time)
-  }
+  const hasPartialBlock = (_d: number) => false
 
   // ── view="times": only show time slots for selected date ──
   if (view === 'times') {
