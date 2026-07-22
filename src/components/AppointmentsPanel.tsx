@@ -63,11 +63,13 @@ export default function AppointmentsPanel({
   businessName,
   staffMember,
   staffMembers,
+  disablePullToRefresh,
 }: {
   businessId: string
   businessName: string
   staffMember?: StaffMember
   staffMembers?: StaffMember[]
+  disablePullToRefresh?: boolean
 }) {
   const [staffFilter, setStaffFilter] = useState<string | null>(null)
   const filteredStaff = staffFilter && staffMembers?.length
@@ -221,7 +223,7 @@ export default function AppointmentsPanel({
   }
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (showBooking || confirmTarget || clientInfo || window.scrollY > 0) {
+    if (disablePullToRefresh || showBooking || confirmTarget || clientInfo || window.scrollY > 0) {
       touchStartY.current = null
       return
     }

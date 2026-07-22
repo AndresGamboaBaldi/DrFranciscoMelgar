@@ -233,6 +233,7 @@ export default function SetupPage() {
                 businessName={displayName}
                 staffMember={staff ?? undefined}
                 staffMembers={isAgency ? pro.staff : undefined}
+                disablePullToRefresh
               />
             </div>
           )}
