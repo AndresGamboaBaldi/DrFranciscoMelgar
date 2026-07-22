@@ -52,7 +52,7 @@ function buildWhatsAppUrl(apt: Appointment, businessName: string, allowCancel: b
   const cancelLine = allowCancel
     ? `\n\nSi no puedes asistir, cancela aquí 👇🏼\nhttps://probo.pro/cancel/${apt.id}`
     : ''
-  const text = `Hola ${firstName}! 👋🏼\nTu cita con ${businessName} es el ${dateLabel} a las ${time}\n\n✅ Te esperamos!${cancelLine}`
+  const text = `Hola ${firstName}! 👋🏼\nTu cita con ${businessName} es el ${dateLabel} a las ${time}\n\n✅ Te espero!${cancelLine}`
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
 }
 

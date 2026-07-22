@@ -349,7 +349,7 @@ const barber_vip: Professional = {
       name: 'Erick Barber',
       shortName: 'Erick Barber',
       title: 'Barbero Profesional',
-      photo: '/barber_vip/photos/erick.PNG',
+      photo: '/barber_vip/photos/erickbarber.png',
       phone: '+59178328018',
       businessId: 'erick_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=b489736a45b9892ba1e8c15e409ef5d1dceecbfefecd4d86a30e56bc1fc25422',

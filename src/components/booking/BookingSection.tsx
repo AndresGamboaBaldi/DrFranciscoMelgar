@@ -184,7 +184,7 @@ function SuccessState({ onReset }: { onReset: () => void }) {
       <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '2.2rem', fontWeight: 300, marginBottom: '.75rem' }}>¡Cita Solicitada!</h3>
       <p style={{ fontSize: '.93rem', color: 'var(--color-ink-dim)', maxWidth: '28rem', margin: '0 auto 2rem', lineHeight: 1.9 }}>
         Hemos recibido tu solicitud. Te contactaremos pronto para confirmar.<br /><br />
-        <span style={{ color: 'var(--color-gold)' }}>¡Te esperamos!</span>
+        <span style={{ color: 'var(--color-gold)' }}>¡Te espero!</span>
       </p>
       <button onClick={onReset} style={{ display: 'inline-flex', alignItems: 'center', gap: '.7rem', padding: '.85rem 2rem', background: 'transparent', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 300, letterSpacing: '.14em', textTransform: 'uppercase', border: '1px solid var(--color-rim-l)', cursor: 'pointer', transition: 'all .3s' }}
         onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-ink)'; e.currentTarget.style.borderColor = 'var(--color-ink-ghost)' }}
