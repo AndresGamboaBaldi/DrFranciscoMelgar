@@ -1179,7 +1179,6 @@ export default function AppointmentsPanel({
       {clientInfo && (() => {
         const { apt, history, loading } = clientInfo
         const today = toISODate(new Date())
-        const past = history.filter(h => h.appointment_date < today || (h.appointment_date === today && h.appointment_time.substring(0,5) <= toISODate(new Date()).substring(0,5)))
         const lastVisit = history.find(h => h.appointment_date <= today)
         const daysSince = lastVisit ? Math.round((new Date(today).getTime() - new Date(lastVisit.appointment_date).getTime()) / 86400000) : null
         const upcoming = history.filter(h => h.appointment_date > today)
