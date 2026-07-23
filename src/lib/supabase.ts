@@ -187,6 +187,30 @@ export async function saveStaffHidden(businessId: string, hidden: boolean): Prom
   await adminWrite({ action: 'save-hidden', business_id: businessId, hidden })
 }
 
+export async function saveScheduleLocked(businessId: string, locked: boolean): Promise<void> {
+  await adminWrite({ action: 'save-schedule-locked', business_id: businessId, locked })
+}
+
+/**
+ * Devuelve un mapa businessId → locked. El candado está prendido por defecto:
+ * una fila sin `schedule_locked = false` (o inexistente) se considera bloqueada.
+ * Solo aplica a barberos dentro de una agencia; los profesionales independientes
+ * nunca leen este valor.
+ */
+export async function getScheduleLockedMap(businessIds: string[]): Promise<Record<string, boolean>> {
+  const map: Record<string, boolean> = {}
+  businessIds.forEach(id => { map[id] = true })
+  if (!supabase || !businessIds.length) return map
+  const { data } = await supabase
+    .from('schedule_settings')
+    .select('business_id, schedule_locked')
+    .in('business_id', businessIds)
+  ;(data ?? []).forEach((r: { business_id: string; schedule_locked: boolean | null }) => {
+    map[r.business_id] = r.schedule_locked !== false
+  })
+  return map
+}
+
 export async function getAppointmentById(id: string): Promise<Appointment | null> {
   if (!supabase) return null
   const { data, error } = await supabase

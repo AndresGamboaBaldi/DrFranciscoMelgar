@@ -6,7 +6,8 @@ import ScheduleEditor from '../components/ScheduleEditor'
 import BlockScheduler from '../components/BlockScheduler'
 import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
-import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden, getHiddenStaffIds } from '../lib/supabase'
+import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden, getHiddenStaffIds, saveScheduleLocked, getScheduleLockedMap } from '../lib/supabase'
+import type { StaffMember } from '../types/professional'
 
 type Section = 'citas' | 'schedule' | 'config' | 'profesionales'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
@@ -63,6 +64,10 @@ export default function SetupPage() {
   const [section, setSection]       = useState<Section>('citas')
   const [staffHidden, setStaffHidden] = useState<Record<string, boolean>>({})
   const [staffHiddenSaving, setStaffHiddenSaving] = useState<string | null>(null)
+  const [staffLocked, setStaffLocked] = useState<Record<string, boolean>>({})
+  const [staffLockedSaving, setStaffLockedSaving] = useState<string | null>(null)
+  const [scheduleStaff, setScheduleStaff] = useState<StaffMember | null>(null)
+  const [ownLocked, setOwnLocked] = useState(false)
   const [pushStatus, setPushStatus] = useState<'active' | 'inactive' | 'unsupported' | 'loading'>('loading')
   const [showIosSteps, setShowIosSteps] = useState(false)
   const [pushWorking, setPushWorking] = useState(false)
@@ -86,11 +91,17 @@ export default function SetupPage() {
       }
     })
     if (isAgency && pro.staff?.length) {
-      getHiddenStaffIds(pro.staff.map(s => s.businessId)).then(hiddenSet => {
+      const ids = pro.staff.map(s => s.businessId)
+      getHiddenStaffIds(ids).then(hiddenSet => {
         const map: Record<string, boolean> = {}
         pro.staff!.forEach(s => { map[s.businessId] = hiddenSet.has(s.businessId) })
         setStaffHidden(map)
       })
+      getScheduleLockedMap(ids).then(setStaffLocked)
+    }
+    // Barbero dentro de una agencia: leer si su horario está bloqueado
+    if (staff) {
+      getScheduleLockedMap([businessId]).then(m => setOwnLocked(m[businessId] ?? true))
     }
   }, [businessId])
 
@@ -105,6 +116,13 @@ export default function SetupPage() {
     setStaffHiddenSaving(staffBusinessId)
     try { await saveStaffHidden(staffBusinessId, hidden) } catch { /* ignore */ }
     finally { setStaffHiddenSaving(null) }
+  }
+
+  const toggleStaffLocked = async (staffBusinessId: string, locked: boolean) => {
+    setStaffLocked(prev => ({ ...prev, [staffBusinessId]: locked }))
+    setStaffLockedSaving(staffBusinessId)
+    try { await saveScheduleLocked(staffBusinessId, locked) } catch { /* ignore */ }
+    finally { setStaffLockedSaving(null) }
   }
 
   // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
@@ -199,7 +217,7 @@ export default function SetupPage() {
           {activeNav.map(n => {
             const active = section === n.id
             return (
-              <button key={n.id} onClick={() => setSection(n.id)}
+              <button key={n.id} onClick={() => { setSection(n.id); setScheduleStaff(null) }}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer',
                   padding: '.85rem 1.25rem',
@@ -238,20 +256,33 @@ export default function SetupPage() {
             </div>
           )}
 
-          {section === 'profesionales' && isAgency && (
+          {section === 'profesionales' && isAgency && !scheduleStaff && (
             <div style={{ maxWidth: '38rem' }}>
-              <Panel title="Profesionales" desc="Activa o desactiva cada profesional. Los desactivados no aparecerán como opción al reservar.">
+              <Panel title="Profesionales" desc="Activa o desactiva cada profesional y gestiona su horario. Los desactivados no aparecerán como opción al reservar.">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                   {pro.staff!.map(s => {
                     const hidden = staffHidden[s.businessId] ?? false
+                    const locked = staffLocked[s.businessId] ?? true
                     const saving = staffHiddenSaving === s.businessId
                     return (
                       <div key={s.businessId} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '.85rem 1rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: saving ? 0.6 : 1, transition: 'opacity .2s' }}>
                         {s.photo && <img src={s.photo} alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: '50%', flexShrink: 0, border: '1px solid var(--color-rim-l)' }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontFamily: 'var(--font-body)', fontSize: '.9rem', fontWeight: 500, color: 'var(--color-ink)' }}>{s.name}</p>
-                          {s.title && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>{s.title}</p>}
+                          <p style={{ fontSize: '.72rem', color: locked ? 'var(--color-ink-ghost)' : 'var(--color-gold)', marginTop: '.1rem' }}>
+                            {locked ? 'Horario gestionado por la agencia' : 'El profesional edita su horario'}
+                          </p>
                         </div>
+                        <button
+                          onClick={() => setScheduleStaff(s)}
+                          title="Ver / editar horario"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', padding: '.45rem .9rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-gold)'; e.currentTarget.style.color = 'var(--color-gold)' }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-rim-l)'; e.currentTarget.style.color = 'var(--color-ink-dim)' }}
+                        >
+                          <Clock size={14} />
+                          Horario
+                        </button>
                         <button
                           onClick={() => toggleStaffHidden(s.businessId, !hidden)}
                           disabled={saving}
@@ -273,6 +304,60 @@ export default function SetupPage() {
             </div>
           )}
 
+          {section === 'profesionales' && isAgency && scheduleStaff && (() => {
+            const s = scheduleStaff
+            const locked = staffLocked[s.businessId] ?? true
+            const lockSaving = staffLockedSaving === s.businessId
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <button
+                    onClick={() => setScheduleStaff(null)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: 'none', border: 'none', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.75rem', fontWeight: 500, letterSpacing: '.08em', textTransform: 'uppercase', cursor: 'pointer', padding: 0, marginBottom: '1rem' }}
+                  >
+                    <ChevronRight size={16} style={{ transform: 'rotate(180deg)' }} />
+                    Profesionales
+                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                    {s.photo && <img src={s.photo} alt="" style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: '50%', flexShrink: 0, border: '1px solid var(--color-rim-l)' }} />}
+                    <div>
+                      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>{s.name}</h2>
+                      {s.title && <p style={{ fontSize: '.78rem', color: 'var(--color-ink-ghost)' }}>{s.title}</p>}
+                    </div>
+                  </div>
+                  {/* Candado: permitir que el profesional edite su propio horario */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', padding: '1rem 1.25rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: lockSaving ? 0.6 : 1, transition: 'opacity .2s' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '.85rem', fontWeight: 500, color: 'var(--color-ink)' }}>Permitir que el profesional edite su horario</p>
+                      <p style={{ fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem' }}>
+                        {locked ? 'Bloqueado — solo la agencia puede cambiarlo.' : 'Activado — el profesional puede editar desde su panel.'}
+                      </p>
+                    </div>
+                    <Toggle checked={!locked} onChange={v => toggleStaffLocked(s.businessId, !v)} disabled={lockSaving} />
+                  </div>
+                </div>
+
+                {s.timeSlots ? (
+                  <Panel title="Horarios de atención" desc="">
+                    <div style={{ padding: '1rem', border: '1px solid var(--color-rim)', background: 'var(--color-surface)', fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.7 }}>
+                      <span style={{ color: 'var(--color-gold)', fontWeight: 500 }}>Horarios configurados manualmente.</span>
+                      <br />
+                      Los slots de este profesional están definidos directamente en el sistema y no se editan aquí.
+                    </div>
+                  </Panel>
+                ) : (
+                  <Panel title="Horarios de atención" desc="">
+                    <ScheduleEditor businessId={s.businessId} />
+                  </Panel>
+                )}
+
+                <Panel title="Vacaciones/Feriados (opcional)" desc="Marca días completos o rangos de horas en que este profesional no estará disponible.">
+                  <BlockScheduler businessId={s.businessId} />
+                </Panel>
+              </div>
+            )
+          })()}
+
           {section === 'schedule' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))', gap: '3rem', alignItems: 'start' }}>
               {(staff?.timeSlots ?? pro.timeSlots) ? (
@@ -285,12 +370,12 @@ export default function SetupPage() {
                 </Panel>
               ) : (
                 <Panel title="Horarios de atención" desc="">
-                  <ScheduleEditor />
+                  <ScheduleEditor readOnly={!!staff && ownLocked} />
                 </Panel>
               )}
 
               <Panel title="Vacaciones/Feriados (opcional)" desc="Cuando lo necesites, marca días completos o rangos de horas en que no estarás disponible — vacaciones, conferencias, feriados.">
-                <BlockScheduler />
+                <BlockScheduler readOnly={!!staff && ownLocked} />
               </Panel>
             </div>
           )}
@@ -481,7 +566,7 @@ export default function SetupPage() {
           const active = section === n.id
           const Icon = n.icon
           return (
-            <button key={n.id} onClick={() => setSection(n.id)}
+            <button key={n.id} onClick={() => { setSection(n.id); setScheduleStaff(null) }}
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 gap: '.3rem', padding: '.7rem .25rem .35rem', minHeight: '3.75rem', background: 'none', border: 'none',
@@ -504,6 +589,16 @@ export default function SetupPage() {
 }
 
 /* ── Panel wrapper ── */
+function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+  return (
+    <div onClick={() => !disabled && onChange(!checked)}
+      style={{ position: 'relative', width: '2.8rem', height: '1.6rem', borderRadius: '999px', background: checked ? 'var(--color-gold)' : 'var(--color-rim-l)', transition: 'background .2s', flexShrink: 0, cursor: disabled ? 'wait' : 'pointer' }}
+    >
+      <div style={{ position: 'absolute', top: '3px', left: checked ? 'calc(100% - 1.3rem)' : '3px', width: '1rem', height: '1rem', borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
+    </div>
+  )
+}
+
 function Panel({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
     <div>

@@ -14,10 +14,10 @@ const ADVANCE_OPTIONS = [
   { v: 48, l: '48 horas (2 días)' },
 ]
 
-export default function ScheduleEditor() {
+export default function ScheduleEditor({ businessId: businessIdProp, readOnly = false }: { businessId?: string; readOnly?: boolean } = {}) {
   const pro = useProfessional()
   const staff = useStaff()
-  const businessId = staff?.businessId ?? pro.businessId
+  const businessId = businessIdProp ?? staff?.businessId ?? pro.businessId
 
   const [workDays,   setWorkDays]   = useState<number[]>([1,2,3,4,5])
 
@@ -121,6 +121,17 @@ export default function ScheduleEditor() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
 
+      {readOnly && (
+        <div style={{ display: 'flex', gap: '.75rem', padding: '1rem', border: '1px solid var(--color-gold)', background: 'rgba(196,153,90,.08)', borderRadius: '4px' }}>
+          <span style={{ color: 'var(--color-gold)', fontSize: '1rem', lineHeight: 1 }}>🔒</span>
+          <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, margin: 0 }}>
+            Tu horario lo gestiona la agencia. Puedes verlo pero no editarlo — contacta a tu administrador para cambios.
+          </p>
+        </div>
+      )}
+
+      <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2.5rem', opacity: readOnly ? 0.7 : 1 }}>
+
       {/* ── 1. Días de atención ── */}
       <Section number="1" title="Días de atención">
         <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', marginBottom: '.9rem' }}>
@@ -185,7 +196,7 @@ export default function ScheduleEditor() {
           <div style={{ border: '1px solid var(--color-rim-l)', padding: '1rem', borderRadius: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: satActive ? '.9rem' : 0 }}>
               <span style={{ fontWeight:'500', fontSize: '.7rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>Sábado (horario especial)</span>
-              <Toggle checked={satActive} onChange={setSatActive} />
+              <Toggle checked={satActive} onChange={setSatActive} disabled={readOnly} />
             </div>
             {satActive && (
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -199,7 +210,7 @@ export default function ScheduleEditor() {
           <div style={{ border: '1px solid var(--color-rim-l)', padding: '1rem', borderRadius: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: sunActive ? '.9rem' : 0 }}>
               <span style={{ fontWeight:'500', fontSize: '.7rem', letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--color-ink)' }}>Domingo (horario especial)</span>
-              <Toggle checked={sunActive} onChange={setSunActive} />
+              <Toggle checked={sunActive} onChange={setSunActive} disabled={readOnly} />
             </div>
             {sunActive && (
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -232,7 +243,10 @@ export default function ScheduleEditor() {
         </p>
       </div>
 
+      </fieldset>
+
       {/* ── Save ── */}
+      {!readOnly && (
       <button onClick={handleSave} disabled={saving}
         style={{ width: '100%', padding: '1rem', background: saving ? 'var(--color-rim-l)' : 'var(--color-gold)', color: saving ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', transition: 'background .3s', borderRadius: '4px' }}
         onMouseEnter={e => { if (!saving) e.currentTarget.style.background = 'var(--color-gold-l)' }}
@@ -240,6 +254,7 @@ export default function ScheduleEditor() {
       >
         {saving ? 'Guardando…' : 'Guardar cambios'}
       </button>
+      )}
 
       <div style={{ position: 'fixed', left: '1rem', right: '1rem', bottom: saved ? '1.5rem' : '-4rem', maxWidth: '420px', margin: '0 auto', transition: 'bottom .35s ease', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '.6rem', background: 'var(--color-bg)', border: '1px solid var(--color-gold)', padding: '.85rem 1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,.35)', borderRadius: '4px' }}>
         <span style={{ color: 'var(--color-gold)', fontSize: '1rem', flexShrink: 0 }}>✓</span>

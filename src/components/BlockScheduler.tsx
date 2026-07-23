@@ -52,10 +52,10 @@ function groupBlocks(blocks: BlockedSlot[]): BlockGroup[] {
   return groups
 }
 
-export default function BlockScheduler() {
+export default function BlockScheduler({ businessId: businessIdProp, readOnly = false }: { businessId?: string; readOnly?: boolean } = {}) {
   const pro = useProfessional()
   const staff = useStaff()
-  const businessId = staff?.businessId ?? pro.businessId
+  const businessId = businessIdProp ?? staff?.businessId ?? pro.businessId
 
   const [blocks, setBlocks]     = useState<BlockedSlot[]>([])
   const [loading, setLoading]   = useState(false)
@@ -129,6 +129,7 @@ export default function BlockScheduler() {
     <div>
 
       {/* ── Add block form ── */}
+      {!readOnly && (
       <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-rim)', padding: '1.75rem', marginBottom: '2rem' }}>
         <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 400, marginBottom: '1.5rem', color: 'var(--color-gold)'}}>
           Agregar bloqueo
@@ -186,6 +187,7 @@ export default function BlockScheduler() {
           {saving ? 'Guardando…' : 'Bloquear horario'}
         </button>
       </div>
+      )}
 
       {/* ── Upcoming blocks list ── */}
       <div style={{ marginTop: '2.5rem', paddingBottom: '3rem' }}>
@@ -226,6 +228,7 @@ export default function BlockScheduler() {
                 </div>
                 {g.reason && <p style={{ fontSize: '.88rem', color: 'var(--color-ink-dim)', marginTop: '.25rem' }}>{g.reason}</p>}
               </div>
+              {!readOnly && (
               <button onClick={() => handleDelete(g.ids)} disabled={isDeleting}
                 style={{ background: 'none', border: '1px solid var(--color-rim-l)', color: isDeleting ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.76rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '.45rem 1rem', cursor: isDeleting ? 'not-allowed' : 'pointer', transition: 'all .2s', flexShrink: 0 }}
                 onMouseEnter={e => { if (!isDeleting) { e.currentTarget.style.borderColor = '#c47070'; e.currentTarget.style.color = '#c47070' } }}
@@ -233,6 +236,7 @@ export default function BlockScheduler() {
               >
                 {isDeleting ? '…' : 'Quitar'}
               </button>
+              )}
             </div>
             )
           })}
