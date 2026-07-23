@@ -121,8 +121,13 @@ export default function SetupPage() {
   const toggleStaffLocked = async (staffBusinessId: string, locked: boolean) => {
     setStaffLocked(prev => ({ ...prev, [staffBusinessId]: locked }))
     setStaffLockedSaving(staffBusinessId)
-    try { await saveScheduleLocked(staffBusinessId, locked) } catch { /* ignore */ }
-    finally { setStaffLockedSaving(null) }
+    try {
+      await saveScheduleLocked(staffBusinessId, locked)
+    } catch {
+      // Revertir si falla el guardado para no mostrar un estado falso
+      setStaffLocked(prev => ({ ...prev, [staffBusinessId]: !locked }))
+      alert('No se pudo guardar el cambio. Verifica que la función admin-write esté desplegada y que exista la columna schedule_locked.')
+    } finally { setStaffLockedSaving(null) }
   }
 
   // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
