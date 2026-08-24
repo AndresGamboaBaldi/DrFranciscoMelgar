@@ -57,7 +57,7 @@ const doctor_melgar: Professional = {
       id: 'botox-facial',
       name: 'Toxina Botulínica · Rostro',
       tag: 'Neuromodulador',
-      durationMins: 60,
+      durationMins: 90,
       description:
         'Suaviza líneas de expresión en entrecejo, frente y patas de gallo, previniendo el envejecimiento prematuro con resultados completamente naturales.',
       image: '/doctor_melgar/services/toxina.jpg',
@@ -66,7 +66,7 @@ const doctor_melgar: Professional = {
       id: 'botox-terapeutico',
       name: 'Toxina Botulínica · Terapéutica',
       tag: 'Neuromodulador',
-      durationMins: 60,
+      durationMins: 90,
       description:
         'Tratamiento para bruxismo, bandas del cuello e hiperhidrosis (sudoración excesiva) en axilas.',
       image: '/doctor_melgar/services/bruxismo.jpg',
@@ -75,7 +75,7 @@ const doctor_melgar: Professional = {
       id: 'hialuronico-labios',
       name: 'Ácido Hialurónico · Labios y Contorno',
       tag: 'Voluminizador',
-      durationMins: 60,
+      durationMins: 90,
       description:
         'Volumiza y define labios, surcos nasogenianos y ojeras con resultados inmediatos y naturales.',
       image: '/doctor_melgar/services/labios.jpg',
@@ -84,7 +84,7 @@ const doctor_melgar: Professional = {
       id: 'hialuronico-rino',
       name: 'Ácido Hialurónico · Rinomodelación',
       tag: 'Voluminizador',
-      durationMins: 60,
+      durationMins: 90,
       description:
         'Define el perfil nasal sin cirugía, corrigiendo joroba, punta y proporciones de la nariz.',
       image: '/doctor_melgar/services/nariz.jpg',
@@ -93,7 +93,7 @@ const doctor_melgar: Professional = {
       id: 'hialuronico-mandibula',
       name: 'Ácido Hialurónico · Definición Mandibular',
       tag: 'Voluminizador',
-      durationMins: 60,
+      durationMins: 90,
       image: '/doctor_melgar/services/menton.avif',
       description:
         'Marca la mandíbula, define el mentón y refuerza los puntos de anclaje facial para un perfil más anguloso y masculino.',
@@ -102,7 +102,7 @@ const doctor_melgar: Professional = {
       id: 'capilar',
       name: 'Salud Capilar',
       tag: 'Mesoterapia',
-      durationMins: 60,
+      durationMins: 90,
       image: '/doctor_melgar/services/capilar.jpg',
       description:
         'Fortalece, revitaliza y estimula el crecimiento del cabello mediante mesoterapia capilar, en sesiones individuales o packs.',
@@ -111,7 +111,7 @@ const doctor_melgar: Professional = {
       id: 'bioestimuladores',
       name: 'Bioestimuladores',
       tag: 'Colágeno',
-      durationMins: 60,
+      durationMins: 90,
       image: '/doctor_melgar/services/bioestimuladores.jpg',
       description:
         'Estimulan la producción natural de colágeno para una piel más firme y joven, con resultados progresivos y duraderos.',
@@ -120,7 +120,7 @@ const doctor_melgar: Professional = {
       id: 'skinboosters',
       name: 'Calidad de Piel',
       tag: 'Skinboosters',
-      durationMins: 60,
+      durationMins: 90,
       image: '/doctor_melgar/services/piel.jpg',
       description:
         'Skinboosters y bioestimulación dérmica para mejorar hidratación, luminosidad y textura de la piel.',
@@ -334,7 +334,7 @@ const barber_vip: Professional = {
       businessId: 'jheison_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=99a5271bb817593998d4a50ec75253ee900be9e7a59378d622f158ca3573def4',
     },
-    {
+    /*{
       id: 'lgsus',
       name: 'Lgsus Barber',
       shortName: 'Lgsus Barber',
@@ -343,7 +343,7 @@ const barber_vip: Professional = {
       phone: '59179396260',
       businessId: 'lgsus_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=03f5e521de8ac7c060c7921814a40bfd75388356d9df7057121c950de306a3fb',
-    },
+    },*/
     {
       id: 'erick',
       name: 'Erick Barber',
