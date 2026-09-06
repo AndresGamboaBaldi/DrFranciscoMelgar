@@ -248,8 +248,16 @@ export async function cancelAppointment(id: string, notify = true): Promise<void
   // Fetch appointment details first so we can notify the professional
   const apt = notify ? await getAppointmentById(id) : null
 
-  const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id)
+  // El .select() es obligatorio: sin él, un UPDATE que RLS filtra a cero filas
+  // vuelve con error=null y parece exitoso, dejando la cita viva en la DB
+  // mientras la UI la da por cancelada.
+  const { data, error } = await supabase
+    .from('appointments')
+    .update({ status: 'cancelled' })
+    .eq('id', id)
+    .select('id')
   if (error) throw new Error(error.message)
+  if (!data?.length) throw new Error('No se canceló la cita (0 filas afectadas)')
 
   // Fire-and-forget push notification — non-blocking
   if (apt?.business_id) {
