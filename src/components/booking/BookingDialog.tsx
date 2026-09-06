@@ -2,7 +2,7 @@
 import ServiceSelector from './ServiceSelector'
 import CalendarPicker from './CalendarPicker'
 import ContactForm from './ContactForm'
-import { createAppointment, getScheduleSettings, prefetchMonthBlocks, getHiddenStaffIds } from '../../lib/supabase'
+import { createAppointment, getScheduleSettings, prefetchMonthBlocks, getHiddenStaffIds, SlotTakenError } from '../../lib/supabase'
 import type { ScheduleSettings } from '../../lib/supabase'
 import { useProfessional } from '../../context/ProfessionalContext'
 import type { BookingFormData, Service, SelectedDate } from '../../types/booking'
@@ -112,6 +112,10 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
   const [slotDuration, setSlotDuration] = useState(30)
   const [paymentSettings, setPaymentSettings] = useState<Pick<ScheduleSettings, 'require_payment' | 'qr_image_url' | 'payment_percentage'> | null>(null)
   const [loading, setLoading] = useState(false)
+  /** Mensaje mostrado cuando otro cliente ganó el slot mientras este llenaba sus datos */
+  const [slotTaken, setSlotTaken] = useState('')
+  /** Se incrementa para forzar a CalendarPicker a re-consultar los slots ocupados */
+  const [slotsRefresh, setSlotsRefresh] = useState(0)
 
   const businessId = selectedStaff?.businessId ?? pro.businessId
   const phone = selectedStaff?.phone ?? pro.phone
@@ -222,6 +226,19 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
 
   const requirePayment = !!(paymentSettings?.require_payment && paymentSettings.qr_image_url)
 
+  /**
+   * Otro cliente reservó el mismo horario mientras este llenaba el formulario.
+   * Lo devolvemos al paso de la hora con los slots ya actualizados.
+   */
+  const handleSlotTaken = () => {
+    sessionStorage.removeItem('pendingQrPayment')
+    setTime('')
+    setShowQrStep(false)
+    setSlotsRefresh((n) => n + 1)
+    setSlotTaken('Ese horario acaba de ser reservado por otra persona. Por favor elegí otro.')
+    setStep(BASE_LABELS.indexOf('Hora') + 1)
+  }
+
   const submit = async () => {
     if (!validate() || !service || !date || !time) return
 
@@ -268,6 +285,10 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
       setWaUrl(`https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`)
       setSuccess(true)
     } catch (err) {
+      if (err instanceof SlotTakenError) {
+        handleSlotTaken()
+        return
+      }
       console.error(err)
       alert('Ocurrió un error. Por favor intenta de nuevo o contáctanos directamente.')
     } finally {
@@ -278,8 +299,6 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
   const confirmAndSend = async () => {
     if (!service || !date || !time) return
 
-    // Open WA window immediately (in the click handler) before any await,
-    // so browsers don't treat it as a blocked popup.
     const proPhoneClean = phone.replace(/\D/g, '')
     const dur = service.durationMins ?? slotDuration
     const durationLabel = dur >= 60
@@ -294,9 +313,10 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
       `*Telefono:* ${form.phone.trim()}`,
       `Te envio el comprobante de pago (${paymentSettings?.payment_percentage ?? 50}%) 📎`,
     ]
-    const waUrl = `https://wa.me/${proPhoneClean}?text=${encodeURIComponent(waLines.join('\n'))}`
-    window.open(waUrl, '_blank')
+    const waLink = `https://wa.me/${proPhoneClean}?text=${encodeURIComponent(waLines.join('\n'))}`
 
+    // La cita se crea ANTES de mandar al cliente a WhatsApp: si el slot ya
+    // fue tomado, no tiene sentido que envíe un comprobante por un horario perdido.
     setLoading(true)
     try {
       const isoDate = `${date.y}-${String(date.m + 1).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`
@@ -313,10 +333,16 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
         initialStatus: 'pending_payment',
       })
       sessionStorage.removeItem('pendingQrPayment')
+      setWaUrl(waLink)
       setPaidByQr(true)
       setShowQrStep(false)
       setSuccess(true)
+      window.open(waLink, '_blank')
     } catch (err) {
+      if (err instanceof SlotTakenError) {
+        handleSlotTaken()
+        return
+      }
       console.error(err)
       alert('Ocurrió un error. Por favor intenta de nuevo o contáctanos directamente.')
     } finally {
@@ -335,6 +361,7 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
     setTime('')
     setForm(EMPTY_FORM)
     setErrors({})
+    setSlotTaken('')
     setSuccess(false)
     setShowQrStep(false)
     setPaidByQr(false)
@@ -588,27 +615,59 @@ export default function BookingDialog({ onClose, initialStaff }: Props) {
                   view="calendar"
                   timeSlots={timeSlots}
                   satTimeSlots={satTimeSlots}
+                  refreshKey={slotsRefresh}
                 />
               )}
 
               {stepKind === 'Hora' && date && (
-                <CalendarPicker
-                  selectedDate={date}
-                  selectedTime={time}
-                  onDateChange={(d) => {
-                    setDate(d)
-                    setTime('')
-                  }}
-                  onTimeChange={(t) => {
-                    setTime(t)
-                    goNext()
-                  }}
-                  businessId={businessId}
-                  serviceDurationMins={service?.durationMins}
-                  view="times"
-                  timeSlots={timeSlots}
-                  satTimeSlots={satTimeSlots}
-                />
+                <>
+                  {slotTaken && (
+                    <div
+                      role="alert"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '.6rem',
+                        padding: '.8rem .9rem',
+                        marginBottom: '1rem',
+                        border: '1px solid #e0603a',
+                        background: 'rgba(224,96,58,.08)',
+                        color: 'var(--color-ink)',
+                        fontSize: '.82rem',
+                        lineHeight: 1.5,
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e0603a"
+                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ flexShrink: 0, marginTop: '.1rem' }}>
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 8v4M12 16h.01" />
+                      </svg>
+                      {slotTaken}
+                    </div>
+                  )}
+                  <CalendarPicker
+                    selectedDate={date}
+                    selectedTime={time}
+                    onDateChange={(d) => {
+                      setDate(d)
+                      setTime('')
+                      setSlotTaken('')
+                    }}
+                    onTimeChange={(t) => {
+                      setTime(t)
+                      setSlotTaken('')
+                      goNext()
+                    }}
+                    businessId={businessId}
+                    serviceDurationMins={service?.durationMins}
+                    view="times"
+                    timeSlots={timeSlots}
+                    satTimeSlots={satTimeSlots}
+                    refreshKey={slotsRefresh}
+                  />
+                </>
               )}
 
               {stepKind === 'Datos' && service && date && time && (
@@ -1306,7 +1365,9 @@ function SuccessState({
       </div>
 
       {/* ── WhatsApp button ── */}
-      {!pendingPayment && waUrl && (
+      {/* En el flujo de pago es el fallback por si el bloqueador de popups
+          impidió abrir WhatsApp automáticamente tras crear la cita. */}
+      {waUrl && (
         <a
           href={waUrl}
           target="_blank"
@@ -1317,9 +1378,9 @@ function SuccessState({
             justifyContent: 'center',
             gap: '.6rem',
             padding: '.85rem 1rem',
-            background: 'none',
+            background: pendingPayment ? '#25D366' : 'none',
             border: '1.5px solid #25D366',
-            color: '#25D366',
+            color: pendingPayment ? '#fff' : '#25D366',
             fontFamily: 'var(--font-body)',
             fontSize: '.75rem',
             fontWeight: 500,
@@ -1329,13 +1390,15 @@ function SuccessState({
             borderRadius: '4px',
             transition: 'all .3s',
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(37,211,102,.1)' }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = 'none' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = pendingPayment ? '#1ea854' : 'rgba(37,211,102,.1)' }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = pendingPayment ? '#25D366' : 'none' }}
         >
           <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
             <path d="M16 0C7.163 0 0 7.163 0 16c0 2.83.738 5.485 2.027 7.793L0 32l8.418-2.007A15.93 15.93 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 0 1-6.77-1.847l-.485-.288-5.003 1.193 1.215-4.871-.317-.5A13.267 13.267 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.27-9.873c-.398-.2-2.355-1.163-2.72-1.295-.365-.133-.631-.2-.896.2-.265.398-1.029 1.295-1.261 1.56-.232.265-.465.299-.863.1-.398-.2-1.682-.62-3.203-1.979-1.184-1.057-1.984-2.363-2.217-2.762-.232-.398-.025-.614.175-.812.18-.179.398-.465.598-.698.199-.232.265-.398.398-.664.133-.265.066-.498-.033-.698-.1-.2-.896-2.163-1.228-2.962-.323-.777-.651-.672-.896-.684l-.763-.013c-.265 0-.697.1-.1063.498-.365.398-1.394 1.362-1.394 3.323 0 1.96 1.428 3.855 1.627 4.12.2.265 2.808 4.287 6.804 6.014.951.41 1.693.655 2.272.839.954.303 1.823.26 2.509.158.765-.114 2.355-.963 2.688-1.893.332-.93.332-1.728.232-1.893-.099-.166-.365-.265-.763-.465z"/>
           </svg>
-          Contactar a {staffName ?? pro.shortName ?? pro.name}
+          {pendingPayment
+            ? 'Enviar comprobante por WhatsApp'
+            : `Contactar a ${staffName ?? pro.shortName ?? pro.name}`}
         </a>
       )}
 

@@ -31,6 +31,8 @@ interface Props {
   timeSlots?: string[]
   /** Override solo para sábados. Si se define, reemplaza timeSlots los sábados. */
   satTimeSlots?: string[]
+  /** Cambiar este número fuerza a re-consultar los slots ocupados (ej: tras una colisión de reserva). */
+  refreshKey?: number
 }
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -121,7 +123,7 @@ function findFirstAvailableMonth(cfg: BookingConfig): Date {
   return new Date(y, m, 1)
 }
 
-export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, businessId, serviceDurationMins, view = 'both', timeSlots: manualSlots, satTimeSlots: manualSatSlots }: Props) {
+export default function CalendarPicker({ selectedDate, selectedTime, onDateChange, onTimeChange, businessId, serviceDurationMins, view = 'both', timeSlots: manualSlots, satTimeSlots: manualSatSlots, refreshKey = 0 }: Props) {
   const [calMonth, setCalMonth]     = useState(() => selectedDate ? new Date(selectedDate.y, selectedDate.m, 1) : new Date())
   const [bookedSlots, setBooked]      = useState<string[]>([])
   const [bookedSlotsDate, setBookedSlotsDate] = useState<string | null>(null)
@@ -175,7 +177,7 @@ export default function CalendarPicker({ selectedDate, selectedTime, onDateChang
       setBookedSlotsDate(iso)
     })
     setDayBlocks(monthBlocks.filter(b => b.date === iso))
-  }, [selectedDate, businessId, monthBlocks, cfg])
+  }, [selectedDate, businessId, monthBlocks, cfg, refreshKey])
 
   const firstDow    = (() => { const d = new Date(y,m,1).getDay(); return d===0?6:d-1 })()
   const daysInMonth = new Date(y, m+1, 0).getDate()

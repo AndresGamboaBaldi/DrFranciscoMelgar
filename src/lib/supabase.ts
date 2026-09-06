@@ -35,6 +35,21 @@ async function adminWrite(payload: Record<string, unknown>): Promise<void> {
 //  APPOINTMENTS
 // ─────────────────────────────────────────────────────────────
 
+/**
+ * El slot ya estaba ocupado cuando se intentó insertar la cita.
+ * Lo lanza `createAppointment` cuando Postgres rechaza el INSERT por el
+ * constraint `appointments_no_overlap` (dos clientes reservando a la vez).
+ */
+export class SlotTakenError extends Error {
+  constructor() {
+    super('slot-taken')
+    this.name = 'SlotTakenError'
+  }
+}
+
+/** 23P01 = exclusion_violation, 23505 = unique_violation */
+const CONFLICT_CODES = new Set(['23P01', '23505'])
+
 export async function createAppointment(
   data: Omit<Appointment, 'id' | 'created_at' | 'status'> & {
     duration_mins?: number
@@ -51,7 +66,12 @@ export async function createAppointment(
   const { error } = await supabase
     .from('appointments')
     .insert([{ ...dbData, status: initialStatus ?? 'pending' }])
-  if (error) throw error
+  if (error) {
+    // La DB rechaza el solapamiento de forma atómica — es la única defensa
+    // real contra dos clientes reservando el mismo horario a la vez.
+    if (CONFLICT_CODES.has(error.code)) throw new SlotTakenError()
+    throw error
+  }
 
   // Fire-and-forget push notification — non-blocking
   if (data.business_id) {
