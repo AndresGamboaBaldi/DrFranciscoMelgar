@@ -354,6 +354,16 @@ const barber_vip: Professional = {
       businessId: 'erick_barber',
       calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=b489736a45b9892ba1e8c15e409ef5d1dceecbfefecd4d86a30e56bc1fc25422',
     },
+    {
+      id: 'saul',
+      name: 'Saúl Barber',
+      shortName: 'Saúl Barber',
+      title: 'Barbero Profesional',
+      photo: '/barber_vip/photos/saul.PNG',
+      phone: '+59178724809',
+      businessId: 'saul_barber',
+      calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=3db3515a7df139ea414ad2ef804af11c2ca0c307ba88ed8a0898344328d973ec',
+    },
      {
       id: 'rey',
       name: 'Rey Barber',
