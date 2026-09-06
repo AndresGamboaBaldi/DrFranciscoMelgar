@@ -26,6 +26,7 @@ const KNOWN_BUSINESS_IDS = new Set([
   'jheison_barber',
   'lgsus_barber',
   'erick_barber',
+  'saul_barber',
   'rey_barber',
 ])
 
