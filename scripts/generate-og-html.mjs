@@ -38,6 +38,14 @@ const PROFESSIONALS = {
     heroPhoto: '/dr_seifert/photos/dr_seifert_2.jpeg',
     services: ['Limpieza & Profilaxis', 'Blanqueamiento Dental', 'Carillas de Porcelana'],
   },
+  daya_borrero: {
+    name: 'Daya Borrero',
+    title: 'Nail Artist Profesional',
+    specialty: 'Especialista en uñas esculpidas, gel y nail art',
+    city: 'Cochabamba',
+    heroPhoto: '/daya_borrero/photos/daya_hero.jpg',
+    services: ['Esmaltado Semipermanente', 'Uñas de Gel', 'Pedicura Spa'],
+  },
   jhoel_cuts: {
     name: 'Jhoel Cuts',
     title: 'Barbero & Estilista',

@@ -28,6 +28,7 @@ const KNOWN_BUSINESS_IDS = new Set([
   'erick_barber',
   'saul_barber',
   'rey_barber',
+  'daya_borrero',
 ])
 
 const ok  = (data: unknown)  => new Response(JSON.stringify(data),          { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } })

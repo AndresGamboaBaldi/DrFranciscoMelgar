@@ -604,7 +604,99 @@ const dr_seifert: Professional = {
 }
 
 // ────────────────────────────────────────────────────────────────
-//  4. JHOEL CUTS — Barbería & Estilismo
+//  4. DAYA BORRERO NAILS — Manicura, pedicura y uñas esculpidas
+// ────────────────────────────────────────────────────────────────
+const daya_borrero: Professional = {
+  photos: ['/daya_borrero/photos/daya.jpeg','/daya_borrero/photos/nailsstudio.jpg'],
+  heroPhoto: '/daya_borrero/photos/nailsstudio.jpg',
+  slug: 'daya_borrero',
+  category: 'estetica',
+  name: 'Daya Borrero',
+  shortName: 'Daya Borrero',
+  title: 'Nail Artist Profesional',
+  specialty: 'Especialista en uñas esculpidas, gel y nail art',
+  location: 'Cochabamba, Bolivia',
+  tagline: 'Tus manos hablan antes que vos,',
+  taglineSub: 'que digan lo correcto.',
+  stats: [
+    { n: '+1.500', label: 'Clientas atendidas' },
+    { n: '10+', label: 'Años de experiencia' },
+  ],
+  email:"citasdaya@gmail.com",
+  aboutTitle: 'del Estudio',
+  finalQuote:
+    'Tus manos hablan antes que vos, que digan lo correcto.',
+  bio: 'Daya Borrero es nail artist certificada, especializada en uñas esculpidas en gel y acrílico, esmaltado semipermanente y diseño personalizado. Trabaja con productos de marcas profesionales y protocolos estrictos de esterilización, porque una uña bonita sobre una uña enferma no sirve de nada. Cada servicio empieza con una evaluación de la lámina natural para elegir la técnica que la cuide, no la desgaste.',
+  credentials: [
+    { label: 'Formación', value: 'Certificación en Nail Art Profesional' },
+    { label: 'Especialización', value: 'Uñas Esculpidas en Gel y Acrílico' },
+  ],
+
+  services: [
+    {
+      id: 'manicura',
+      name: 'Manicura Clásica',
+      tag: 'Esencial',
+      durationMins: 120,
+      price: 'Desde Bs. 150',
+      description:
+        'Limado, cutícula, hidratación y esmaltado tradicional. El mantenimiento básico que mantiene tus manos impecables entre servicios.',
+      image: '/daya_borrero/services/naturales.jpeg',
+    },
+    {
+      id: 'gel',
+      name: 'Uñas de Gel',
+      tag: 'Premium',
+      durationMins: 120,
+      price: 'Desde Bs. 250',
+      description:
+        'Extensión y escultura en gel con acabado natural. Más flexibles y livianas que el acrílico, ideales para quien nunca usó uñas postizas.',
+      image: '/daya_borrero/services/gel.jpeg',
+    },
+    {
+      id: 'acrilicas',
+      name: 'Uñas Acrílicas',
+      tag: 'Escultura',
+      durationMins: 180,
+      price: 'Desde Bs. 250',
+      description:
+        'Escultura en acrílico para máxima resistencia y largo. La opción para quien trabaja con las manos y necesita que duren.',
+      image: '/daya_borrero/services/acrilicas.jpeg',
+    },
+    {
+      id: 'pedicura',
+      name: 'Pedicura Clásica',
+      tag: 'Esencial',
+      durationMins: 120,
+      price: 'Desde Bs. 180',
+      description:
+        'Corte, limado, tratamiento de cutícula y esmaltado. Incluye retiro de durezas y exfoliación suave.',
+      image: '/daya_borrero/services/pedicura.jpeg',
+    },
+  ],
+
+  phone: '59177956534',
+  address: 'Edificio TARRACO, C. Irigoyen #1560',
+  schedule: ['Mar — Sab: 9:00 — 19:00'],
+
+  theme: {
+    mode: 'light',
+    accent: '#b56b7f',
+    accentLight: '#c98496',
+    fonts: {
+      display: 'Bebas Neue',
+      body: 'Inter',
+      googleFontsUrl:
+        'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap',
+    },
+  },
+  mapUrl: 'https://maps.app.goo.gl/WLqbqcWj13hCZkzZ9?g_st=iw',
+  businessId: 'daya_borrero',
+  calendarFeedUrl: 'https://ghsecmooxmmodsgnwbvh.supabase.co/functions/v1/calendar-feed?token=352a74dc07423fc07dfc9c6d16040916037c9945e64e7ded60e99bb7d62cb237',
+}
+
+// ────────────────────────────────────────────────────────────────
+//  5. JHOEL CUTS — Barbería & Estilismo
 // ────────────────────────────────────────────────────────────────
 /*const jhoel_cuts: Professional = {
   slug:      'jhoel_cuts',
@@ -671,6 +763,7 @@ export const PROFESSIONALS: Record<string, Professional> = {
   barber_vip,
   andres,
   dr_seifert,
+  daya_borrero,
   //jhoel_cuts,
 }
 
