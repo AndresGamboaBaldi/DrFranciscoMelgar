@@ -4,12 +4,13 @@ import { getProfessional } from '../../data/professionals'
 import CajaGuard from '../../components/caja/CajaGuard'
 import { signOut, type PosUsuario } from '../../lib/pos/auth'
 import { CAJA_VARS, CAJA_FONTS_URL } from './cajaTheme'
+import TabCobros from './TabCobros'
+import type { Professional } from '../../types/professional'
 
-type Pestana = 'cobrar' | 'caja' | 'comisiones' | 'reportes'
+type Pestana = 'cobros' | 'comisiones' | 'reportes'
 
 const PESTANAS: { id: Pestana; label: string; soloDueno?: boolean }[] = [
-  { id: 'cobrar',     label: 'Cobrar' },
-  { id: 'caja',       label: 'Caja' },
+  { id: 'cobros',     label: 'Cobros' },
   { id: 'comisiones', label: 'Comisiones', soloDueno: true },
   { id: 'reportes',   label: 'Reportes',   soloDueno: true },
 ]
@@ -45,15 +46,16 @@ export default function CajaPage() {
 
   return (
     <CajaGuard businessId={pro.businessId} nombreNegocio={pro.shortName ?? pro.name} slug={pro.slug}>
-      {(usuario) => <CajaShell usuario={usuario} nombreNegocio={pro.shortName ?? pro.name} />}
+      {(usuario) => <CajaShell usuario={usuario} pro={pro} />}
     </CajaGuard>
   )
 }
 
-function CajaShell({ usuario, nombreNegocio }: { usuario: PosUsuario; nombreNegocio: string }) {
+function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional }) {
+  const nombreNegocio = pro.shortName ?? pro.name
   const esDueno = usuario.rol === 'dueno'
   const visibles = PESTANAS.filter(p => !p.soloDueno || esDueno)
-  const [activa, setActiva] = useState<Pestana>('cobrar')
+  const [activa, setActiva] = useState<Pestana>('cobros')
 
   return (
     <div style={{ ...CAJA_VARS, display: 'flex', flexDirection: 'column' }}>
@@ -124,7 +126,9 @@ function CajaShell({ usuario, nombreNegocio }: { usuario: PosUsuario; nombreNego
       {/* ── Contenido ── */}
       <main style={{ flex: 1, padding: 'clamp(1.2rem,3vw,2rem) clamp(1rem,4vw,2rem)' }}>
         <div style={{ maxWidth: '54rem', margin: '0 auto' }}>
-          <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />
+          {activa === 'cobros'
+            ? <TabCobros pro={pro} usuario={usuario} />
+            : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
         </div>
       </main>
     </div>
