@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../data/professionals'
 import { ProfessionalContext } from '../context/ProfessionalContext'
@@ -12,9 +12,13 @@ import About         from '../components/About'
 import Footer        from '../components/Footer'
 import QuoteSection  from '../components/QuoteSection'
 import BookingDialog from '../components/booking/BookingDialog'
-import SetupPage     from './SetupPage'
-import SetupGuard    from '../components/SetupGuard'
 import type { Professional } from '../types/professional'
+
+// El panel del profesional arrastra ScheduleEditor, BlockScheduler y
+// AppointmentsPanel. Diferirlo saca todo eso del bundle que descarga
+// el cliente que solo viene a reservar una cita.
+const SetupPage  = lazy(() => import('./SetupPage'))
+const SetupGuard = lazy(() => import('../components/SetupGuard'))
 
 function lightenHex(hex: string, amount = 20): string {
   const n = parseInt(hex.replace('#', ''), 16)
@@ -80,6 +84,23 @@ function buildThemeVars(pro: Professional): React.CSSProperties {
   } as React.CSSProperties
 }
 
+/** Placeholder mientras baja el chunk del panel. Usa las vars del tema ya aplicadas. */
+function PanelLoading() {
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          width: '2rem', height: '2rem', borderRadius: '50%',
+          border: '2px solid var(--color-rim)',
+          borderTopColor: 'var(--color-gold)',
+          animation: 'spin 0.7s linear infinite',
+        }}
+      />
+      <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
+    </div>
+  )
+}
+
 export default function ProfessionalPage() {
   const { slug, staffId } = useParams<{ slug: string; staffId?: string }>()
   const pro = getProfessional(slug ?? '')
@@ -135,7 +156,9 @@ export default function ProfessionalPage() {
         {/* background + color use the INLINE var overrides, not the :root dark defaults */}
         <div style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark', background: 'var(--color-bg)', color: 'var(--color-ink)', minHeight: '100vh' }}>
           {isSetup ? (
-            <SetupGuard><SetupPage /></SetupGuard>
+            <Suspense fallback={<PanelLoading />}>
+              <SetupGuard><SetupPage /></SetupGuard>
+            </Suspense>
           ) : (
             <>
               <Navbar />

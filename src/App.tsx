@@ -1,8 +1,13 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import Home             from './pages/Home'
+
+// Eager: es la ruta que abre casi todo el tráfico (el cliente que viene a reservar).
+// Dejarla en el bundle inicial le evita un viaje extra.
 import ProfessionalPage from './pages/ProfessionalPage'
-import CancelPage       from './pages/CancelPage'
+
+// Diferidas: cada una viaja en su propio chunk y solo se baja si se visita.
+const Home       = lazy(() => import('./pages/Home'))
+const CancelPage = lazy(() => import('./pages/CancelPage'))
 
 /** Hides the HTML splash screen once React has mounted and painted */
 function HideSplash() {
@@ -25,15 +30,21 @@ function ScrollToTop() {
 export default function App() {
   return (
     <BrowserRouter>
-      <HideSplash />
-      <ScrollToTop />
-      <Routes>
-        <Route path="/"                  element={<Home />} />
-        <Route path="/cancel/:id"        element={<CancelPage />} />
-        <Route path="/:slug/setup/:staffId" element={<ProfessionalPage />} />
-        <Route path="/:slug/setup"       element={<ProfessionalPage />} />
-        <Route path="/:slug"             element={<ProfessionalPage />} />
-      </Routes>
+      {/* HideSplash va DENTRO del Suspense a propósito: mientras una ruta diferida
+          se descarga, todo este subárbol queda suspendido y el splash del HTML
+          sigue visible, en vez de esconderse y dejar la pantalla en blanco.
+          El timeout de 4s en main.tsx sigue siendo la red de seguridad. */}
+      <Suspense fallback={null}>
+        <HideSplash />
+        <ScrollToTop />
+        <Routes>
+          <Route path="/"                  element={<Home />} />
+          <Route path="/cancel/:id"        element={<CancelPage />} />
+          <Route path="/:slug/setup/:staffId" element={<ProfessionalPage />} />
+          <Route path="/:slug/setup"       element={<ProfessionalPage />} />
+          <Route path="/:slug"             element={<ProfessionalPage />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }
