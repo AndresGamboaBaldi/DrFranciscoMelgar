@@ -8,6 +8,7 @@ import ProfessionalPage from './pages/ProfessionalPage'
 // Diferidas: cada una viaja en su propio chunk y solo se baja si se visita.
 const Home       = lazy(() => import('./pages/Home'))
 const CancelPage = lazy(() => import('./pages/CancelPage'))
+const CajaPage   = lazy(() => import('./pages/caja/CajaPage'))
 
 /** Hides the HTML splash screen once React has mounted and painted */
 function HideSplash() {
@@ -40,6 +41,7 @@ export default function App() {
         <Routes>
           <Route path="/"                  element={<Home />} />
           <Route path="/cancel/:id"        element={<CancelPage />} />
+          <Route path="/:slug/caja"        element={<CajaPage />} />
           <Route path="/:slug/setup/:staffId" element={<ProfessionalPage />} />
           <Route path="/:slug/setup"       element={<ProfessionalPage />} />
           <Route path="/:slug"             element={<ProfessionalPage />} />
