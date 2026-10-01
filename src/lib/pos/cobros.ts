@@ -117,6 +117,21 @@ export async function getTotalDelDia(businessId: string, fecha: string): Promise
   return (data ?? []).reduce((s, v: { total: number }) => s + Number(v.total), 0)
 }
 
+/**
+ * Lo que debería haber en el cajón: fondo + ventas en efectivo − gastos.
+ * Lo calcula Postgres (función pos_efectivo_esperado) para que la caja y el
+ * arqueo nunca usen fórmulas distintas.
+ */
+export async function getEfectivoEsperado(arqueoId: string): Promise<number> {
+  if (!posSupabase) return 0
+  const { data, error } = await posSupabase.rpc('pos_efectivo_esperado', { p_arqueo_id: arqueoId })
+  if (error) {
+    console.error('[getEfectivoEsperado]', error)
+    return 0
+  }
+  return Number(data ?? 0)
+}
+
 export interface NuevoCobro {
   businessId: string
   arqueoId: string

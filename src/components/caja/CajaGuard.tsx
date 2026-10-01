@@ -1,19 +1,18 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { getAcceso, signIn, signOut, onAuthChange, type PosUsuario, type PosAccesoError } from '../../lib/pos/auth'
-import { CAJA_VARS } from '../../pages/caja/cajaTheme'
 
 const MENSAJES: Record<PosAccesoError, { titulo: string; detalle: string }> = {
   'sin-cuenta': {
     titulo: 'Sin acceso a la caja',
-    detalle: 'Tu cuenta existe pero no está habilitada para ningún negocio. Pedile al dueño que te dé de alta.',
+    detalle: 'Tu cuenta existe pero no está habilitada para ningún negocio. Pídele al dueño que te dé de alta.',
   },
   'otro-negocio': {
     titulo: 'Caja equivocada',
-    detalle: 'Tu cuenta pertenece a otro negocio. Entrá por el enlace de tu propia caja.',
+    detalle: 'Tu cuenta pertenece a otro negocio. Entra por el enlace de tu propia caja.',
   },
   inactiva: {
     titulo: 'Cuenta desactivada',
-    detalle: 'El dueño desactivó este acceso. Si creés que es un error, hablá con él.',
+    detalle: 'El dueño desactivó este acceso. Si crees que es un error, habla con él.',
   },
 }
 
@@ -37,16 +36,9 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
 
   const revisar = useCallback(async () => {
     const r = await getAcceso(businessId)
-    if (!r) {
-      setUsuario(null)
-      setRechazo(null)
-    } else if ('error' in r) {
-      setUsuario(null)
-      setRechazo(r.error)
-    } else {
-      setUsuario(r.usuario)
-      setRechazo(null)
-    }
+    if (!r) { setUsuario(null); setRechazo(null) }
+    else if ('error' in r) { setUsuario(null); setRechazo(r.error) }
+    else { setUsuario(r.usuario); setRechazo(null) }
     setVerificando(false)
   }, [businessId])
 
@@ -55,21 +47,20 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password) { setError('Completá correo y contraseña'); return }
+    if (!email.trim() || !password) { setError('Completa correo y contraseña'); return }
     setEnviando(true)
     setError('')
     const err = await signIn(email, password)
-    if (err) setError(err)
+    if (err) { setError(err); setEnviando(false) }
     // Si salió bien, onAuthChange dispara revisar() y el guard se abre solo.
-    setEnviando(false)
   }
 
   if (verificando) {
     return (
-      <div style={{ ...CAJA_VARS, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
         <div style={{
           width: '2rem', height: '2rem', borderRadius: '50%',
-          border: '2px solid var(--caja-rim)', borderTopColor: 'var(--caja-accent)',
+          border: '2px solid var(--color-rim)', borderTopColor: 'var(--color-gold)',
           animation: 'caja-spin .7s linear infinite',
         }} />
         <style>{'@keyframes caja-spin{to{transform:rotate(360deg)}}'}</style>
@@ -82,37 +73,33 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
   const msg = rechazo ? MENSAJES[rechazo] : null
 
   return (
-    <div style={{ ...CAJA_VARS, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-      <div style={{ width: '100%', maxWidth: '22rem' }}>
-        <div style={{
-          background: 'var(--caja-surface)', border: '1px solid var(--caja-rim)',
-          borderRadius: '10px', padding: '2rem 1.6rem',
-        }}>
-          <p style={{
-            margin: 0, fontSize: '.68rem', fontWeight: 600, letterSpacing: '.18em',
-            textTransform: 'uppercase', color: 'var(--caja-accent)', textAlign: 'center',
-          }}>Caja</p>
-          <h1 style={{
-            margin: '.45rem 0 1.6rem', fontSize: '1.35rem', fontWeight: 600,
-            color: 'var(--caja-ink)', textAlign: 'center', lineHeight: 1.2,
-          }}>{nombreNegocio}</h1>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)', padding: '1.5rem' }}>
+      <div style={{ maxWidth: '380px', width: '100%', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '2.5rem 2rem', textAlign: 'center' }}>
+        <p style={{ fontWeight: 500, fontSize: '.7rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.5rem' }}>
+          Caja
+        </p>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: 'var(--color-ink)', marginBottom: '.5rem' }}>
+          {nombreNegocio}
+        </h1>
 
-          {msg ? (
-            <>
-              <div style={{
-                border: '1px solid var(--caja-rim-l)', borderLeft: '3px solid var(--caja-warn)',
-                background: 'rgba(224,163,65,.07)', borderRadius: '6px',
-                padding: '.9rem 1rem', marginBottom: '1.2rem',
-              }}>
-                <p style={{ margin: 0, fontSize: '.85rem', fontWeight: 600, color: 'var(--caja-ink)' }}>{msg.titulo}</p>
-                <p style={{ margin: '.35rem 0 0', fontSize: '.8rem', lineHeight: 1.55, color: 'var(--caja-ink-dim)' }}>{msg.detalle}</p>
-              </div>
-              <button onClick={async () => { await signOut(); setRechazo(null) }} style={botonSecundario}>
-                Entrar con otra cuenta
-              </button>
-            </>
-          ) : (
-            <form onSubmit={entrar} style={{ display: 'flex', flexDirection: 'column', gap: '.65rem' }}>
+        {msg ? (
+          <>
+            <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, marginBottom: '.4rem', marginTop: '1.25rem', fontWeight: 500 }}>
+              {msg.titulo}
+            </p>
+            <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+              {msg.detalle}
+            </p>
+            <button onClick={async () => { await signOut(); setRechazo(null) }} style={btnSecundario}>
+              Entrar con otra cuenta
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, marginBottom: '2rem' }}>
+              Inicia sesión para registrar cobros.
+            </p>
+            <form onSubmit={entrar} style={{ display: 'flex', flexDirection: 'column', gap: '.7rem' }}>
               <input
                 type="email" value={email} autoFocus autoComplete="username"
                 onChange={e => { setEmail(e.target.value); setError('') }}
@@ -122,16 +109,17 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
                 <input
                   type={verClave ? 'text' : 'password'} value={password} autoComplete="current-password"
                   onChange={e => { setPassword(e.target.value); setError('') }}
-                  placeholder="Contraseña" style={{ ...input, paddingRight: '2.9rem' }}
+                  placeholder="Contraseña"
+                  style={{ ...input, padding: '.85rem 2.75rem .85rem 1rem' }}
                   className="no-native-reveal"
                 />
                 <button
                   type="button" onClick={() => setVerClave(v => !v)}
                   aria-label={verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   style={{
-                    position: 'absolute', top: 0, right: 0, height: '100%', width: '2.9rem',
+                    position: 'absolute', top: 0, right: 0, height: '100%', width: '2.75rem',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'none', border: 'none', color: 'var(--caja-ink-ghost)', cursor: 'pointer',
+                    background: 'none', border: 'none', color: 'var(--color-ink-ghost)', cursor: 'pointer',
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -141,23 +129,25 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
                 </button>
               </div>
 
-              {error && (
-                <p role="alert" style={{ margin: 0, fontSize: '.78rem', color: 'var(--caja-danger)' }}>{error}</p>
-              )}
+              {error && <p role="alert" style={{ fontSize: '.78rem', color: '#c47070', margin: 0 }}>{error}</p>}
 
-              <button type="submit" disabled={enviando} style={{ ...botonPrimario, opacity: enviando ? .6 : 1 }}>
+              <button type="submit" disabled={enviando} style={{
+                ...btnPrimario,
+                background: enviando ? 'var(--color-rim-l)' : 'var(--color-gold)',
+                color: enviando ? 'var(--color-ink-ghost)' : 'var(--color-bg)',
+                cursor: enviando ? 'not-allowed' : 'pointer',
+              }}>
                 {enviando ? 'Entrando…' : 'Entrar'}
               </button>
             </form>
-          )}
-        </div>
+          </>
+        )}
 
-        <div style={{ textAlign: 'center', marginTop: '1.4rem' }}>
-          <a href={`/${slug}`} style={{
-            fontSize: '.72rem', letterSpacing: '.06em', textTransform: 'uppercase',
-            color: 'var(--caja-ink-ghost)', textDecoration: 'none',
-          }}>← Volver a la página</a>
-        </div>
+        <a href={`/${slug}`} style={{
+          display: 'inline-block', marginTop: '1.75rem', fontSize: '.72rem',
+          letterSpacing: '.08em', textTransform: 'uppercase',
+          color: 'var(--color-ink-ghost)', textDecoration: 'none',
+        }}>← Volver a la página</a>
       </div>
     </div>
   )
@@ -166,37 +156,34 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
 const input: React.CSSProperties = {
   width: '100%',
   padding: '.85rem 1rem',
-  background: 'var(--caja-bg)',
-  border: '1px solid var(--caja-rim-l)',
-  borderRadius: '6px',
-  color: 'var(--caja-ink)',
-  // 16px evita que iOS haga zoom al enfocar el campo
-  fontSize: '16px',
-  fontFamily: 'inherit',
+  background: 'var(--color-bg)',
+  border: '1px solid var(--color-rim-l)',
+  color: 'var(--color-ink)',
+  fontFamily: 'var(--font-body)',
+  fontSize: '16px', // evita el zoom de iOS al enfocar
+  textAlign: 'center',
 }
 
-const botonPrimario: React.CSSProperties = {
-  padding: '.9rem 1.5rem',
-  background: 'var(--caja-accent)',
-  color: '#06231a',
-  border: 'none',
-  borderRadius: '6px',
-  fontFamily: 'inherit',
-  fontSize: '.8rem',
-  fontWeight: 600,
-  letterSpacing: '.08em',
-  textTransform: 'uppercase',
-  cursor: 'pointer',
-}
-
-const botonSecundario: React.CSSProperties = {
-  width: '100%',
+const btnPrimario: React.CSSProperties = {
   padding: '.85rem 1.5rem',
+  fontFamily: 'var(--font-body)',
+  fontSize: '.72rem',
+  fontWeight: 400,
+  letterSpacing: '.12em',
+  textTransform: 'uppercase',
+  border: 'none',
+}
+
+const btnSecundario: React.CSSProperties = {
+  width: '100%',
+  padding: '.75rem 1.5rem',
   background: 'none',
-  color: 'var(--caja-ink-dim)',
-  border: '1px solid var(--caja-rim-l)',
-  borderRadius: '6px',
-  fontFamily: 'inherit',
-  fontSize: '.78rem',
+  border: '1px solid var(--color-rim-l)',
+  color: 'var(--color-ink-dim)',
+  fontFamily: 'var(--font-body)',
+  fontSize: '.68rem',
+  fontWeight: 500,
+  letterSpacing: '.1em',
+  textTransform: 'uppercase',
   cursor: 'pointer',
 }

@@ -17,7 +17,7 @@ interface Props {
   userId: string
   /** Barberos del negocio. Si está vacío, se cobra al negocio mismo. */
   barberos: StaffMember[]
-  /** Catálogo de nombres — los precios los pone la cajera. */
+  /** Catálogo de nombres — los montos los pone la cajera. */
   servicios: ProService[]
   prefill: CobroPrefill
   onCerrar: () => void
@@ -56,14 +56,13 @@ export default function CobroDialog({
 
   const guardar = async () => {
     const validos = items.filter(i => i.nombre.trim() && i.precio > 0)
-    if (!validos.length) { setError('Cargá al menos un servicio con su monto'); return }
+    if (!validos.length) { setError('Carga al menos un servicio con su monto'); return }
 
     setGuardando(true)
     setError('')
     try {
       await registrarCobro({
-        businessId,
-        arqueoId,
+        businessId, arqueoId,
         barberoBusinessId: barbero,
         appointmentId: prefill.appointmentId ?? null,
         clienteNombre: cliente.trim() || null,
@@ -76,8 +75,8 @@ export default function CobroDialog({
     } catch (e) {
       setError(
         e instanceof CitaYaCobradaError
-          ? 'Esta cita ya fue cobrada. Actualizá la lista para ver el cobro.'
-          : 'No se pudo registrar el cobro. Revisá la conexión e intentá de nuevo.',
+          ? 'Esta cita ya fue cobrada. Actualiza la lista para ver el cobro.'
+          : 'No se pudo registrar el cobro. Revisa la conexión e intenta de nuevo.',
       )
       setGuardando(false)
     }
@@ -88,32 +87,33 @@ export default function CobroDialog({
       onClick={() => !guardando && onCerrar()}
       style={{
         position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.72)',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
       }}
     >
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: '30rem', maxHeight: '92vh',
-          background: 'var(--caja-surface)', border: '1px solid var(--caja-rim)',
-          borderRadius: '14px 14px 0 0', display: 'flex', flexDirection: 'column',
+          width: '100%', maxWidth: '26rem', maxHeight: '92dvh',
+          background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+          display: 'flex', flexDirection: 'column',
         }}
       >
         <header style={{
-          padding: '1.1rem 1.25rem', borderBottom: '1px solid var(--caja-rim)',
+          padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-rim)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
-          <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Nuevo cobro</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+            Nuevo cobro
+          </h2>
           <button onClick={onCerrar} disabled={guardando} aria-label="Cerrar" style={{
-            background: 'none', border: 'none', color: 'var(--caja-ink-ghost)',
-            cursor: 'pointer', fontSize: '1.4rem', lineHeight: 1, padding: '0 .2rem',
+            background: 'none', border: 'none', color: 'var(--color-ink-ghost)',
+            cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1, padding: '0 .2rem',
           }}>×</button>
         </header>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <Campo label="Cliente">
-            <input value={cliente} onChange={e => setCliente(e.target.value)}
-              placeholder="Opcional" style={input} />
+            <input value={cliente} onChange={e => setCliente(e.target.value)} placeholder="Opcional" style={input} />
           </Campo>
 
           {barberos.length > 0 && (
@@ -127,29 +127,24 @@ export default function CobroDialog({
           )}
 
           <Campo label="Servicios">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.45rem' }}>
               {items.map((it, i) => (
-                <div key={i} style={{ display: 'flex', gap: '.4rem' }}>
+                <div key={i} style={{ display: 'flex', gap: '.35rem' }}>
                   <input
-                    list="caja-servicios"
-                    value={it.nombre}
+                    list="caja-servicios" value={it.nombre}
                     onChange={e => setItem(i, { nombre: e.target.value })}
-                    placeholder="Servicio"
-                    style={{ ...input, flex: 1, minWidth: 0 }}
+                    placeholder="Servicio" style={{ ...input, flex: 1, minWidth: 0 }}
                   />
                   <input
                     type="number" inputMode="decimal" min="0" step="1"
-                    value={it.precio || ''}
-                    onChange={e => setItem(i, { precio: Number(e.target.value) || 0 })}
-                    placeholder="Bs"
-                    style={{ ...input, width: '5.5rem', textAlign: 'right' }}
+                    value={it.precio || ''} onChange={e => setItem(i, { precio: Number(e.target.value) || 0 })}
+                    placeholder="Bs" style={{ ...input, width: '5.5rem', textAlign: 'right' }}
                   />
                   {items.length > 1 && (
-                    <button onClick={() => setItems(prev => prev.filter((_, n) => n !== i))}
-                      aria-label="Quitar" style={{
-                        background: 'none', border: '1px solid var(--caja-rim-l)', borderRadius: '6px',
-                        color: 'var(--caja-ink-ghost)', cursor: 'pointer', width: '2.4rem', flexShrink: 0,
-                      }}>×</button>
+                    <button onClick={() => setItems(prev => prev.filter((_, n) => n !== i))} aria-label="Quitar" style={{
+                      background: 'none', border: '1px solid var(--color-rim-l)',
+                      color: 'var(--color-ink-ghost)', cursor: 'pointer', width: '2.4rem', flexShrink: 0,
+                    }}>×</button>
                   )}
                 </div>
               ))}
@@ -159,11 +154,11 @@ export default function CobroDialog({
               <button
                 onClick={() => setItems(prev => [...prev, { service_id: null, nombre: '', precio: 0, cantidad: 1 }])}
                 style={{
-                  alignSelf: 'flex-start', background: 'none', border: 'none',
-                  color: 'var(--caja-accent-l)', cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: '.8rem', padding: '.2rem 0',
+                  alignSelf: 'flex-start', background: 'none', border: 'none', padding: '.2rem 0',
+                  color: 'var(--color-gold)', cursor: 'pointer', fontFamily: 'var(--font-body)',
+                  fontSize: '.68rem', fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase',
                 }}
-              >+ Agregar otro servicio</button>
+              >+ Agregar servicio</button>
             </div>
           </Campo>
 
@@ -174,16 +169,18 @@ export default function CobroDialog({
           </Campo>
 
           <Campo label="Método de pago">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.4rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.35rem' }}>
               {METODOS.map(m => {
                 const on = m.id === metodo
                 return (
                   <button key={m.id} onClick={() => setMetodo(m.id)} style={{
-                    padding: '.7rem .4rem', borderRadius: '8px', cursor: 'pointer',
-                    fontFamily: 'inherit', fontSize: '.74rem', fontWeight: on ? 600 : 500,
-                    background: on ? 'var(--caja-accent)' : 'transparent',
-                    color: on ? '#fff' : 'var(--caja-ink-dim)',
-                    border: `1px solid ${on ? 'var(--caja-accent)' : 'var(--caja-rim-l)'}`,
+                    padding: '.6rem .3rem',
+                    background: on ? 'var(--color-gold-glow)' : 'none',
+                    border: `1px solid ${on ? 'var(--color-gold)' : 'var(--color-rim-l)'}`,
+                    color: on ? 'var(--color-gold)' : 'var(--color-ink-dim)',
+                    fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 500,
+                    letterSpacing: '.08em', textTransform: 'uppercase',
+                    cursor: 'pointer', transition: 'all .2s',
                   }}>{m.label}</button>
                 )
               })}
@@ -191,24 +188,25 @@ export default function CobroDialog({
           </Campo>
 
           {error && (
-            <p role="alert" style={{
-              margin: 0, fontSize: '.8rem', lineHeight: 1.5, color: 'var(--caja-danger)',
-              background: 'rgba(216,106,82,.08)', border: '1px solid rgba(216,106,82,.3)',
-              borderRadius: '6px', padding: '.7rem .85rem',
-            }}>{error}</p>
+            <p role="alert" style={{ fontSize: '.78rem', lineHeight: 1.5, color: '#c47070', margin: 0 }}>{error}</p>
           )}
         </div>
 
-        <footer style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--caja-rim)' }}>
+        <footer style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--color-rim)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.85rem' }}>
-            <span style={{ fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--caja-ink-ghost)' }}>Total</span>
-            <span style={{ fontSize: '1.5rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{bs(total)}</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
+              Total
+            </span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              {bs(total)}
+            </span>
           </div>
           <button onClick={guardar} disabled={guardando} style={{
-            width: '100%', padding: '.95rem', borderRadius: '8px', border: 'none',
-            background: guardando ? 'var(--caja-accent-d)' : 'var(--caja-accent)',
-            color: '#fff', fontFamily: 'inherit', fontSize: '.85rem', fontWeight: 600,
-            letterSpacing: '.06em', textTransform: 'uppercase',
+            width: '100%', padding: '1rem 2rem',
+            background: guardando ? 'var(--color-rim-l)' : 'var(--color-gold)',
+            color: guardando ? 'var(--color-ink-ghost)' : 'var(--color-bg)',
+            border: 'none', fontFamily: 'var(--font-body)', fontSize: '.78rem',
+            fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase',
             cursor: guardando ? 'not-allowed' : 'pointer',
           }}>{guardando ? 'Registrando…' : 'Registrar cobro'}</button>
         </footer>
@@ -221,8 +219,8 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '.45rem' }}>
       <span style={{
-        fontSize: '.68rem', fontWeight: 600, letterSpacing: '.14em',
-        textTransform: 'uppercase', color: 'var(--caja-ink-ghost)',
+        fontFamily: 'var(--font-body)', fontSize: '.62rem', fontWeight: 500,
+        letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)',
       }}>{label}</span>
       {children}
     </div>
@@ -230,12 +228,11 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const input: React.CSSProperties = {
-  padding: '.75rem .85rem',
-  background: 'var(--caja-bg)',
-  border: '1px solid var(--caja-rim-l)',
-  borderRadius: '7px',
-  color: 'var(--caja-ink)',
-  fontSize: '16px', // evita el zoom de iOS al enfocar
-  fontFamily: 'inherit',
   width: '100%',
+  padding: '.75rem .9rem',
+  background: 'var(--color-bg)',
+  border: '1px solid var(--color-rim-l)',
+  color: 'var(--color-ink)',
+  fontFamily: 'var(--font-body)',
+  fontSize: '16px', // evita el zoom de iOS al enfocar
 }
