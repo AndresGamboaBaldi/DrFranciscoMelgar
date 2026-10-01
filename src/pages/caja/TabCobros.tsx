@@ -3,7 +3,7 @@ import { getAppointmentsByDate } from '../../lib/supabase'
 import type { Appointment } from '../../types/booking'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
-import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getEfectivoEsperado, type Venta, type Arqueo } from '../../lib/pos/cobros'
+import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, type Venta, type Arqueo } from '../../lib/pos/cobros'
 import { bs, bsCorto, hoyISO } from './cajaTheme'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
@@ -43,7 +43,6 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [ventas, setVentas] = useState<Venta[]>([])
   const [totalAyer, setTotalAyer] = useState(0)
   const [arqueo, setArqueo] = useState<Arqueo | null>(null)
-  const [efectivo, setEfectivo] = useState(0)
   const [cargando, setCargando] = useState(true)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
@@ -60,15 +59,12 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
     setVentas(vs)
     setTotalAyer(ayer)
     setArqueo(arq)
-    // Depende del arqueo, así que va después del Promise.all de arriba.
-    setEfectivo(arq ? await getEfectivoEsperado(arq.id) : 0)
     setCargando(false)
   }, [businessIds, pro.businessId, usuario.user_id])
 
   useEffect(() => { cargar() }, [cargar])
 
   const hoyCobrado = ventas.reduce((s, v) => s + Number(v.total), 0)
-  const enEfectivo = ventas.filter(v => v.metodo_pago === 'efectivo').length
   const variacion = totalAyer > 0 ? ((hoyCobrado - totalAyer) / totalAyer) * 100 : null
 
   const cobradasIds = useMemo(
@@ -119,7 +115,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
       </div>
 
       {/* ── Resumen ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(9rem, 1fr))', gap: '.5rem', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.5rem', marginBottom: '1.25rem' }}>
         <Tile
           label="Hoy cobrado" valor={bsCorto(hoyCobrado)} unidad="Bs"
           pie={variacion === null
@@ -128,10 +124,6 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           destacado={variacion !== null && variacion >= 0}
         />
         <Tile label="Cobros" valor={String(ventas.length)} unidad="hoy" pie={`${nPendientes} por cobrar`} />
-        <Tile
-          label="Efectivo en caja" valor={bsCorto(efectivo)} unidad="Bs"
-          pie={`${enEfectivo} ${enEfectivo === 1 ? 'cobro' : 'cobros'} en efectivo`}
-        />
       </div>
 
       {/* ── Nuevo cobro ── */}

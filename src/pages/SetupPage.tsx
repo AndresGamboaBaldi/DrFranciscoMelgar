@@ -8,6 +8,7 @@ import AppointmentsPanel from '../components/AppointmentsPanel'
 import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
 import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden, getHiddenStaffIds, saveScheduleLocked, getScheduleLockedMap } from '../lib/supabase'
 import type { StaffMember } from '../types/professional'
+import { useHideOnScroll, useAltura, useEsMobile } from '../lib/useHideOnScroll'
 
 type Section = 'citas' | 'schedule' | 'config' | 'profesionales'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
@@ -130,6 +131,16 @@ export default function SetupPage() {
     } finally { setStaffLockedSaving(null) }
   }
 
+  // Barras que se esconden al bajar, estilo Instagram. Solo en mobile, y solo
+  // si hay contenido suficiente como para que valga la pena.
+  const mainRef   = useRef<HTMLElement | null>(null)
+  const headerRef = useRef<HTMLElement | null>(null)
+  const tabbarRef = useRef<HTMLElement | null>(null)
+  const esMobile  = useEsMobile()
+  const barrasOcultas = useHideOnScroll(mainRef, esMobile)
+  const altoHeader = useAltura(headerRef)
+  const altoTabbar = useAltura(tabbarRef)
+
   // Setup page always uses the Bebas Neue / Inter typography, regardless of professional theme
   useEffect(() => {
     const id = 'gf-setup-bebas-inter'
@@ -191,13 +202,18 @@ export default function SetupPage() {
     <div style={{ height: '100dvh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden', colorScheme: 'inherit', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
 
       {/* ── Sticky header ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
+      {/* Sin position:sticky a propósito: el contenedor raíz es 100dvh con
+          overflow hidden, así que la cabecera ya es un flex item fijo. Con
+          sticky, el margen negativo que la esconde al scrollear no surte efecto. */}
+      <header ref={headerRef} style={{
+        zIndex: 50,
         background: 'var(--color-nav-scrolled, var(--color-surface))',
         backdropFilter: 'blur(14px)',
         borderBottom: '1px solid var(--color-rim)',
         padding: '.85rem clamp(1rem, 4vw, 2.5rem)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+        marginTop: barrasOcultas ? -altoHeader : 0,
+        transition: 'margin-top .25s ease',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
           <a href={`/${pro.slug}`} aria-label="Volver a mi página"
@@ -217,7 +233,7 @@ export default function SetupPage() {
       </header>
 
       {/* ── Tab bar (desktop/tablet) ── */}
-      <div className="setup-tabbar-top" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
+      <div className="panel-tabbar-top" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
         <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
           {activeNav.map(n => {
             const active = section === n.id
@@ -246,7 +262,7 @@ export default function SetupPage() {
       </div>
 
       {/* ── Content ── */}
-      <main className="setup-main-mobile-pad" style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
+      <main ref={mainRef} className="panel-main-mobile-pad" style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
         <div style={{ maxWidth: (section === 'schedule' || section === 'config') ? '100rem' : '48rem', margin: '0 auto' }}>
 
           {section === 'citas' && (
@@ -566,7 +582,11 @@ export default function SetupPage() {
       </main>
 
       {/* ── Tab bar (mobile, fixed bottom) ── */}
-      <nav className="setup-tabbar-bottom">
+      <nav
+        className="panel-tabbar-bottom"
+        ref={tabbarRef}
+        style={{ marginBottom: barrasOcultas ? -altoTabbar : 0, transition: 'margin-bottom .25s ease' }}
+      >
         {activeNav.map(n => {
           const active = section === n.id
           const Icon = n.icon

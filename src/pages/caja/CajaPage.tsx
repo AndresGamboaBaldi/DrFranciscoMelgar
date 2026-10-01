@@ -1,4 +1,6 @@
-import { useState, useEffect, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
+import { Banknote, Percent, ChartColumn } from 'lucide-react'
+import { useHideOnScroll, useAltura, useEsMobile } from '../../lib/useHideOnScroll'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../../data/professionals'
 import { buildThemeVars, PANEL_FONT_VARS, PANEL_FONTS_URL } from '../../lib/theme'
@@ -9,10 +11,10 @@ import type { Professional } from '../../types/professional'
 
 type Pestana = 'cobros' | 'comisiones' | 'reportes'
 
-const PESTANAS: { id: Pestana; label: string; soloDueno?: boolean }[] = [
-  { id: 'cobros',     label: 'Cobros' },
-  { id: 'comisiones', label: 'Comisiones', soloDueno: true },
-  { id: 'reportes',   label: 'Reportes',   soloDueno: true },
+const PESTANAS: { id: Pestana; label: string; icon: typeof Banknote; soloDueno?: boolean }[] = [
+  { id: 'cobros',     label: 'Cobros',     icon: Banknote },
+  { id: 'comisiones', label: 'Comisiones', icon: Percent,     soloDueno: true },
+  { id: 'reportes',   label: 'Reportes',   icon: ChartColumn, soloDueno: true },
 ]
 
 export default function CajaPage() {
@@ -61,17 +63,31 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
   const visibles = PESTANAS.filter(p => !p.soloDueno || esDueno)
   const [activa, setActiva] = useState<Pestana>('cobros')
 
+  // Cabecera y barra inferior se esconden al bajar, igual que en el panel de setup.
+  const mainRef   = useRef<HTMLElement | null>(null)
+  const headerRef = useRef<HTMLElement | null>(null)
+  const tabbarRef = useRef<HTMLElement | null>(null)
+  const esMobile  = useEsMobile()
+  const barrasOcultas = useHideOnScroll(mainRef, esMobile)
+  const altoHeader = useAltura(headerRef)
+  const altoTabbar = useAltura(tabbarRef)
+
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Cabecera ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
+      {/* Sin position:sticky a propósito: el contenedor raíz es 100dvh con
+          overflow hidden, así que la cabecera ya es un flex item fijo. Con
+          sticky, el margen negativo que la esconde al scrollear no surte efecto. */}
+      <header ref={headerRef} style={{
+        zIndex: 50,
         background: 'var(--color-nav-scrolled, var(--color-surface))',
         backdropFilter: 'blur(14px)',
         borderBottom: '1px solid var(--color-rim)',
         padding: '.85rem clamp(1rem, 4vw, 2.5rem)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+        marginTop: barrasOcultas ? -altoHeader : 0,
+        transition: 'margin-top .25s ease',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
           <a href={`/${pro.slug}`} aria-label="Volver a la página"
@@ -112,8 +128,8 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
         </div>
       </header>
 
-      {/* ── Pestañas ── */}
-      <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
+      {/* ── Pestañas (desktop/tablet) ── */}
+      <div className="panel-tabbar-top" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', overflowX: 'auto', overflowY: 'hidden' }}>
         <div style={{ display: 'flex', gap: 0, minWidth: 'max-content' }}>
           {visibles.map(p => {
             const active = p.id === activa
@@ -142,13 +158,42 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
       </div>
 
       {/* ── Contenido ── */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
+      <main ref={mainRef} className="panel-main-mobile-pad" style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
           {activa === 'cobros'
             ? <TabCobros pro={pro} usuario={usuario} />
             : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
         </div>
       </main>
+
+      {/* ── Pestañas (mobile, barra inferior) ── */}
+      <nav
+        className="panel-tabbar-bottom"
+        ref={tabbarRef}
+        style={{ marginBottom: barrasOcultas ? -altoTabbar : 0, transition: 'margin-bottom .25s ease' }}
+      >
+        {visibles.map(p => {
+          const active = p.id === activa
+          const Icon = p.icon
+          return (
+            <button key={p.id} onClick={() => setActiva(p.id)}
+              style={{
+                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '.3rem', padding: '.7rem .25rem .35rem', minHeight: '3.75rem', background: 'none', border: 'none',
+                borderTop: `2px solid ${active ? 'var(--color-gold)' : 'transparent'}`,
+                marginTop: -1, cursor: 'pointer',
+                color: active ? 'var(--color-gold)' : 'var(--color-ink-dim)',
+                fontFamily: 'var(--font-body)', fontSize: '.68rem',
+                fontWeight: active ? 500 : 300, letterSpacing: '.04em', textTransform: 'uppercase',
+                transition: 'color .2s, border-color .2s',
+              }}
+            >
+              <Icon size={22} color={active ? 'var(--color-gold)' : 'var(--color-ink-dim)'} />
+              {p.label}
+            </button>
+          )
+        })}
+      </nav>
     </div>
   )
 }
