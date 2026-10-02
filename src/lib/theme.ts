@@ -14,6 +14,38 @@ export function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`
 }
 
+/** Luminancia relativa (WCAG), para decidir qué texto se lee sobre un color. */
+function luminancia(hex: string): number {
+  const n = parseInt(hex.replace('#', ''), 16)
+  const canal = (c: number) => {
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * canal((n >> 16) & 255) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255)
+}
+
+const TINTA_OSCURA = '#17140e'
+const TINTA_CLARA = '#ffffff'
+
+/** Razón de contraste WCAG entre dos colores. */
+function contraste(a: string, b: string): number {
+  const [alta, baja] = [luminancia(a), luminancia(b)].sort((x, y) => y - x)
+  return (alta + 0.05) / (baja + 0.05)
+}
+
+/**
+ * Color de texto que mejor se lee sobre el acento.
+ *
+ * No se puede fijar en blanco: da 6,6:1 sobre el azul de Barber VIP pero solo
+ * 3,6:1 sobre el dorado de Melgar, por debajo del mínimo legible. Tampoco
+ * sirve var(--color-bg), que cambia con el modo claro/oscuro.
+ *
+ * En vez de un umbral, se comparan las dos opciones y gana la de más contraste.
+ */
+export function textoSobreAcento(hex: string): string {
+  return contraste(hex, TINTA_OSCURA) >= contraste(hex, TINTA_CLARA) ? TINTA_OSCURA : TINTA_CLARA
+}
+
 /**
  * Variables CSS del tema de un profesional.
  *
@@ -30,6 +62,8 @@ export function buildThemeVars(pro: Professional): CSSProperties {
     '--color-gold': accent,
     '--color-gold-l': accentL,
     '--color-gold-glow': hexToRgba(accent, 0.1),
+    // Texto legible encima del acento, para los botones rellenos
+    '--color-on-gold': textoSobreAcento(accent),
   }
 
   if (fonts) {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { bs } from './cajaTheme'
+import { btnPrimario, chip } from '../../lib/panelUI'
 import { METODOS, registrarCobro, CitaYaCobradaError, type MetodoPago, type VentaItem } from '../../lib/pos/cobros'
 import type { ProService, StaffMember } from '../../types/professional'
 
@@ -95,6 +96,7 @@ export default function CobroDialog({
         style={{
           width: '100%', maxWidth: '26rem', maxHeight: '92dvh',
           background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+          borderRadius: 'var(--r-xl)', overflow: 'hidden',
           display: 'flex', flexDirection: 'column',
         }}
       >
@@ -174,13 +176,8 @@ export default function CobroDialog({
                 const on = m.id === metodo
                 return (
                   <button key={m.id} onClick={() => setMetodo(m.id)} style={{
-                    padding: '.6rem .3rem',
-                    background: on ? 'var(--color-gold-glow)' : 'none',
-                    border: `1px solid ${on ? 'var(--color-gold)' : 'var(--color-rim-l)'}`,
-                    color: on ? 'var(--color-gold)' : 'var(--color-ink-dim)',
-                    fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 500,
-                    letterSpacing: '.08em', textTransform: 'uppercase',
-                    cursor: 'pointer', transition: 'all .2s',
+                    ...chip(on), padding: '.6rem .3rem', fontSize: '.64rem',
+                    letterSpacing: '.06em', whiteSpace: 'normal', lineHeight: 1.25,
                   }}>{m.label}</button>
                 )
               })}
@@ -201,14 +198,10 @@ export default function CobroDialog({
               {bs(total)}
             </span>
           </div>
-          <button onClick={guardar} disabled={guardando} style={{
-            width: '100%', padding: '1rem 2rem',
-            background: guardando ? 'var(--color-rim-l)' : 'var(--color-gold)',
-            color: guardando ? 'var(--color-ink-ghost)' : 'var(--color-bg)',
-            border: 'none', fontFamily: 'var(--font-body)', fontSize: '.78rem',
-            fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase',
-            cursor: guardando ? 'not-allowed' : 'pointer',
-          }}>{guardando ? 'Registrando…' : 'Registrar cobro'}</button>
+          <button onClick={guardar} disabled={guardando}
+            style={{ ...btnPrimario('lg', guardando), width: '100%' }}>
+            {guardando ? 'Registrando…' : 'Registrar cobro'}
+          </button>
         </footer>
       </div>
     </div>
@@ -232,6 +225,7 @@ const input: React.CSSProperties = {
   padding: '.75rem .9rem',
   background: 'var(--color-bg)',
   border: '1px solid var(--color-rim-l)',
+  borderRadius: 'var(--r-md)',
   color: 'var(--color-ink)',
   fontFamily: 'var(--font-body)',
   fontSize: '16px', // evita el zoom de iOS al enfocar

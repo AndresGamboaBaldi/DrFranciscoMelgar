@@ -202,7 +202,7 @@ export default function BlockScheduler({ businessId: businessIdProp, readOnly = 
         </div>
 
         {!loading && blocks.length === 0 && (
-          <div style={{ padding: '1.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', textAlign: 'center' }}>
+          <div style={{ padding: '1.5rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-ink-dim)' }}>
               Sin vacaciones programadas
             </p>

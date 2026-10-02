@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { btnPrimario, btnSecundario } from '../../lib/panelUI'
 import { getAcceso, signIn, signOut, onAuthChange, type PosUsuario, type PosAccesoError } from '../../lib/pos/auth'
 
 const MENSAJES: Record<PosAccesoError, { titulo: string; detalle: string }> = {
@@ -74,7 +75,7 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)', padding: '1.5rem' }}>
-      <div style={{ maxWidth: '380px', width: '100%', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '2.5rem 2rem', textAlign: 'center' }}>
+      <div style={{ maxWidth: '380px', width: '100%', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', padding: '2.5rem 2rem', textAlign: 'center' }}>
         <p style={{ fontWeight: 500, fontSize: '.7rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--color-gold)', marginBottom: '.5rem' }}>
           Caja
         </p>
@@ -90,7 +91,8 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
             <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, marginBottom: '1.75rem' }}>
               {msg.detalle}
             </p>
-            <button onClick={async () => { await signOut(); setRechazo(null) }} style={btnSecundario}>
+            <button onClick={async () => { await signOut(); setRechazo(null) }}
+              style={{ ...btnSecundario('md'), width: '100%' }}>
               Entrar con otra cuenta
             </button>
           </>
@@ -131,12 +133,8 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
 
               {error && <p role="alert" style={{ fontSize: '.78rem', color: '#c47070', margin: 0 }}>{error}</p>}
 
-              <button type="submit" disabled={enviando} style={{
-                ...btnPrimario,
-                background: enviando ? 'var(--color-rim-l)' : 'var(--color-gold)',
-                color: enviando ? 'var(--color-ink-ghost)' : 'var(--color-bg)',
-                cursor: enviando ? 'not-allowed' : 'pointer',
-              }}>
+              <button type="submit" disabled={enviando}
+                style={{ ...btnPrimario('md', enviando), width: '100%' }}>
                 {enviando ? 'Entrando…' : 'Entrar'}
               </button>
             </form>
@@ -158,32 +156,11 @@ const input: React.CSSProperties = {
   padding: '.85rem 1rem',
   background: 'var(--color-bg)',
   border: '1px solid var(--color-rim-l)',
+  borderRadius: 'var(--r-md)',
   color: 'var(--color-ink)',
   fontFamily: 'var(--font-body)',
   fontSize: '16px', // evita el zoom de iOS al enfocar
   textAlign: 'center',
 }
 
-const btnPrimario: React.CSSProperties = {
-  padding: '.85rem 1.5rem',
-  fontFamily: 'var(--font-body)',
-  fontSize: '.72rem',
-  fontWeight: 400,
-  letterSpacing: '.12em',
-  textTransform: 'uppercase',
-  border: 'none',
-}
 
-const btnSecundario: React.CSSProperties = {
-  width: '100%',
-  padding: '.75rem 1.5rem',
-  background: 'none',
-  border: '1px solid var(--color-rim-l)',
-  color: 'var(--color-ink-dim)',
-  fontFamily: 'var(--font-body)',
-  fontSize: '.68rem',
-  fontWeight: 500,
-  letterSpacing: '.1em',
-  textTransform: 'uppercase',
-  cursor: 'pointer',
-}

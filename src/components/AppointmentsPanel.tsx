@@ -1145,7 +1145,7 @@ export default function AppointmentsPanel({
                       { label: 'Total citas', value: String(history.length) },
                       { label: daysSince === null ? 'Sin visitas' : daysSince === 0 ? 'Última visita' : 'Días sin visitar', value: daysSince === null ? '—' : daysSince === 0 ? 'Hoy' : String(daysSince) },
                     ].map(s => (
-                      <div key={s.label} style={{ padding: '.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', textAlign: 'center' }}>
+                      <div key={s.label} style={{ padding: '.75rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', textAlign: 'center' }}>
                         <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--color-gold)', lineHeight: 1 }}>{s.value}</p>
                         <p style={{ fontSize: '.58rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginTop: '.3rem' }}>{s.label}</p>
                       </div>
@@ -1165,7 +1165,7 @@ export default function AppointmentsPanel({
                         const dateLabel = `${DAYS_ES[new Date(hy, hm-1, hd).getDay()]} ${hd} de ${MONTHS_ES[hm-1]}`
                         const isPast = h.appointment_date < today
                         return (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', padding: '.5rem .75rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: isPast ? 0.65 : 1 }}>
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem', padding: '.5rem .75rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', opacity: isPast ? 0.65 : 1 }}>
                             <span style={{ fontSize: '.82rem', color: 'var(--color-ink-dim)', textTransform: 'capitalize' }}>{dateLabel}</span>
                             <span style={{ fontSize: '.78rem', color: 'var(--color-ink-ghost)', textAlign: 'right', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.service}</span>
                           </div>

@@ -50,7 +50,7 @@ export default function CajaPage() {
   const isLight = pro.theme?.mode === 'light'
 
   return (
-    <div style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark', background: 'var(--color-bg)', color: 'var(--color-ink)' }}>
+    <div className="panel-shell" style={{ ...themeVars, colorScheme: isLight ? 'light' : 'dark', background: 'var(--color-bg)', color: 'var(--color-ink)' }}>
       <CajaGuard businessId={pro.businessId} nombreNegocio={pro.shortName ?? pro.name} slug={pro.slug}>
         {(usuario) => <CajaShell usuario={usuario} pro={pro} />}
       </CajaGuard>
@@ -73,7 +73,7 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
   const altoTabbar = useAltura(tabbarRef)
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="panel-shell" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Cabecera ── */}
       {/* Sin position:sticky a propósito: el contenedor raíz es 100dvh con

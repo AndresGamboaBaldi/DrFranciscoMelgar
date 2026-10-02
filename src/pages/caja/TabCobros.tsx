@@ -5,6 +5,8 @@ import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
 import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, type Venta, type Arqueo } from '../../lib/pos/cobros'
 import { bs, bsCorto, hoyISO } from './cajaTheme'
+import { btnPrimario, chip } from '../../lib/panelUI'
+import { Scissors, Clock, Check } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -72,6 +74,14 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
     [ventas],
   )
 
+  // Hora de cada cita, para que al cobrarla la fila no salte al final de la
+  // lista: lo que ordena es el turno, no el momento en que se registró el pago.
+  const horaDeCita = useMemo(() => {
+    const m = new Map<string, string>()
+    citas.forEach(c => { if (c.id) m.set(c.id, (c.appointment_time ?? '').substring(0, 5)) })
+    return m
+  }, [citas])
+
   const filas: Fila[] = useMemo(() => {
     const pendientes: Fila[] = citas
       .filter(c => c.id && !cobradasIds.has(c.id) && c.status !== 'cancelled')
@@ -88,15 +98,19 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
     const hechas: Fila[] = ventas.map(v => ({
       tipo: 'cobrado' as const,
       key: `v-${v.id}`,
-      hora: new Date(v.created_at).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' }),
+      // La hora de la cita manda; solo los walk-in caen en la hora del cobro.
+      // hour12:false mantiene el formato HH:MM que usa el orden alfabético.
+      hora: (v.appointment_id ? horaDeCita.get(v.appointment_id) : null)
+        ?? new Date(v.created_at).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', hour12: false }),
       cliente: v.cliente_nombre ?? 'Sin nombre',
       servicio: v.items.map(i => i.nombre).join(' + '),
       barberoId: v.barbero_business_id,
       venta: v,
     }))
 
-    return [...pendientes, ...hechas].sort((a, b) => b.hora.localeCompare(a.hora))
-  }, [citas, ventas, cobradasIds, pro.businessId])
+    // De la hora más temprana a la más tardía: sigue el orden del día.
+    return [...pendientes, ...hechas].sort((a, b) => a.hora.localeCompare(b.hora))
+  }, [citas, ventas, cobradasIds, horaDeCita, pro.businessId])
 
   const visibles = filas.filter(f =>
     filtro === 'todos' ? true : filtro === 'por-cobrar' ? f.tipo === 'pendiente' : f.tipo === 'cobrado',
@@ -130,15 +144,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
       <button
         onClick={() => setPrefill({})}
         disabled={!arqueo}
-        style={{
-          width: '100%', padding: '1rem 2rem', marginBottom: '1.5rem',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
-          background: arqueo ? 'var(--color-gold)' : 'var(--color-rim-l)',
-          color: arqueo ? 'var(--color-bg)' : 'var(--color-ink-ghost)',
-          border: 'none', fontFamily: 'var(--font-body)', fontSize: '.78rem',
-          fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase',
-          cursor: arqueo ? 'pointer' : 'not-allowed',
-        }}
+        style={{ ...btnPrimario('lg', !arqueo), width: '100%', marginBottom: '1.5rem' }}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -147,7 +153,9 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
       </button>
 
       {/* ── Filtros ── */}
-      <div style={{ display: 'flex', gap: '.4rem', overflowX: 'auto', marginBottom: '1rem', paddingBottom: '.15rem' }}>
+      {/* Grid de 3 columnas iguales para que ocupen todo el ancho — con flex
+          quedaba un hueco a la derecha. */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.4rem', marginBottom: '1rem' }}>
         {([
           ['todos', `Todos (${filas.length})`],
           ['por-cobrar', `Por cobrar (${nPendientes})`],
@@ -156,13 +164,9 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           const on = id === filtro
           return (
             <button key={id} onClick={() => setFiltro(id)} style={{
-              padding: '.45rem .9rem', whiteSpace: 'nowrap',
-              background: on ? 'var(--color-gold-glow)' : 'none',
-              border: `1px solid ${on ? 'var(--color-gold)' : 'var(--color-rim-l)'}`,
-              color: on ? 'var(--color-gold)' : 'var(--color-ink-dim)',
-              fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 500,
-              letterSpacing: '.1em', textTransform: 'uppercase',
-              cursor: 'pointer', transition: 'all .2s',
+              // Deja envolver: "Por cobrar (2)" no entra en una línea a 375px
+              ...chip(on), padding: '.5rem .35rem', fontSize: '.64rem',
+              letterSpacing: '.05em', whiteSpace: 'normal', lineHeight: 1.25,
             }}>{label}</button>
           )
         })}
@@ -221,7 +225,7 @@ function Tile({ label, valor, unidad, pie, destacado }: {
   label: string; valor: string; unidad: string; pie: string; destacado?: boolean
 }) {
   return (
-    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '.85rem 1rem' }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', padding: '.85rem 1rem' }}>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: '.62rem', fontWeight: 500, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
         {label}
       </p>
@@ -236,53 +240,90 @@ function Tile({ label, valor, unidad, pie, destacado }: {
 
 function FilaCard({ fila, barbero, onCobrar }: { fila: Fila; barbero: string; onCobrar: () => void }) {
   const pendiente = fila.tipo === 'pendiente'
+  const Icono = pendiente ? Clock : Check
+  const acento = pendiente ? 'var(--color-gold)' : 'var(--color-ink-ghost)'
 
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: '1rem',
-      padding: '.85rem 1rem',
+      display: 'flex', gap: '.85rem',
+      padding: '.95rem 1rem',
       background: 'var(--color-surface)',
       border: '1px solid var(--color-rim)',
-      borderLeft: `2px solid ${pendiente ? 'var(--color-gold)' : 'var(--color-rim)'}`,
-      flexWrap: 'wrap',
+      // Riel más grueso en las pendientes: es lo que hay que mirar primero
+      borderLeft: `3px solid ${pendiente ? 'var(--color-gold)' : 'var(--color-rim)'}`,
     }}>
-      <div style={{ flex: 1, minWidth: '10rem' }}>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '.9rem', fontWeight: 500, color: 'var(--color-ink)' }}>
-          {fila.cliente}
-        </p>
-        <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>
-          {fila.servicio || '—'}
-        </p>
-        <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>
-          {barbero} · {fila.hora}
-        </p>
+      {/* Placa del icono */}
+      <div style={{
+        width: '2.6rem', height: '2.6rem', flexShrink: 0,
+        background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+        borderRadius: 'var(--r-md)',
+        display: 'grid', placeItems: 'center', color: acento,
+      }}>
+        <Icono size={18} />
       </div>
 
-      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        {!pendiente && (
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
-            {bs(Number(fila.venta.total))}
-          </p>
-        )}
-        <p style={{ fontSize: '.68rem', marginTop: '.15rem', color: pendiente ? 'var(--color-gold)' : 'var(--color-ink-ghost)' }}>
-          {pendiente
-            ? 'Por cobrar'
-            : `${METODO_LABEL[fila.venta.metodo_pago] ?? fila.venta.metodo_pago}${Number(fila.venta.propina) > 0 ? ` · propina ${bs(Number(fila.venta.propina))}` : ''}`}
-        </p>
-      </div>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '.65rem' }}>
+        {/* Nombre y monto */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '.75rem', alignItems: 'flex-start' }}>
+          <div style={{ minWidth: 0 }}>
+            <p style={{
+              fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 400,
+              color: 'var(--color-ink)', lineHeight: 1.1,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>{fila.cliente}</p>
+            <p style={{ fontSize: '.78rem', color: 'var(--color-ink-dim)', lineHeight: 1.4, marginTop: '.1rem' }}>
+              {fila.servicio || '—'}
+            </p>
+          </div>
 
-      {pendiente && (
-        <button
-          onClick={onCobrar}
-          style={{
-            padding: '.45rem .9rem', flexShrink: 0,
-            background: 'var(--color-gold-glow)', border: '1px solid var(--color-gold)',
-            color: 'var(--color-gold)', fontFamily: 'var(--font-body)', fontSize: '.68rem',
-            fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase',
-            cursor: 'pointer', transition: 'all .2s',
-          }}
-        >Cobrar</button>
-      )}
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            {!pendiente && (
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400,
+                color: 'var(--color-ink)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums',
+              }}>{bs(Number(fila.venta.total))}</p>
+            )}
+            <p style={{
+              display: 'inline-flex', alignItems: 'center', gap: '.35rem',
+              marginTop: pendiente ? 0 : '.15rem',
+              fontSize: '.66rem', fontWeight: 600, letterSpacing: '.1em',
+              textTransform: 'uppercase', color: acento,
+            }}>
+              <span style={{ width: '.4rem', height: '.4rem', borderRadius: '50%', background: acento, flexShrink: 0 }} />
+              {pendiente ? 'Por cobrar' : 'Pagado'}
+            </p>
+          </div>
+        </div>
+
+        {/* Barbero y acción */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '.35rem', minWidth: 0,
+            fontSize: '.74rem', color: 'var(--color-ink-ghost)',
+          }}>
+            <Scissors size={13} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {barbero} · {fila.hora}
+            </span>
+          </span>
+
+          {pendiente ? (
+            <button onClick={onCobrar} style={{ ...btnPrimario('sm'), flexShrink: 0 }}>
+              Cobrar ahora
+            </button>
+          ) : (
+            <span style={{
+              padding: '.3rem .6rem', flexShrink: 0,
+              background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+              borderRadius: 'var(--r-sm)',
+              fontSize: '.66rem', color: 'var(--color-ink-dim)',
+            }}>
+              {METODO_LABEL[fila.venta.metodo_pago] ?? fila.venta.metodo_pago}
+              {Number(fila.venta.propina) > 0 && ` · propina ${bs(Number(fila.venta.propina))}`}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -293,7 +334,7 @@ function Vacio({ filtro }: { filtro: Filtro }) {
     : filtro === 'cobrados' ? 'Todavía no se cobró nada hoy.'
     : 'No hay citas ni cobros hoy.'
   return (
-    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '2.5rem 1.5rem', textAlign: 'center' }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', padding: '2.5rem 1.5rem', textAlign: 'center' }}>
       <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '.95rem', color: 'var(--color-ink-ghost)' }}>{msg}</p>
     </div>
   )

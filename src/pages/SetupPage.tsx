@@ -9,6 +9,7 @@ import { getWebcalUrl, getGoogleCalendarUrl } from '../lib/calendar'
 import { subscribeToPush, getPushStatus, getScheduleSettings, saveAllowCancel, savePaymentSettings, uploadQrImage, saveStaffHidden, getHiddenStaffIds, saveScheduleLocked, getScheduleLockedMap } from '../lib/supabase'
 import type { StaffMember } from '../types/professional'
 import { useHideOnScroll, useAltura, useEsMobile } from '../lib/useHideOnScroll'
+import { btnPrimario, btnFantasma } from '../lib/panelUI'
 
 type Section = 'citas' | 'schedule' | 'config' | 'profesionales'
 type CalTab  = 'iphone'   | 'google'  | 'outlook'
@@ -199,7 +200,7 @@ export default function SetupPage() {
   }
 
   return (
-    <div style={{ height: '100dvh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden', colorScheme: 'inherit', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
+    <div className="panel-shell" style={{ height: '100dvh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden', colorScheme: 'inherit', '--font-display': "'Bebas Neue', serif", '--font-body': "'Inter', sans-serif" } as CSSProperties}>
 
       {/* ── Sticky header ── */}
       {/* Sin position:sticky a propósito: el contenedor raíz es 100dvh con
@@ -286,7 +287,7 @@ export default function SetupPage() {
                     const locked = staffLocked[s.businessId] ?? true
                     const saving = staffHiddenSaving === s.businessId
                     return (
-                      <div key={s.businessId} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '.85rem 1rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: saving ? 0.6 : 1, transition: 'opacity .2s' }}>
+                      <div key={s.businessId} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '.85rem 1rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', opacity: saving ? 0.6 : 1, transition: 'opacity .2s' }}>
                         {s.photo && <img src={s.photo} alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: '50%', flexShrink: 0, border: '1px solid var(--color-rim-l)' }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontFamily: 'var(--font-body)', fontSize: '.9rem', fontWeight: 500, color: 'var(--color-ink)' }}>{s.name}</p>
@@ -347,7 +348,7 @@ export default function SetupPage() {
                     </div>
                   </div>
                   {/* Candado: permitir que el profesional edite su propio horario */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', padding: '1rem 1.25rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', opacity: lockSaving ? 0.6 : 1, transition: 'opacity .2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', padding: '1rem 1.25rem', background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', opacity: lockSaving ? 0.6 : 1, transition: 'opacity .2s' }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ fontFamily: 'var(--font-body)', fontSize: '.85rem', fontWeight: 500, color: 'var(--color-ink)' }}>Permitir que el profesional edite su horario</p>
                       <p style={{ fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem' }}>
@@ -423,7 +424,7 @@ export default function SetupPage() {
 
                 {pushStatus !== 'active' && pushStatus !== 'unsupported' && (
                   <button onClick={handleSubscribe} disabled={pushWorking}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '1rem 2rem', background: pushWorking ? 'var(--color-rim-l)' : 'var(--color-gold)', color: pushWorking ? 'var(--color-ink-ghost)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: pushWorking ? 'not-allowed' : 'pointer', transition: 'background .3s', alignSelf: 'flex-start', borderRadius: '4px' }}
+                    style={{ ...btnPrimario('lg', pushWorking), alignSelf: 'flex-start' }}
                     onMouseEnter={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold-l)' }}
                     onMouseLeave={e => { if (!pushWorking) e.currentTarget.style.background = 'var(--color-gold)' }}
                   >
@@ -433,7 +434,7 @@ export default function SetupPage() {
 
                 {pushStatus === 'active' && (
                   <button onClick={handleUnsubscribe} disabled={pushWorking}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '.6rem', padding: '.8rem 2rem', background: 'none', border: '1px solid var(--color-rim-l)', color: pushWorking ? 'var(--color-ink-ghost)' : 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 300, letterSpacing: '.12em', textTransform: 'uppercase', cursor: pushWorking ? 'not-allowed' : 'pointer', transition: 'all .3s', alignSelf: 'flex-start' }}
+                    style={{ ...btnFantasma('md'), alignSelf: 'flex-start', cursor: pushWorking ? 'not-allowed' : 'pointer' }}
                     onMouseEnter={e => { if (!pushWorking) { e.currentTarget.style.color = '#c47070'; e.currentTarget.style.borderColor = '#c47070' } }}
                     onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-ink-dim)'; e.currentTarget.style.borderColor = 'var(--color-rim-l)' }}
                   >
@@ -525,7 +526,7 @@ export default function SetupPage() {
                           <img src={qrImageUrl} alt="QR de cobro" style={{ width: '8rem', height: '8rem', objectFit: 'contain', border: '1px solid var(--color-rim)', background: '#fff', padding: '.5rem' }} />
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                             <button onClick={() => qrFileRef.current?.click()} disabled={qrUploading}
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', padding: '.65rem 1.25rem', background: 'none', border: '1px solid var(--color-rim-l)', color: 'var(--color-ink-dim)', fontFamily: 'var(--font-body)', fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer' }}
+                              style={btnFantasma('md')}
                             >
                               <Upload size={13} /> {qrUploading ? 'Subiendo…' : 'Cambiar imagen'}
                             </button>
@@ -676,7 +677,7 @@ function MagicLinkPanel() {
   }
 
   if (!feedUrl) return (
-    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', padding: '1.5rem' }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', padding: '1.5rem' }}>
       <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--color-ink-ghost)', fontSize: '.9rem' }}>
         <AlertTriangle size={14} style={{ verticalAlign: '-2px' }} /> Configura <code style={{ background: 'var(--color-surface2)', padding: '.1rem .4rem', color: 'var(--color-gold)', fontSize: '.8rem' }}>calendarFeedUrl</code> en{' '}
         <code style={{ background: 'var(--color-surface2)', padding: '.1rem .4rem', fontSize: '.8rem' }}>src/data/professionals.ts</code>
@@ -715,7 +716,10 @@ function MagicLinkPanel() {
             {feedUrl}
           </div>
           <button onClick={copy}
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.4rem', padding: '1rem 1.5rem', background: copied ? 'var(--color-surface2)' : 'var(--color-gold)', color: copied ? 'var(--color-ink-dim)' : 'var(--color-bg)', fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 600, letterSpacing: '.15em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', transition: 'background .3s', flexShrink: 0, borderRadius: '4px' }}>
+            style={{
+              ...btnPrimario('lg'), flexShrink: 0,
+              ...(copied ? { background: 'var(--color-surface2)', color: 'var(--color-ink-dim)', borderColor: 'var(--color-rim-l)' } : null),
+            }}>
             {copied ? <><Check size={14} /> Copiado</> : 'Copiar'}
           </button>
         </div>
