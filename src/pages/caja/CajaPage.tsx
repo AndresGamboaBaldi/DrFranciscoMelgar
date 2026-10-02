@@ -8,6 +8,7 @@ import CajaGuard from '../../components/caja/CajaGuard'
 import { signOut, type PosUsuario } from '../../lib/pos/auth'
 import TabCobros from './TabCobros'
 import TabComisiones from './TabComisiones'
+import TabReportes from './TabReportes'
 import TabConfig from './TabConfig'
 import type { Professional } from '../../types/professional'
 
@@ -151,6 +152,7 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
           {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} />
             : activa === 'comisiones' ? <TabComisiones pro={pro} usuario={usuario} />
+            : activa === 'reportes' ? <TabReportes pro={pro} />
             : activa === 'config' ? <TabConfig pro={pro} />
             : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
         </div>
