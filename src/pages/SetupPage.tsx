@@ -496,8 +496,8 @@ export default function SetupPage() {
                     </div>
                   </label>
 
-                  {requirePayment && (<>
-                    {/* Percentage */}
+                  {/* El porcentaje solo tiene sentido con el cobro anticipado */}
+                  {requirePayment && (
                     <div>
                       <p style={{ fontSize: '.8rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', marginBottom: '.75rem' }}>Porcentaje a cobrar</p>
                       <div style={{ display: 'flex', gap: '.5rem' }}>
@@ -516,9 +516,11 @@ export default function SetupPage() {
                         ))}
                       </div>
                     </div>
+                  )}
 
-                    {/* QR Upload */}
-                    <div>
+                  {/* El QR también lo usa la caja para cobrar en el mostrador,
+                      así que no depende del cobro anticipado: siempre se sube. */}
+                  <div>
                       <p style={{ fontSize: '.8rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)', marginBottom: '.75rem' }}>Imagen de tu QR</p>
                       <input ref={qrFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleQrFileChange} />
                       {qrImageUrl ? (
@@ -547,8 +549,7 @@ export default function SetupPage() {
                       )}
                     </div>
 
-                    {qrSaving && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)' }}>Guardando…</p>}
-                  </>)}
+                  {qrSaving && <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)' }}>Guardando…</p>}
                 </div>
               </Panel>
 

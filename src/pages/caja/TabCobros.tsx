@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { getAppointmentsByDate } from '../../lib/supabase'
+import { getAppointmentsByDate, getScheduleSettings } from '../../lib/supabase'
 import type { Appointment } from '../../types/booking'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
@@ -45,22 +45,26 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [ventas, setVentas] = useState<Venta[]>([])
   const [totalAyer, setTotalAyer] = useState(0)
   const [arqueo, setArqueo] = useState<Arqueo | null>(null)
+  // El mismo QR que ya usa el flujo de pago de reservas; se sube desde Setup → Pagos
+  const [qrUrl, setQrUrl] = useState<string | null>(null)
   const [cargando, setCargando] = useState(true)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
 
   const cargar = useCallback(async () => {
     const hoy = hoyISO()
-    const [cs, vs, ayer, arq] = await Promise.all([
+    const [cs, vs, ayer, arq, cfg] = await Promise.all([
       getAppointmentsByDate(businessIds, hoy),
       getVentasDelDia(pro.businessId, hoy),
       getTotalDelDia(pro.businessId, ayerISO()),
       getOAbrirArqueo(pro.businessId, usuario.user_id),
+      getScheduleSettings(pro.businessId),
     ])
     setCitas(cs)
     setVentas(vs)
     setTotalAyer(ayer)
     setArqueo(arq)
+    setQrUrl(cfg?.qr_image_url ?? null)
     setCargando(false)
   }, [businessIds, pro.businessId, usuario.user_id])
 
@@ -210,6 +214,8 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           userId={usuario.user_id}
           barberos={barberos}
           servicios={pro.services}
+          qrUrl={qrUrl}
+          slug={pro.slug}
           prefill={prefill}
           onCerrar={() => setPrefill(null)}
           onCobrado={() => { setPrefill(null); cargar() }}
