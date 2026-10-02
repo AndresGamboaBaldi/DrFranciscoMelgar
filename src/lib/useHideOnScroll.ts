@@ -8,13 +8,6 @@ const ZONA_TOPE = 60
 const DELTA_MIN = 6
 /** Cerca del final siempre se muestran: ahí ya llegaste y conviene ver la navegación. */
 const ZONA_FONDO = 72
-/**
- * Al cambiar de estado, las barras colapsan y el contenedor crece. Eso recorta
- * scrollTop y dispara un scroll que NO hizo el usuario. Sin esta pausa, ese
- * evento se lee como movimiento contrario y las barras oscilan sin parar.
- * Tiene que cubrir la transición de 250ms.
- */
-const PAUSA_MS = 320
 
 export function useEsMobile(maxWidth = 767): boolean {
   const [esMobile, setEsMobile] = useState(
@@ -41,7 +34,6 @@ export function useEsMobile(maxWidth = 767): boolean {
 export function useHideOnScroll(scrollRef: RefObject<HTMLElement | null>, activo: boolean) {
   const [oculto, setOculto] = useState(false)
   const ultimoY = useRef(0)
-  const pausaHasta = useRef(0)
 
   useEffect(() => {
     if (!activo) { setOculto(false); return }
@@ -51,39 +43,26 @@ export function useHideOnScroll(scrollRef: RefObject<HTMLElement | null>, activo
     ultimoY.current = el.scrollTop
     let pendiente = false
 
-    const aplicar = (nuevo: boolean, y: number) => {
-      ultimoY.current = y
-      setOculto(prev => {
-        if (prev !== nuevo) pausaHasta.current = Date.now() + PAUSA_MS
-        return nuevo
-      })
-    }
-
     const onScroll = () => {
       if (pendiente) return
       pendiente = true
       requestAnimationFrame(() => {
         pendiente = false
         const y = el.scrollTop
-
-        // Mientras el layout se reacomoda, los eventos no los generó el usuario.
-        // Resincronizamos la referencia y no tocamos el estado.
-        if (Date.now() < pausaHasta.current) {
-          ultimoY.current = y
-          return
-        }
+        const aplicar = (v: boolean) => { ultimoY.current = y; setOculto(v) }
 
         // Poco para scrollear: la navegación se queda.
-        if (el.scrollHeight - el.clientHeight < MIN_DESBORDE) return aplicar(false, y)
+        if (el.scrollHeight - el.clientHeight < MIN_DESBORDE) return aplicar(false)
         // Arriba del todo, siempre visible.
-        if (y <= ZONA_TOPE) return aplicar(false, y)
-        // Al final también: si no, al crecer el contenedor el scroll se recorta
-        // y arranca la oscilación justo donde está la última tarjeta.
-        if (el.scrollHeight - (y + el.clientHeight) <= ZONA_FONDO) return aplicar(false, y)
+        if (y <= ZONA_TOPE) return aplicar(false)
+        // Al final también: ahí ya llegaste y conviene tener la navegación.
+        // Esta comparación es estable porque las barras flotan: ocultarlas no
+        // cambia clientHeight, así que mostrarlas no invalida la condición.
+        if (el.scrollHeight - (y + el.clientHeight) <= ZONA_FONDO) return aplicar(false)
 
         const delta = y - ultimoY.current
         if (Math.abs(delta) < DELTA_MIN) return
-        aplicar(delta > 0, y)
+        aplicar(delta > 0)
       })
     }
 

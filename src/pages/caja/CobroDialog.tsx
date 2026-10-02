@@ -90,11 +90,14 @@ export default function CobroDialog({
 
   // Al revelarse, el campo de propina libre nace fuera de vista. Lo acercamos
   // en vez de obligar a scrollear. 'nearest' mueve lo mínimo necesario.
+  //
+  // Sin 'smooth' a propósito: una animación de ~300ms mueve los botones debajo
+  // del dedo entre el toque y el clic, y terminás activando el de al lado.
   const propinaRef = useRef<HTMLInputElement | null>(null)
   useEffect(() => {
     if (!propinaLibre) return
     const id = requestAnimationFrame(() => {
-      propinaRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      propinaRef.current?.scrollIntoView({ block: 'nearest' })
     })
     return () => cancelAnimationFrame(id)
   }, [propinaLibre])
@@ -168,7 +171,13 @@ export default function CobroDialog({
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: '26rem', maxHeight: '94dvh',
+          width: '100%', maxWidth: '26rem',
+          // Alto FIJO, no maxHeight: el diálogo está centrado, así que si crece
+          // o se encoge se desplaza media diferencia. Eso movía los botones
+          // entre el toque y el clic — al colapsar la lista de servicios o al
+          // aparecer el botón de QR — y terminabas activando el de arriba.
+          // Con alto fijo, todo cambio lo absorbe el área que scrollea.
+          height: 'min(94dvh, 42rem)',
           background: 'var(--color-bg)', border: '1px solid var(--color-rim)',
           borderRadius: 'var(--r-xl)', overflow: 'hidden',
           display: 'flex', flexDirection: 'column',
@@ -199,7 +208,9 @@ export default function CobroDialog({
           }}><X size={16} /></button>
         </header>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '1.4rem' }}>
+        {/* minHeight:0 es necesario: el mínimo por defecto de un flex item es
+            el de su contenido, y sin esto el área desborda en vez de scrollear. */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '1.4rem' }}>
 
           {/* ── Barbero ── */}
           {barberos.length > 0 && (
@@ -307,20 +318,16 @@ export default function CobroDialog({
                   </p>
                 </button>
 
-                <div style={{ display: 'flex', gap: '.25rem', flexShrink: 0 }}>
-                  {servicioSel && (
-                    <button
-                      onClick={() => { setServicioId(''); setServicioPrecio(0); setEligiendo(false) }}
-                      aria-label="Quitar servicio" title="Quitar servicio"
-                      style={{ ...btnIcono, color: 'var(--color-ink-ghost)' }}
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
-                  <button onClick={() => setEligiendo(v => !v)} aria-label="Cambiar servicio" style={btnIcono}>
-                    <ChevronDown size={14} style={{ transform: eligiendo ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+                {/* Sin chevron: tocar la fila ya abre y cierra la lista. */}
+                {servicioSel && (
+                  <button
+                    onClick={() => { setServicioId(''); setServicioPrecio(0); setEligiendo(false) }}
+                    aria-label="Quitar servicio" title="Quitar servicio"
+                    style={{ ...btnIcono, color: 'var(--color-ink-ghost)' }}
+                  >
+                    <X size={14} />
                   </button>
-                </div>
+                )}
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '.25rem', flexShrink: 0 }}>
                   <span style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)' }}>Bs</span>
@@ -500,12 +507,13 @@ export default function CobroDialog({
               <QrCode size={15} /> Mostrar QR al cliente
             </button>
           )}
-          {propina > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginBottom: '.3rem' }}>
-              <span>Servicios {bs(subtotal)}</span>
-              <span>Propina + {bs(propina)}</span>
-            </div>
-          )}
+          {/* Siempre presente, aunque la propina sea 0: si apareciera al elegir
+              propina, el pie crecería y empujaría los botones de arriba justo
+              mientras los estás tocando. */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginBottom: '.3rem', minHeight: '1.1rem' }}>
+            <span>Servicios {bs(subtotal)}</span>
+            <span>{propina > 0 ? `Propina + ${bs(propina)}` : ''}</span>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.85rem' }}>
             <span style={{ fontSize: '.66rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
               Total a cobrar

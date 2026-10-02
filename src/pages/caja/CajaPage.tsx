@@ -75,12 +75,11 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
   const altoTabbar = useAltura(tabbarRef)
 
   return (
-    <div className="panel-shell" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="panel-shell" style={{ position: 'relative', height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Cabecera ── */}
-      {/* Sin position:sticky a propósito: el contenedor raíz es 100dvh con
-          overflow hidden, así que la cabecera ya es un flex item fijo. Con
-          sticky, el margen negativo que la esconde al scrollear no surte efecto. */}
+      {/* En mobile FLOTA sobre el contenido. Si colapsara, cambiaría el
+          clientHeight del área que scrollea y realimentaría al detector. */}
       <header ref={headerRef} style={{
         zIndex: 50,
         background: 'var(--color-nav-scrolled, var(--color-surface))',
@@ -88,8 +87,11 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
         borderBottom: '1px solid var(--color-rim)',
         padding: '.85rem clamp(1rem, 4vw, 2.5rem)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
-        marginTop: barrasOcultas ? -altoHeader : 0,
-        transition: 'margin-top .25s ease',
+        ...(esMobile ? {
+          position: 'absolute' as const, top: 0, left: 0, right: 0,
+          transform: barrasOcultas ? 'translateY(-100%)' : 'none',
+          transition: 'transform .25s ease',
+        } : null),
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
           <a href={`/${pro.slug}`} aria-label="Volver a la página"
@@ -160,7 +162,14 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
       </div>
 
       {/* ── Contenido ── */}
-      <main ref={mainRef} className="panel-main-mobile-pad" style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
+      <main ref={mainRef} className="panel-main-mobile-pad" style={{
+        flex: 1, minHeight: 0, overflowY: 'auto',
+        padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)',
+        ...(esMobile ? {
+          paddingTop: altoHeader + 20,
+          paddingBottom: altoTabbar + 20,
+        } : null),
+      }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
           {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} />
             : activa === 'config' ? <TabConfig pro={pro} />
@@ -172,7 +181,11 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
       <nav
         className="panel-tabbar-bottom"
         ref={tabbarRef}
-        style={{ marginBottom: barrasOcultas ? -altoTabbar : 0, transition: 'margin-bottom .25s ease' }}
+        style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 50,
+          transform: barrasOcultas ? 'translateY(100%)' : 'none',
+          transition: 'transform .25s ease',
+        }}
       >
         {visibles.map(p => {
           const active = p.id === activa
