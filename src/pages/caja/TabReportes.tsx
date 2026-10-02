@@ -195,11 +195,6 @@ export default function TabReportes({ pro }: { pro: Professional }) {
             )
           })}
         </div>
-        {rep.propinas > 0 && (
-          <p style={{ fontSize: '.66rem', color: 'var(--color-ink-ghost)', marginTop: '.5rem', lineHeight: 1.5 }}>
-            Sin contar {bs(rep.propinas)} de propinas, que van enteras a los barberos.
-          </p>
-        )}
       </div>
 
       {/* ── Resultado ── */}
@@ -213,11 +208,11 @@ export default function TabReportes({ pro }: { pro: Professional }) {
           resaltado
         />
         <Tile
-          icono={Scissors} label="Comisiones"
-          valor={`Bs. ${bsCorto(rep.comisiones)}`}
+          icono={Scissors} label="Comisiones + propinas"
+          valor={`Bs. ${bsCorto(rep.comisionesMasPropinas)}`}
           // Sin esta aclaración no se entiende por qué no coincide con el
           // "a pagar" de la pestaña Comisiones, que sí incluye las propinas.
-          pie={`${barberoIds.length} ${barberoIds.length === 1 ? 'barbero' : 'barberos'} · no incluye propinas`}
+          pie={`${barberoIds.length} ${barberoIds.length === 1 ? 'barbero' : 'barberos'}`}
           pieAcento resaltado
         />
         <Tile
@@ -239,7 +234,7 @@ export default function TabReportes({ pro }: { pro: Professional }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
             {rep.porServicio.slice(0, 6).map(s => {
-              const pct = rep.facturado > 0 ? (s.total / rep.facturado) * 100 : 0
+              const pct = rep.facturadoServicios > 0 ? (s.total / rep.facturadoServicios) * 100 : 0
               return (
                 <div key={s.nombre}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '.75rem', fontSize: '.76rem', marginBottom: '.3rem' }}>

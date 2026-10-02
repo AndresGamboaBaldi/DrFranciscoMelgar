@@ -14,12 +14,17 @@ export interface TopBarbero {
 }
 
 export interface Reporte {
-  /** Lo que factura el local: servicios, sin propinas. */
+  /** Bruto que entró: servicios + propinas. */
   facturado: number
-  /** Pasan enteras al barbero, no son ingreso del local. */
+  /** Solo servicios. Base de las comisiones y del desglose por servicio. */
+  facturadoServicios: number
+  /** Pasan enteras al barbero; salen dentro de comisionesMasPropinas. */
   propinas: number
   nVentas: number
+  /** Porcentaje aplicado a los servicios. */
   comisiones: number
+  /** Bruto que se lleva el staff: comisiones + propinas. */
+  comisionesMasPropinas: number
   /** Operativos. Excluye adelantos: esos se descuentan de la comisión, no son gasto. */
   gastos: number
   neto: number
@@ -104,9 +109,10 @@ export async function getReporte(
     getPorcentajes(businessId),
   ])
 
-  const facturado = ventas.reduce((s, v) => s + Number(v.subtotal), 0)
+  const facturadoServicios = ventas.reduce((s, v) => s + Number(v.subtotal), 0)
   const propinas = ventas.reduce((s, v) => s + Number(v.propina), 0)
-  const facturadoPrevio = ventasPrevias.reduce((s, v) => s + Number(v.subtotal), 0)
+  const facturado = facturadoServicios + propinas
+  const facturadoPrevio = ventasPrevias.reduce((s, v) => s + Number(v.subtotal) + Number(v.propina), 0)
   const gastos = ((gastosRes.data ?? []) as { monto: number }[]).reduce((s, g) => s + Number(g.monto), 0)
 
   // Por barbero
@@ -141,15 +147,23 @@ export async function getReporte(
 
   // Siempre los tres métodos, aunque alguno esté en cero: una forma de cobro
   // que desaparece de la vista se lee como si no existiera.
+  // Suman el bruto, propinas incluidas, para cuadrar con el titular.
   const porMetodo: TotalPorMetodo[] = (['efectivo', 'qr', 'tarjeta'] as MetodoPago[]).map(m => {
     const suyas = ventas.filter(v => v.metodo_pago === m)
-    return { metodo: m, total: suyas.reduce((s, v) => s + Number(v.subtotal), 0), n: suyas.length }
+    return {
+      metodo: m,
+      total: suyas.reduce((s, v) => s + Number(v.subtotal) + Number(v.propina), 0),
+      n: suyas.length,
+    }
   })
 
+  const comisionesMasPropinas = comisiones + propinas
+
   return {
-    facturado, propinas, nVentas: ventas.length,
-    comisiones, gastos,
-    neto: facturado - comisiones - gastos,
+    facturado, facturadoServicios, propinas, nVentas: ventas.length,
+    comisiones, comisionesMasPropinas, gastos,
+    // Las propinas entran y salen: el neto no cambia por contarlas en el bruto.
+    neto: facturado - comisionesMasPropinas - gastos,
     facturadoPrevio, porMetodo, porServicio, topBarberos,
   }
 }

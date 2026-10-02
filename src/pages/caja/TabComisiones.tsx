@@ -10,10 +10,10 @@ import { bs, bsCorto } from './cajaTheme'
 import { getNombresUsuarios } from '../../lib/pos/cobros'
 import { btnPrimario, chip } from '../../lib/panelUI'
 
-type Rango = 'hoy' | 'semana' | 'mes'
+/** Sin "hoy": una comisión se liquida por ciclo de pago, no día por día. */
+type Rango = 'semana' | 'mes'
 
 const RANGOS: { id: Rango; label: string }[] = [
-  { id: 'hoy',    label: 'Hoy' },
   { id: 'semana', label: 'Esta semana' },
   { id: 'mes',    label: 'Este mes' },
 ]
@@ -25,7 +25,7 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
     [barberos, pro.businessId],
   )
 
-  const [rango, setRango] = useState<Rango>('hoy')
+  const [rango, setRango] = useState<Rango>('semana')
   const periodo: Periodo = useMemo(() => calcularPeriodo(rango), [rango])
 
   const [resumen, setResumen] = useState<ResumenBarbero[]>([])
@@ -57,11 +57,11 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
   // ── Totales del período ──
   const facturado = resumen.reduce((s, r) => s + r.facturado, 0)
   const comisiones = resumen.reduce((s, r) => s + r.comision, 0)
-  const paraElSalon = facturado - comisiones
-  const splitStaff = facturado > 0 ? (comisiones / facturado) * 100 : 0
   const totalPropinas = resumen.reduce((s, r) => s + r.propinas, 0)
-  const totalAdelantos = resumen.reduce((s, r) => s + r.adelantos, 0)
-  const totalYaLiquidado = resumen.reduce((s, r) => s + r.yaLiquidado, 0)
+  // Bruto que se lleva el staff: la comisión sobre servicios más las propinas.
+  const comisionesMasPropinas = comisiones + totalPropinas
+  const paraElSalon = facturado - comisionesMasPropinas
+  const splitStaff = facturado > 0 ? (comisionesMasPropinas / facturado) * 100 : 0
   // Lo que falta entregar. Un barbero sobrepagado no resta de los demás:
   // su saldo negativo es un asunto suyo, no un descuento del resto.
   const totalAPagar = resumen.reduce((s, r) => s + Math.max(r.aPagar, 0), 0)
@@ -115,7 +115,7 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
       </div>
 
       {/* ── Período ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.4rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.4rem', marginBottom: '1rem' }}>
         {RANGOS.map(r => (
           <button key={r.id} onClick={() => setRango(r.id)} style={{
             ...chip(r.id === rango), padding: '.55rem .35rem', fontSize: '.66rem',
@@ -132,11 +132,11 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '.62rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-              Total comisiones
+              Total comisiones + propinas
             </p>
             <p style={{ display: 'flex', alignItems: 'baseline', gap: '.3rem', marginTop: '.25rem' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 400, lineHeight: 1, color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums' }}>
-                {bsCorto(comisiones)}
+                {bsCorto(comisionesMasPropinas)}
               </span>
               <span style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)' }}>Bs</span>
             </p>
@@ -158,30 +158,21 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.45rem', fontSize: '.68rem' }}>
               <span style={{ color: 'var(--color-gold)' }}>
-                Barberos {splitStaff.toFixed(0)}% · {bs(comisiones)}
+                Barberos {splitStaff.toFixed(0)}% · {bs(comisionesMasPropinas)}
               </span>
               <span style={{ color: 'var(--color-ink-ghost)' }}>
                 Local {(100 - splitStaff).toFixed(0)}% · {bs(paraElSalon)}
               </span>
             </div>
-            {/* El total a pagar casi nunca coincide con las comisiones, y sin
-                mostrar la cuenta parece un error. Acá queda a la vista. */}
             <div style={{ borderTop: '1px solid var(--color-rim)', marginTop: '.85rem', paddingTop: '.75rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.75rem' }}>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-                  Total a entregar
+                  Falta por entregar
                 </span>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                   {bs(totalAPagar)}
                 </span>
               </div>
-              <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.35rem', lineHeight: 1.5 }}>
-                {bs(comisiones)} de comisión
-                {totalPropinas > 0 && ` + ${bs(totalPropinas)} de propinas`}
-                {totalAdelantos > 0 && ` − ${bs(totalAdelantos)} en adelantos`}
-                {totalYaLiquidado > 0 && ` − ${bs(totalYaLiquidado)} ya pagados`}.
-                Las propinas no entran en el reparto.
-              </p>
             </div>
           </>
         )}
@@ -305,7 +296,7 @@ function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquid
       {/* Desglose */}
       {!sinActividad && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', paddingTop: '.65rem', borderTop: '1px solid var(--color-rim)' }}>
-          <Linea label={`Facturación servicios (${r.nServicios})`} valor={bs(r.facturado)} />
+          <Linea label={`Facturación servicios (${r.nServicios})`} valor={bs(r.baseComision)} />
           <Linea
             label={
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>

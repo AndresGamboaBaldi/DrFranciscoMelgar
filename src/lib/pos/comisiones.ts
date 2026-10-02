@@ -31,12 +31,16 @@ export interface Adelanto {
 export interface ResumenBarbero {
   barberoBusinessId: string
   nServicios: number
-  /** Solo servicios, sin propina: la comisión no se calcula sobre la propina. */
+  /** Bruto que movió: servicios + propinas. */
   facturado: number
-  /** Van enteras al barbero, no entran en el reparto. */
+  /** Solo servicios. Es la base sobre la que se aplica el porcentaje. */
+  baseComision: number
   propinas: number
   porcentaje: number
+  /** Porcentaje aplicado a los servicios. */
   comision: number
+  /** Lo que se lleva el barbero del bruto: comisión + propinas. */
+  comisionTotal: number
   adelantos: number
   detalleAdelantos: Adelanto[]
   /** comisión + propinas − adelantos, antes de descontar lo ya liquidado. */
@@ -139,24 +143,29 @@ export async function getResumen(
 
   return barberoIds.map(id => {
     const mias = ventas.filter(v => v.barbero_business_id === id)
-    const facturado = mias.reduce((s, v) => s + Number(v.subtotal), 0)
+    const baseComision = mias.reduce((s, v) => s + Number(v.subtotal), 0)
     const propinas = mias.reduce((s, v) => s + Number(v.propina), 0)
     const detalleAdelantos = gastos.filter(g => g.barbero_business_id === id)
     const adelantos = detalleAdelantos.reduce((s, g) => s + Number(g.monto), 0)
     const porcentaje = porcentajes[id] ?? PORCENTAJE_POR_DEFECTO
-    const comision = Math.round(facturado * porcentaje) / 100
+    // El porcentaje se aplica a los servicios, no a las propinas: esas van
+    // enteras al barbero y se suman aparte.
+    const comision = Math.round(baseComision * porcentaje) / 100
+    const comisionTotal = comision + propinas
 
     const suyas = liquidaciones.filter(l => l.barbero_business_id === id)
     const yaLiquidado = suyas.reduce((s, l) => s + Number(l.a_pagar), 0)
-    const aPagarBruto = comision + propinas - adelantos
+    const aPagarBruto = comisionTotal - adelantos
 
     return {
       barberoBusinessId: id,
       nServicios: mias.length,
-      facturado,
+      facturado: baseComision + propinas,
+      baseComision,
       propinas,
       porcentaje,
       comision,
+      comisionTotal,
       adelantos,
       detalleAdelantos,
       aPagarBruto,
@@ -224,7 +233,9 @@ export async function liquidar(
     barbero_business_id: r.barberoBusinessId,
     desde: periodo.desde,
     hasta: periodo.hasta,
-    producido: r.facturado,
+    // Se guarda la base de la comisión, no el bruto con propinas: es lo que
+    // explica el importe junto con el porcentaje.
+    producido: r.baseComision,
     porcentaje: r.porcentaje,
     comision: r.comision,
     adelantos: r.adelantos,
