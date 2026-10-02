@@ -19,8 +19,3 @@ export function bsCorto(monto: number): string {
   return monto.toLocaleString('es-BO', { maximumFractionDigits: 0 })
 }
 
-/** 'YYYY-MM-DD' de hoy en hora local (no UTC: a las 20:00 en Bolivia UTC ya es mañana). */
-export function hoyISO(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}

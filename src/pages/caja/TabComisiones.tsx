@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Check, Percent, Scissors } from 'lucide-react'
+import { Check, Percent, Scissors, Info, X } from 'lucide-react'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
 import {
   calcularPeriodo, getResumen, liquidar, guardarPorcentaje, YaLiquidadoError,
-  type ResumenBarbero, type Periodo,
+  type ResumenBarbero, type Periodo, type Liquidacion,
 } from '../../lib/pos/comisiones'
 import { bs, bsCorto } from './cajaTheme'
+import { getNombresUsuarios } from '../../lib/pos/cobros'
 import { btnPrimario, chip } from '../../lib/panelUI'
 
 type Rango = 'hoy' | 'semana' | 'mes'
@@ -32,10 +33,17 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
   const [fallo, setFallo] = useState(false)
   const [liquidando, setLiquidando] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [verAdelantos, setVerAdelantos] = useState<{ lista: Liquidacion[]; barbero: string } | null>(null)
+  const [nombres, setNombres] = useState<Record<string, string>>({})
 
   const cargar = useCallback(async () => {
     try {
-      setResumen(await getResumen(pro.businessId, periodo, barberoIds))
+      const [res, noms] = await Promise.all([
+        getResumen(pro.businessId, periodo, barberoIds),
+        getNombresUsuarios(pro.businessId),
+      ])
+      setResumen(res)
+      setNombres(noms)
       setFallo(false)
     } catch {
       setFallo(true)
@@ -53,7 +61,10 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
   const splitStaff = facturado > 0 ? (comisiones / facturado) * 100 : 0
   const totalPropinas = resumen.reduce((s, r) => s + r.propinas, 0)
   const totalAdelantos = resumen.reduce((s, r) => s + r.adelantos, 0)
-  const totalAPagar = resumen.reduce((s, r) => s + r.aPagar, 0)
+  const totalYaLiquidado = resumen.reduce((s, r) => s + r.yaLiquidado, 0)
+  // Lo que falta entregar. Un barbero sobrepagado no resta de los demás:
+  // su saldo negativo es un asunto suyo, no un descuento del resto.
+  const totalAPagar = resumen.reduce((s, r) => s + Math.max(r.aPagar, 0), 0)
 
   const onLiquidar = async (r: ResumenBarbero) => {
     setLiquidando(r.barberoBusinessId)
@@ -167,7 +178,8 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
               <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.35rem', lineHeight: 1.5 }}>
                 {bs(comisiones)} de comisión
                 {totalPropinas > 0 && ` + ${bs(totalPropinas)} de propinas`}
-                {totalAdelantos > 0 && ` − ${bs(totalAdelantos)} ya adelantados`}.
+                {totalAdelantos > 0 && ` − ${bs(totalAdelantos)} en adelantos`}
+                {totalYaLiquidado > 0 && ` − ${bs(totalYaLiquidado)} ya pagados`}.
                 Las propinas no entran en el reparto.
               </p>
             </div>
@@ -192,16 +204,30 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
               liquidando={liquidando === r.barberoBusinessId}
               onLiquidar={() => onLiquidar(r)}
               onPorcentaje={pct => cambiarPorcentaje(r.barberoBusinessId, pct)}
+              onVerAdelantos={() => setVerAdelantos({
+                lista: r.liquidaciones,
+                barbero: barberos.find(b => b.businessId === r.barberoBusinessId)?.shortName
+                  ?? pro.shortName ?? pro.name,
+              })}
             />
           ))}
       </div>
+
+      {verAdelantos && (
+        <DialogoAdelantos
+          liquidaciones={verAdelantos.lista}
+          nombres={nombres}
+          barbero={verAdelantos.barbero}
+          onCerrar={() => setVerAdelantos(null)}
+        />
+      )}
     </div>
   )
 }
 
 /* ── Tarjeta ──────────────────────────────────────────────── */
 
-function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquidar, onPorcentaje }: {
+function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquidar, onPorcentaje, onVerAdelantos }: {
   r: ResumenBarbero
   puesto: number
   staff: StaffMember | null
@@ -209,13 +235,16 @@ function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquid
   liquidando: boolean
   onLiquidar: () => void
   onPorcentaje: (pct: number) => Promise<void>
+  onVerAdelantos: () => void
 }) {
   const [editandoPct, setEditandoPct] = useState(false)
   const [pct, setPct] = useState(String(r.porcentaje))
   const [guardandoPct, setGuardandoPct] = useState(false)
 
-  const cerrada = !!r.liquidacion
-  const sinActividad = r.nServicios === 0
+  // "Cerrada" = no queda nada por entregar. Puede haberse liquidado en varios
+  // tramos (un día, luego otro) y verse acá dentro de la semana o el mes.
+  const cerrada = r.yaLiquidado > 0 && r.aPagar <= 0.004
+  const sinActividad = r.nServicios === 0 && r.adelantos === 0
 
   const guardarPct = async () => {
     const n = Number(pct)
@@ -268,7 +297,7 @@ function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquid
             {cerrada ? 'Pagado' : 'A pagar'}
           </p>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
-            {bs(cerrada ? Number(r.liquidacion!.a_pagar) : r.aPagar)}
+            {bs(cerrada ? r.yaLiquidado : r.aPagar)}
           </p>
         </div>
       </div>
@@ -307,16 +336,43 @@ function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquid
                       cursor: cerrada ? 'default' : 'pointer',
                     }}
                   >
-                    {cerrada ? Number(r.liquidacion!.porcentaje) : r.porcentaje}
+                    {r.porcentaje}
                     <Percent size={9} />
                   </button>
                 )}
               </span>
             }
-            valor={bs(cerrada ? Number(r.liquidacion!.comision) : r.comision)}
+            valor={bs(r.comision)}
           />
           {r.propinas > 0 && <Linea label="Propinas" valor={`+ ${bs(r.propinas)}`} destacado />}
-          {r.adelantos > 0 && <Linea label="Adelantos entregados" valor={`− ${bs(r.adelantos)}`} negativo />}
+          {r.adelantos > 0 && (
+            <Linea label="Adelantos en efectivo" valor={`− ${bs(r.adelantos)}`} negativo />
+          )}
+          {/* Lo ya pagado de un período más corto: liquidaste el día y la
+              semana todavía está abierta. Se descuenta de lo que falta.
+              Si ya está todo pago, la línea sobra: el detalle pasa al estado. */}
+          {r.yaLiquidado > 0 && !cerrada && (
+            <Linea
+              label={
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
+                  Ya adelantado
+                  <button
+                    onClick={onVerAdelantos}
+                    aria-label="Ver qué se pagó" title="Ver qué se pagó"
+                    style={{
+                      display: 'grid', placeItems: 'center', width: '1.1rem', height: '1.1rem',
+                      padding: 0, background: 'none', border: 'none', borderRadius: '50%',
+                      cursor: 'pointer', color: 'var(--color-ink-ghost)', flexShrink: 0,
+                    }}
+                  >
+                    <Info size={12} />
+                  </button>
+                </span>
+              }
+              valor={`− ${bs(r.yaLiquidado)}`}
+              negativo
+            />
+          )}
         </div>
       )}
 
@@ -328,7 +384,20 @@ function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquid
           color: cerrada ? 'var(--color-ink-ghost)' : sinActividad ? 'var(--color-ink-ghost)' : 'var(--color-gold)',
         }}>
           {cerrada ? (
-            <><Check size={12} /> Liquidado {new Date(r.liquidacion!.cerrada_at).toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit' })}</>
+            <>
+              <Check size={12} /> Liquidado
+              <button
+                onClick={onVerAdelantos}
+                aria-label="Ver qué se pagó" title="Ver qué se pagó"
+                style={{
+                  display: 'grid', placeItems: 'center', width: '1.1rem', height: '1.1rem',
+                  padding: 0, background: 'none', border: 'none', borderRadius: '50%',
+                  cursor: 'pointer', color: 'var(--color-ink-ghost)', flexShrink: 0,
+                }}
+              >
+                <Info size={12} />
+              </button>
+            </>
           ) : sinActividad ? 'Sin movimiento' : (
             <><span style={{ width: '.4rem', height: '.4rem', borderRadius: '50%', background: 'var(--color-gold)' }} /> Pendiente de pago</>
           )}
@@ -339,6 +408,97 @@ function TarjetaBarbero({ r, puesto, staff, nombreFallback, liquidando, onLiquid
             {liquidando ? 'Liquidando…' : 'Liquidar'}
           </button>
         )}
+      </div>
+    </div>
+  )
+}
+
+
+/** Lo ya pagado dentro del período: monto, fecha y quién lo liquidó. */
+function DialogoAdelantos({ liquidaciones, nombres, barbero, onCerrar }: {
+  liquidaciones: Liquidacion[]
+  nombres: Record<string, string>
+  barbero: string
+  onCerrar: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar() }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [onCerrar])
+
+  const total = liquidaciones.reduce((s, l) => s + Number(l.a_pagar), 0)
+
+  return (
+    <div
+      onClick={onCerrar}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.72)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: '23rem', maxHeight: '85dvh',
+          background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+          borderRadius: 'var(--r-xl)', overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
+        }}
+      >
+        <header style={{
+          padding: '1rem 1.15rem', borderBottom: '1px solid var(--color-rim)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
+        }}>
+          <div style={{ minWidth: 0 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+              Ya adelantado
+            </h2>
+            <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {barbero}
+            </p>
+          </div>
+          <button onClick={onCerrar} aria-label="Cerrar" style={{
+            background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+            color: 'var(--color-ink-dim)', cursor: 'pointer',
+            width: '2rem', height: '2rem', flexShrink: 0, display: 'grid', placeItems: 'center',
+          }}><X size={15} /></button>
+        </header>
+
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+          {[...liquidaciones]
+            .sort((a, b) => a.cerrada_at.localeCompare(b.cerrada_at))
+            .map(l => (
+              <div key={l.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.9rem',
+                paddingBottom: '.5rem', borderBottom: '1px solid var(--color-rim)',
+              }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '.78rem', color: 'var(--color-ink)' }}>
+                    {new Date(l.cerrada_at).toLocaleDateString('es-BO', {
+                      day: '2-digit', month: 'short', year: 'numeric',
+                    })}
+                  </p>
+                  <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>
+                    {nombres[l.cerrada_por] ?? 'Usuario desconocido'}
+                  </p>
+                </div>
+                <span style={{ fontSize: '.88rem', fontWeight: 600, color: 'var(--color-ink)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                  {bs(Number(l.a_pagar))}
+                </span>
+              </div>
+            ))}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.9rem', marginTop: '.3rem' }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
+              Total
+            </span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              {bs(total)}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   )

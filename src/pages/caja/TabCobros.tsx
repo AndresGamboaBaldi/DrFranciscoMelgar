@@ -4,9 +4,10 @@ import type { Appointment } from '../../types/booking'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
 import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta, type Arqueo } from '../../lib/pos/cobros'
-import { bs, bsCorto, hoyISO } from './cajaTheme'
+import { bs, bsCorto } from './cajaTheme'
+import { hoyISO, correrDias, etiquetaDia } from '../../lib/pos/fechas'
 import { btnPrimario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check, Info, X } from 'lucide-react'
+import { Scissors, Clock, Check, Info, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -22,11 +23,6 @@ const METODO_LABEL: Record<string, string> = {
   tarjeta: 'Tarjeta',
 }
 
-function ayerISO(): string {
-  const d = new Date()
-  d.setDate(d.getDate() - 1)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 export default function TabCobros({ pro, usuario }: { pro: Professional; usuario: PosUsuario }) {
   const barberos: StaffMember[] = useMemo(() => pro.staff ?? [], [pro.staff])
@@ -51,16 +47,18 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [falloCarga, setFalloCarga] = useState(false)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
+  /** Día que se está mirando. Arranca en hoy y se puede retroceder. */
+  const [fecha, setFecha] = useState(hoyISO())
+  const esHoy = fecha === hoyISO()
   const [detalle, setDetalle] = useState<Venta | null>(null)
   const [nombres, setNombres] = useState<Record<string, string>>({})
 
   const cargar = useCallback(async () => {
-    const hoy = hoyISO()
     try {
       const [cs, vs, ayer, arq, cfg, noms] = await Promise.all([
-        getAppointmentsByDate(businessIds, hoy),
-        getVentasDelDia(pro.businessId, hoy),
-        getTotalDelDia(pro.businessId, ayerISO()),
+        getAppointmentsByDate(businessIds, fecha),
+        getVentasDelDia(pro.businessId, fecha),
+        getTotalDelDia(pro.businessId, correrDias(fecha, -1)),
         getOAbrirArqueo(pro.businessId, usuario.user_id),
         getScheduleSettings(pro.businessId),
         getNombresUsuarios(pro.businessId),
@@ -78,7 +76,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
       // En finally: sin esto, un fallo deja la pantalla cargando para siempre.
       setCargando(false)
     }
-  }, [businessIds, pro.businessId, usuario.user_id])
+  }, [businessIds, pro.businessId, usuario.user_id, fecha])
 
   useEffect(() => { cargar() }, [cargar])
 
@@ -154,25 +152,69 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   return (
     <div>
       {/* ── Encabezado ── */}
-      <div style={{ marginBottom: '1.75rem' }}>
+      <div style={{ marginBottom: '1.25rem' }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,3.5vw,2.5rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)' }}>
-          Cobros del día
+          Cobros
         </h2>
+      </div>
+
+      {/* ── Día ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem',
+        background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+        borderRadius: 'var(--r-lg)', padding: '.4rem .5rem', marginBottom: '1rem',
+      }}>
+        <button onClick={() => setFecha(f => correrDias(f, -1))} aria-label="Día anterior" style={btnDia}>
+          <ChevronLeft size={16} />
+        </button>
+
+        <div style={{ textAlign: 'center', minWidth: 0 }}>
+          <p style={{
+            fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 600,
+            color: 'var(--color-ink)', textTransform: 'capitalize',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {etiquetaDia(fecha)}
+          </p>
+          {!esHoy && (
+            <button onClick={() => setFecha(hoyISO())} style={{
+              background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+              fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 600,
+              letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-gold)',
+            }}>Volver a hoy</button>
+          )}
+        </div>
+
+        {/* No se navega al futuro: no puede haber cobros que todavía no pasaron */}
+        <button
+          onClick={() => setFecha(f => correrDias(f, 1))}
+          disabled={esHoy}
+          aria-label="Día siguiente"
+          style={{ ...btnDia, opacity: esHoy ? .3 : 1, cursor: esHoy ? 'not-allowed' : 'pointer' }}
+        >
+          <ChevronRight size={16} />
+        </button>
       </div>
 
       {/* ── Resumen ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.5rem', marginBottom: '1.25rem' }}>
         <Tile
-          label="Hoy cobrado" valor={bsCorto(hoyCobrado)} unidad="Bs"
+          label="Cobrado" valor={bsCorto(hoyCobrado)} unidad="Bs"
           pie={variacion === null
-            ? `Ayer: ${bs(totalAyer)}`
-            : `${variacion >= 0 ? '↗' : '↘'} ${variacion >= 0 ? '+' : ''}${variacion.toFixed(1)}% vs ayer`}
+            ? `Día anterior: ${bs(totalAyer)}`
+            : `${variacion >= 0 ? '↗' : '↘'} ${variacion >= 0 ? '+' : ''}${variacion.toFixed(1)}% vs. día anterior`}
           destacado={variacion !== null && variacion >= 0}
         />
-        <Tile label="Cobros" valor={String(ventas.length)} unidad="hoy" pie={`${nPendientes} por cobrar`} />
+        <Tile
+          label="Cobros" valor={String(ventas.length)}
+          unidad={ventas.length === 1 ? 'cobro' : 'cobros'}
+          pie={`${nPendientes} por cobrar`}
+        />
       </div>
 
       {/* ── Nuevo cobro ── */}
+      {/* El cobro se imputa al día que se está mirando, no al de hoy: por eso
+          también se puede cobrar una cita de un día pasado. */}
       <button
         onClick={() => setPrefill({})}
         disabled={!arqueo}
@@ -244,6 +286,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           barberos={barberos}
           servicios={pro.services}
           qrUrl={qrUrl}
+          fecha={fecha}
           prefill={prefill}
           onCerrar={() => setPrefill(null)}
           onCobrado={() => { setPrefill(null); cargar() }}
@@ -481,6 +524,19 @@ function FilaCard({ fila, barbero, onCobrar, onVerDetalle }: {
       </div>
     </div>
   )
+}
+
+const btnDia: React.CSSProperties = {
+  width: '2.2rem',
+  height: '2.2rem',
+  flexShrink: 0,
+  display: 'grid',
+  placeItems: 'center',
+  background: 'var(--color-surface2)',
+  border: '1px solid var(--color-rim-l)',
+  color: 'var(--color-ink-dim)',
+  cursor: 'pointer',
+  padding: 0,
 }
 
 function Vacio({ filtro }: { filtro: Filtro }) {

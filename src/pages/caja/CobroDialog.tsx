@@ -21,6 +21,8 @@ interface Props {
   servicios: ProService[]
   /** QR de cobro del negocio (schedule_settings.qr_image_url), para mostrárselo al cliente. */
   qrUrl?: string | null
+  /** Día al que se imputa el cobro — el que se está mirando en la lista. */
+  fecha: string
   prefill: CobroPrefill
   onCerrar: () => void
   onCobrado: () => void
@@ -44,7 +46,7 @@ function precioSugerido(price?: string): number {
 interface Linea extends VentaItem { id: string; libre?: boolean }
 
 export default function CobroDialog({
-  businessId, arqueoId, userId, barberos, servicios, qrUrl, prefill, onCerrar, onCobrado,
+  businessId, arqueoId, userId, barberos, servicios, qrUrl, fecha, prefill, onCerrar, onCobrado,
 }: Props) {
   const [verQr, setVerQr] = useState(false)
   const [barbero, setBarbero] = useState(
@@ -141,7 +143,7 @@ export default function CobroDialog({
     setError('')
     try {
       await registrarCobro({
-        businessId, arqueoId,
+        businessId, arqueoId, fecha,
         barberoBusinessId: barbero,
         appointmentId: prefill.appointmentId ?? null,
         clienteNombre: cliente.trim() || null,

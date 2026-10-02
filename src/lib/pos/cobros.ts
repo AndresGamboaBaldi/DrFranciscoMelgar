@@ -1,5 +1,5 @@
 import { posSupabase } from './client'
-import { hoyISO, rangoUtc } from './fechas'
+import { hoyISO } from './fechas'
 
 export type MetodoPago = 'efectivo' | 'qr' | 'tarjeta'
 
@@ -25,6 +25,8 @@ export interface Venta {
   propina: number
   total: number
   metodo_pago: MetodoPago
+  /** Día de negocio al que pertenece. Puede diferir de created_at. */
+  fecha: string
   created_at: string
   cobrado_por: string
   anulada: boolean
@@ -82,19 +84,19 @@ export async function getOAbrirArqueo(businessId: string, userId: string): Promi
 export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Promise<Venta[]> {
   if (!posSupabase) return []
 
-  const { desde, hasta } = rangoUtc(fecha, fecha)
-
   const { data, error } = await posSupabase
     .from('pos_ventas')
     .select(`
       id, barbero_business_id, appointment_id, cliente_nombre,
-      subtotal, propina, total, metodo_pago, created_at, cobrado_por, anulada,
+      subtotal, propina, total, metodo_pago, fecha, created_at, cobrado_por, anulada,
       items:pos_venta_items ( service_id, nombre, precio, cantidad )
     `)
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', desde)
-    .lte('created_at', hasta)
+    // Por `fecha` y no por `created_at`: comparar un date contra 'YYYY-MM-DD'
+    // no depende de la zona de la sesión, y respeta el día al que el cobro
+    // pertenece aunque se haya registrado otro día.
+    .eq('fecha', fecha)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -119,14 +121,12 @@ export async function getNombresUsuarios(businessId: string): Promise<Record<str
 /** Total cobrado en una fecha — se usa para comparar hoy contra ayer. */
 export async function getTotalDelDia(businessId: string, fecha: string): Promise<number> {
   if (!posSupabase) return 0
-  const { desde, hasta } = rangoUtc(fecha, fecha)
   const { data } = await posSupabase
     .from('pos_ventas')
     .select('total')
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', desde)
-    .lte('created_at', hasta)
+    .eq('fecha', fecha)
   return (data ?? []).reduce((s, v: { total: number }) => s + Number(v.total), 0)
 }
 
@@ -148,6 +148,8 @@ export async function getEfectivoEsperado(arqueoId: string): Promise<number> {
 export interface NuevoCobro {
   businessId: string
   arqueoId: string
+  /** Día al que pertenece el cobro. Permite cobrar una cita de un día pasado. */
+  fecha: string
   barberoBusinessId: string
   appointmentId?: string | null
   clienteNombre?: string | null
@@ -176,6 +178,7 @@ export async function registrarCobro(c: NuevoCobro): Promise<string> {
     .insert([{
       business_id: c.businessId,
       arqueo_id: c.arqueoId,
+      fecha: c.fecha,
       barbero_business_id: c.barberoBusinessId,
       appointment_id: c.appointmentId ?? null,
       cliente_nombre: c.clienteNombre ?? null,

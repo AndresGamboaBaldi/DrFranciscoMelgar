@@ -20,9 +20,25 @@ export function hoyISO(): string {
 }
 
 export function ayerISO(): string {
-  const d = new Date()
-  d.setDate(d.getDate() - 1)
-  return iso(d)
+  return correrDias(hoyISO(), -1)
+}
+
+/** Mueve una fecha 'YYYY-MM-DD' la cantidad de días indicada. */
+export function correrDias(fechaISO: string, dias: number): string {
+  const [a, m, d] = fechaISO.split('-').map(Number)
+  const x = new Date(a, m - 1, d)
+  x.setDate(x.getDate() + dias)
+  return iso(x)
+}
+
+/** 'jueves 2 de octubre', o 'Hoy' / 'Ayer' cuando corresponde. */
+export function etiquetaDia(fechaISO: string): string {
+  if (fechaISO === hoyISO()) return 'Hoy'
+  if (fechaISO === ayerISO()) return 'Ayer'
+  const [a, m, d] = fechaISO.split('-').map(Number)
+  return new Date(a, m - 1, d).toLocaleDateString('es-BO', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  })
 }
 
 /**
