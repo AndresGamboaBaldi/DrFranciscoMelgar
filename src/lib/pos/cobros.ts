@@ -26,6 +26,7 @@ export interface Venta {
   total: number
   metodo_pago: MetodoPago
   created_at: string
+  cobrado_por: string
   anulada: boolean
   items: VentaItem[]
 }
@@ -87,7 +88,7 @@ export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Pro
     .from('pos_ventas')
     .select(`
       id, barbero_business_id, appointment_id, cliente_nombre,
-      subtotal, propina, total, metodo_pago, created_at, anulada,
+      subtotal, propina, total, metodo_pago, created_at, cobrado_por, anulada,
       items:pos_venta_items ( service_id, nombre, precio, cantidad )
     `)
     .eq('business_id', businessId)
@@ -101,6 +102,18 @@ export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Pro
     return []
   }
   return (data ?? []) as unknown as Venta[]
+}
+
+/** Nombre de cada usuario de la caja, para mostrar quién cobró en vez del uuid. */
+export async function getNombresUsuarios(businessId: string): Promise<Record<string, string>> {
+  if (!posSupabase) return {}
+  const { data } = await posSupabase
+    .from('pos_usuarios')
+    .select('user_id, nombre')
+    .eq('business_id', businessId)
+  const m: Record<string, string> = {}
+  for (const u of (data ?? []) as { user_id: string; nombre: string }[]) m[u.user_id] = u.nombre
+  return m
 }
 
 /** Total cobrado en una fecha — se usa para comparar hoy contra ayer. */

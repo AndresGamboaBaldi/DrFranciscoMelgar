@@ -3,10 +3,10 @@ import { getAppointmentsByDate, getScheduleSettings } from '../../lib/supabase'
 import type { Appointment } from '../../types/booking'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
-import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, type Venta, type Arqueo } from '../../lib/pos/cobros'
+import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta, type Arqueo } from '../../lib/pos/cobros'
 import { bs, bsCorto, hoyISO } from './cajaTheme'
 import { btnPrimario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check } from 'lucide-react'
+import { Scissors, Clock, Check, Info, X } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -51,22 +51,26 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [falloCarga, setFalloCarga] = useState(false)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
+  const [detalle, setDetalle] = useState<Venta | null>(null)
+  const [nombres, setNombres] = useState<Record<string, string>>({})
 
   const cargar = useCallback(async () => {
     const hoy = hoyISO()
     try {
-      const [cs, vs, ayer, arq, cfg] = await Promise.all([
+      const [cs, vs, ayer, arq, cfg, noms] = await Promise.all([
         getAppointmentsByDate(businessIds, hoy),
         getVentasDelDia(pro.businessId, hoy),
         getTotalDelDia(pro.businessId, ayerISO()),
         getOAbrirArqueo(pro.businessId, usuario.user_id),
         getScheduleSettings(pro.businessId),
+        getNombresUsuarios(pro.businessId),
       ])
       setCitas(cs)
       setVentas(vs)
       setTotalAyer(ayer)
       setArqueo(arq)
       setQrUrl(cfg?.qr_image_url ?? null)
+      setNombres(noms)
       setFalloCarga(false)
     } catch {
       setFalloCarga(true)
@@ -226,6 +230,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
                 barberoBusinessId: f.barberoId,
                 servicioNombre: f.servicio,
               })}
+              onVerDetalle={() => { if (f.tipo === 'cobrado') setDetalle(f.venta) }}
             />
           ))}
         </div>
@@ -244,6 +249,112 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           onCobrado={() => { setPrefill(null); cargar() }}
         />
       )}
+
+      {detalle && (
+        <DetalleCobro
+          venta={detalle}
+          cobradoPor={nombres[detalle.cobrado_por] ?? 'Usuario desconocido'}
+          barbero={nombrePorId.get(detalle.barbero_business_id) ?? detalle.barbero_business_id}
+          onCerrar={() => setDetalle(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+/* ── Detalle del cobro ────────────────────────────────────── */
+
+function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
+  venta: Venta; cobradoPor: string; barbero: string; onCerrar: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar() }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [onCerrar])
+
+  const momento = new Date(venta.created_at)
+
+  return (
+    <div
+      onClick={onCerrar}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.72)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: '22rem',
+          background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+          borderRadius: 'var(--r-xl)', overflow: 'hidden',
+        }}
+      >
+        <header style={{
+          padding: '1rem 1.15rem', borderBottom: '1px solid var(--color-rim)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
+        }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+            Detalle del cobro
+          </h2>
+          <button onClick={onCerrar} aria-label="Cerrar" style={{
+            background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+            color: 'var(--color-ink-dim)', cursor: 'pointer',
+            width: '2rem', height: '2rem', flexShrink: 0, display: 'grid', placeItems: 'center',
+          }}><X size={15} /></button>
+        </header>
+
+        <div style={{ padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '.55rem' }}>
+          <Dato etiqueta="Cobrado por" valor={cobradoPor} fuerte />
+          <Dato
+            etiqueta="Hora del cobro"
+            valor={momento.toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', hour12: false })}
+            fuerte
+          />
+          <Dato etiqueta="Fecha" valor={momento.toLocaleDateString('es-BO', { day: '2-digit', month: 'long', year: 'numeric' })} />
+
+          <div style={{ height: 1, background: 'var(--color-rim)', margin: '.3rem 0' }} />
+
+          <Dato etiqueta="Cliente" valor={venta.cliente_nombre ?? 'Sin nombre'} />
+          <Dato etiqueta="Atendió" valor={barbero} />
+          <Dato etiqueta="Método" valor={METODO_LABEL[venta.metodo_pago] ?? venta.metodo_pago} />
+
+          <div style={{ height: 1, background: 'var(--color-rim)', margin: '.3rem 0' }} />
+
+          {venta.items.map((it, i) => (
+            <Dato key={i} etiqueta={it.nombre} valor={bs(Number(it.precio) * Number(it.cantidad))} />
+          ))}
+          {Number(venta.propina) > 0 && (
+            <Dato etiqueta="Propina" valor={bs(Number(venta.propina))} />
+          )}
+
+          <div style={{ height: 1, background: 'var(--color-rim)', margin: '.3rem 0' }} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.75rem' }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
+              Total
+            </span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              {bs(Number(venta.total))}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Dato({ etiqueta, valor, fuerte }: { etiqueta: string; valor: string; fuerte?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.9rem' }}>
+      <span style={{ fontSize: '.76rem', color: 'var(--color-ink-ghost)', minWidth: 0 }}>{etiqueta}</span>
+      <span style={{
+        fontSize: '.8rem', flexShrink: 0, textAlign: 'right',
+        fontWeight: fuerte ? 600 : 400,
+        color: fuerte ? 'var(--color-ink)' : 'var(--color-ink-dim)',
+      }}>{valor}</span>
     </div>
   )
 }
@@ -267,7 +378,9 @@ function Tile({ label, valor, unidad, pie, destacado }: {
   )
 }
 
-function FilaCard({ fila, barbero, onCobrar }: { fila: Fila; barbero: string; onCobrar: () => void }) {
+function FilaCard({ fila, barbero, onCobrar, onVerDetalle }: {
+  fila: Fila; barbero: string; onCobrar: () => void; onVerDetalle: () => void
+}) {
   const pendiente = fila.tipo === 'pendiente'
   const Icono = pendiente ? Clock : Check
   const acento = pendiente ? 'var(--color-gold)' : 'var(--color-ink-ghost)'
@@ -320,6 +433,19 @@ function FilaCard({ fila, barbero, onCobrar }: { fila: Fila; barbero: string; on
             }}>
               <span style={{ width: '.4rem', height: '.4rem', borderRadius: '50%', background: acento, flexShrink: 0 }} />
               {pendiente ? 'Por cobrar' : 'Pagado'}
+              {!pendiente && (
+                <button
+                  onClick={onVerDetalle}
+                  aria-label="Ver detalle del cobro" title="Ver detalle del cobro"
+                  style={{
+                    display: 'grid', placeItems: 'center', width: '1.15rem', height: '1.15rem',
+                    padding: 0, background: 'none', border: 'none', borderRadius: '50%',
+                    cursor: 'pointer', color: 'var(--color-ink-ghost)', flexShrink: 0,
+                  }}
+                >
+                  <Info size={13} />
+                </button>
+              )}
             </p>
           </div>
         </div>
