@@ -51,6 +51,9 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
   const comisiones = resumen.reduce((s, r) => s + r.comision, 0)
   const paraElSalon = facturado - comisiones
   const splitStaff = facturado > 0 ? (comisiones / facturado) * 100 : 0
+  const totalPropinas = resumen.reduce((s, r) => s + r.propinas, 0)
+  const totalAdelantos = resumen.reduce((s, r) => s + r.adelantos, 0)
+  const totalAPagar = resumen.reduce((s, r) => s + r.aPagar, 0)
 
   const onLiquidar = async (r: ResumenBarbero) => {
     setLiquidando(r.barberoBusinessId)
@@ -150,9 +153,24 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
                 Local {(100 - splitStaff).toFixed(0)}% · {bs(paraElSalon)}
               </span>
             </div>
-            <p style={{ fontSize: '.66rem', color: 'var(--color-ink-ghost)', marginTop: '.5rem', lineHeight: 1.5 }}>
-              Las propinas no entran en el reparto: van enteras al barbero.
-            </p>
+            {/* El total a pagar casi nunca coincide con las comisiones, y sin
+                mostrar la cuenta parece un error. Acá queda a la vista. */}
+            <div style={{ borderTop: '1px solid var(--color-rim)', marginTop: '.85rem', paddingTop: '.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.75rem' }}>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
+                  Total a entregar
+                </span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  {bs(totalAPagar)}
+                </span>
+              </div>
+              <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.35rem', lineHeight: 1.5 }}>
+                {bs(comisiones)} de comisión
+                {totalPropinas > 0 && ` + ${bs(totalPropinas)} de propinas`}
+                {totalAdelantos > 0 && ` − ${bs(totalAdelantos)} ya adelantados`}.
+                Las propinas no entran en el reparto.
+              </p>
+            </div>
           </>
         )}
       </div>

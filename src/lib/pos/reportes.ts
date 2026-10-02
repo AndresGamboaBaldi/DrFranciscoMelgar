@@ -1,8 +1,10 @@
 import { posSupabase } from './client'
 import { getPorcentajes, PORCENTAJE_POR_DEFECTO, type Periodo } from './comisiones'
 import { iso, rangoUtc } from './fechas'
+import type { MetodoPago } from './cobros'
 
 export interface PuntoDia { fecha: string; total: number }
+export interface TotalPorMetodo { metodo: MetodoPago; total: number; n: number }
 export interface ServicioTotal { nombre: string; total: number; cantidad: number }
 export interface TopBarbero {
   barberoBusinessId: string
@@ -22,6 +24,8 @@ export interface Reporte {
   gastos: number
   neto: number
   facturadoPrevio: number
+  /** Desglose del facturado por forma de cobro. Los tres suman `facturado`. */
+  porMetodo: TotalPorMetodo[]
   porServicio: ServicioTotal[]
   topBarberos: TopBarbero[]
 }
@@ -49,14 +53,21 @@ function periodoPrevio(p: Periodo): Periodo {
   return { desde: iso(inicioPrevio), hasta: iso(finPrevio) }
 }
 
-interface VentaFila { id: string; barbero_business_id: string; subtotal: number; propina: number; created_at: string }
+interface VentaFila {
+  id: string
+  barbero_business_id: string
+  subtotal: number
+  propina: number
+  metodo_pago: MetodoPago
+  created_at: string
+}
 
 async function traerVentas(businessId: string, p: Periodo): Promise<VentaFila[]> {
   if (!posSupabase) return []
   const { desde, hasta } = rangoUtc(p.desde, p.hasta)
   const { data } = await posSupabase
     .from('pos_ventas')
-    .select('id, barbero_business_id, subtotal, propina, created_at')
+    .select('id, barbero_business_id, subtotal, propina, metodo_pago, created_at')
     .eq('business_id', businessId)
     .eq('anulada', false)
     .gte('created_at', desde)
@@ -128,11 +139,18 @@ export async function getReporte(
   }
   const porServicio = [...mapa.values()].sort((a, b) => b.total - a.total)
 
+  // Siempre los tres métodos, aunque alguno esté en cero: una forma de cobro
+  // que desaparece de la vista se lee como si no existiera.
+  const porMetodo: TotalPorMetodo[] = (['efectivo', 'qr', 'tarjeta'] as MetodoPago[]).map(m => {
+    const suyas = ventas.filter(v => v.metodo_pago === m)
+    return { metodo: m, total: suyas.reduce((s, v) => s + Number(v.subtotal), 0), n: suyas.length }
+  })
+
   return {
     facturado, propinas, nVentas: ventas.length,
     comisiones, gastos,
     neto: facturado - comisiones - gastos,
-    facturadoPrevio, porServicio, topBarberos,
+    facturadoPrevio, porMetodo, porServicio, topBarberos,
   }
 }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet, Download } from 'lucide-react'
+import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet, Download, Banknote, QrCode, CreditCard } from 'lucide-react'
 import type { Professional, StaffMember } from '../../types/professional'
 import {
   calcularPeriodoReporte, getReporte, getCurvaDiaria,
@@ -26,6 +26,9 @@ const RANGOS: { id: Rango; label: string }[] = [
  */
 const DIAS_MOVIL = 7
 const DIAS_ESCRITORIO = 14
+
+const ICONO_METODO = { efectivo: Banknote, qr: QrCode, tarjeta: CreditCard } as const
+const ETIQUETA_METODO = { efectivo: 'Efectivo', qr: 'QR', tarjeta: 'Tarjeta' } as const
 
 export default function TabReportes({ pro }: { pro: Professional }) {
   const esMobile = useEsMobile()
@@ -158,6 +161,40 @@ export default function TabReportes({ pro }: { pro: Professional }) {
             {rep.nVentas} {rep.nVentas === 1 ? 'servicio' : 'servicios'}
           </span>
         </div>
+
+        {/* Desglose por forma de cobro. Suma el facturado de arriba, no lo
+            recibido: las propinas van aparte y no son ingreso del local. */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '.4rem', marginTop: '.9rem' }}>
+          {rep.porMetodo.map(m => {
+            const Icono = ICONO_METODO[m.metodo]
+            return (
+              <div key={m.metodo} style={{
+                background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+                borderRadius: 'var(--r-md)', padding: '.6rem .55rem',
+                opacity: m.n === 0 ? .55 : 1,
+              }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '.3rem', minWidth: 0 }}>
+                  <Icono size={13} color="var(--color-gold)" style={{ flexShrink: 0 }} />
+                  <span style={{
+                    fontFamily: 'var(--font-body)', fontSize: '.58rem', fontWeight: 600,
+                    letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-dim)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>{ETIQUETA_METODO[m.metodo]}</span>
+                </p>
+                <p style={{
+                  fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 400,
+                  color: 'var(--color-ink)', lineHeight: 1.1, marginTop: '.25rem',
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
+                  Bs. {bsCorto(m.total)}
+                </p>
+                <p style={{ fontSize: '.6rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>
+                  {m.n === 0 ? 'Sin cobros' : `${m.n} ${m.n === 1 ? 'cobro' : 'cobros'}`}
+                </p>
+              </div>
+            )
+          })}
+        </div>
         {rep.propinas > 0 && (
           <p style={{ fontSize: '.66rem', color: 'var(--color-ink-ghost)', marginTop: '.5rem', lineHeight: 1.5 }}>
             Sin contar {bs(rep.propinas)} de propinas, que van enteras a los barberos.
@@ -178,7 +215,9 @@ export default function TabReportes({ pro }: { pro: Professional }) {
         <Tile
           icono={Scissors} label="Comisiones"
           valor={`Bs. ${bsCorto(rep.comisiones)}`}
-          pie={`${barberoIds.length} ${barberoIds.length === 1 ? 'barbero' : 'barberos'}`}
+          // Sin esta aclaración no se entiende por qué no coincide con el
+          // "a pagar" de la pestaña Comisiones, que sí incluye las propinas.
+          pie={`${barberoIds.length} ${barberoIds.length === 1 ? 'barbero' : 'barberos'} · no incluye propinas`}
           pieAcento resaltado
         />
         <Tile
