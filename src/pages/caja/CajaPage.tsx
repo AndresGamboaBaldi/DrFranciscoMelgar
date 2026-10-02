@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Banknote, Percent, ChartColumn } from 'lucide-react'
+import { Banknote, Percent, ChartColumn, Settings } from 'lucide-react'
 import { useHideOnScroll, useAltura, useEsMobile } from '../../lib/useHideOnScroll'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../../data/professionals'
@@ -7,14 +7,16 @@ import { buildThemeVars, PANEL_FONT_VARS, PANEL_FONTS_URL } from '../../lib/them
 import CajaGuard from '../../components/caja/CajaGuard'
 import { signOut, type PosUsuario } from '../../lib/pos/auth'
 import TabCobros from './TabCobros'
+import TabConfig from './TabConfig'
 import type { Professional } from '../../types/professional'
 
-type Pestana = 'cobros' | 'comisiones' | 'reportes'
+type Pestana = 'cobros' | 'comisiones' | 'reportes' | 'config'
 
 const PESTANAS: { id: Pestana; label: string; icon: typeof Banknote; soloDueno?: boolean }[] = [
   { id: 'cobros',     label: 'Cobros',     icon: Banknote },
   { id: 'comisiones', label: 'Comisiones', icon: Percent,     soloDueno: true },
   { id: 'reportes',   label: 'Reportes',   icon: ChartColumn, soloDueno: true },
+  { id: 'config',     label: 'Ajustes',    icon: Settings,    soloDueno: true },
 ]
 
 export default function CajaPage() {
@@ -160,8 +162,8 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
       {/* ── Contenido ── */}
       <main ref={mainRef} className="panel-main-mobile-pad" style={{ flex: 1, overflowY: 'auto', padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
-          {activa === 'cobros'
-            ? <TabCobros pro={pro} usuario={usuario} />
+          {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} />
+            : activa === 'config' ? <TabConfig pro={pro} />
             : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
         </div>
       </main>

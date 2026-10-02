@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
-import { X, Plus, Check, QrCode, Banknote, CreditCard, ChevronDown } from 'lucide-react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { X, Plus, QrCode, Banknote, CreditCard, ChevronDown } from 'lucide-react'
 import { bs } from './cajaTheme'
 import { btnPrimario } from '../../lib/panelUI'
 import { registrarCobro, CitaYaCobradaError, type MetodoPago, type VentaItem } from '../../lib/pos/cobros'
@@ -21,7 +21,6 @@ interface Props {
   servicios: ProService[]
   /** QR de cobro del negocio (schedule_settings.qr_image_url), para mostrárselo al cliente. */
   qrUrl?: string | null
-  slug: string
   prefill: CobroPrefill
   onCerrar: () => void
   onCobrado: () => void
@@ -45,29 +44,39 @@ function precioSugerido(price?: string): number {
 interface Linea extends VentaItem { id: string; libre?: boolean }
 
 export default function CobroDialog({
-  businessId, arqueoId, userId, barberos, servicios, qrUrl, slug, prefill, onCerrar, onCobrado,
+  businessId, arqueoId, userId, barberos, servicios, qrUrl, prefill, onCerrar, onCobrado,
 }: Props) {
   const [verQr, setVerQr] = useState(false)
   const [barbero, setBarbero] = useState(
     prefill.barberoBusinessId ?? barberos[0]?.businessId ?? businessId,
   )
   const [cambiandoBarbero, setCambiandoBarbero] = useState(false)
+  const [eligiendo, setEligiendo] = useState(false)
   const [cliente, setCliente] = useState(prefill.clienteNombre ?? '')
 
   const barberoSel = barberos.find(b => b.businessId === barbero) ?? null
   // Un barbero puede tener catálogo propio; si no, usa el del negocio.
   const catalogo = barberoSel?.services ?? servicios
 
-  const [seleccion, setSeleccion] = useState<Record<string, number>>(() => {
-    // Precarga el servicio de la cita si coincide con alguno del catálogo
+  // El servicio principal: viene de la cita si coincide con el catálogo.
+  const [servicioId, setServicioId] = useState<string>(() => {
     const base = barberos.find(b => b.businessId === (prefill.barberoBusinessId ?? ''))?.services ?? servicios
     const coincide = prefill.servicioNombre
       ? base.find(s => s.name.toLowerCase() === prefill.servicioNombre!.toLowerCase())
       : null
-    return coincide ? { [coincide.id]: precioSugerido(coincide.price) } : {}
+    return coincide?.id ?? ''
   })
+  const [servicioPrecio, setServicioPrecio] = useState(() => {
+    const base = barberos.find(b => b.businessId === (prefill.barberoBusinessId ?? ''))?.services ?? servicios
+    const coincide = prefill.servicioNombre
+      ? base.find(s => s.name.toLowerCase() === prefill.servicioNombre!.toLowerCase())
+      : null
+    return coincide ? precioSugerido(coincide.price) : 0
+  })
+
+  // Extras: lo que se suma al servicio principal, o el servicio de la cita
+  // cuando no figura en el catálogo.
   const [libres, setLibres] = useState<Linea[]>(() =>
-    // El servicio de la cita que no está en el catálogo entra como ítem libre
     prefill.servicioNombre && !servicios.some(s => s.name.toLowerCase() === prefill.servicioNombre!.toLowerCase())
       ? [{ id: 'libre-0', service_id: null, nombre: prefill.servicioNombre, precio: 0, cantidad: 1, libre: true }]
       : [],
@@ -79,12 +88,22 @@ export default function CobroDialog({
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
 
+  // Al revelarse, el campo de propina libre nace fuera de vista. Lo acercamos
+  // en vez de obligar a scrollear. 'nearest' mueve lo mínimo necesario.
+  const propinaRef = useRef<HTMLInputElement | null>(null)
+  useEffect(() => {
+    if (!propinaLibre) return
+    const id = requestAnimationFrame(() => {
+      propinaRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [propinaLibre])
+
   const subtotal = useMemo(
-    () => Object.values(seleccion).reduce((s, p) => s + p, 0) + libres.reduce((s, l) => s + l.precio, 0),
-    [seleccion, libres],
+    () => servicioPrecio + libres.reduce((s, l) => s + l.precio, 0),
+    [servicioPrecio, libres],
   )
   const total = subtotal + propina
-  const nSeleccionados = Object.keys(seleccion).length + libres.length
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !guardando) onCerrar() }
@@ -93,28 +112,27 @@ export default function CobroDialog({
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
   }, [onCerrar, guardando])
 
-  const alternar = (s: ProService) => {
+  /** Al elegir del picker se precarga el precio de lista; la cajera lo ajusta. */
+  const elegirServicio = (id: string) => {
     setError('')
-    setSeleccion(prev => {
-      const copia = { ...prev }
-      if (s.id in copia) delete copia[s.id]
-      else copia[s.id] = precioSugerido(s.price)
-      return copia
-    })
+    setServicioId(id)
+    const s = catalogo.find(x => x.id === id)
+    setServicioPrecio(s ? precioSugerido(s.price) : 0)
   }
+
+  const servicioSel = catalogo.find(s => s.id === servicioId) ?? null
 
   const guardar = async () => {
     const items: VentaItem[] = [
-      ...Object.entries(seleccion).map(([id, precio]) => {
-        const s = catalogo.find(x => x.id === id)
-        return { service_id: id, nombre: s?.name ?? id, precio, cantidad: 1 }
-      }),
+      ...(servicioSel
+        ? [{ service_id: servicioSel.id, nombre: servicioSel.name, precio: servicioPrecio, cantidad: 1 }]
+        : []),
       ...libres.filter(l => l.nombre.trim()).map(l => ({
         service_id: null, nombre: l.nombre.trim(), precio: l.precio, cantidad: 1,
       })),
     ].filter(i => i.precio > 0)
 
-    if (!items.length) { setError('Elegí al menos un servicio y poné su monto'); return }
+    if (!items.length) { setError('Elegí un servicio y poné su monto'); return }
 
     setGuardando(true)
     setError('')
@@ -221,7 +239,17 @@ export default function CobroDialog({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.4rem', marginTop: '.4rem' }}>
                   {barberos.filter(b => b.businessId !== barbero).map(b => (
                     <button key={b.businessId}
-                      onClick={() => { setBarbero(b.businessId); setCambiandoBarbero(false); setSeleccion({}) }}
+                      onClick={() => {
+                        setBarbero(b.businessId)
+                        setCambiandoBarbero(false)
+                        // Si el barbero nuevo tiene catálogo propio, el servicio
+                        // elegido puede no existir ahí: se limpia la selección.
+                        const nuevoCat = b.services ?? servicios
+                        if (servicioId && !nuevoCat.some(s => s.id === servicioId)) {
+                          setServicioId('')
+                          setServicioPrecio(0)
+                        }
+                      }}
                       style={{
                         display: 'flex', alignItems: 'center', gap: '.5rem', textAlign: 'left',
                         padding: '.5rem .6rem', background: 'var(--color-surface)',
@@ -248,65 +276,103 @@ export default function CobroDialog({
 
           {/* ── Servicios ── */}
           <section>
-            <Rotulo extra={nSeleccionados ? `${nSeleccionados} seleccionado${nSeleccionados > 1 ? 's' : ''}` : undefined}>
-              Servicios
-            </Rotulo>
+            <Rotulo extra={servicioSel?.tag}>Servicio</Rotulo>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
-              {catalogo.map(s => {
-                const activo = s.id in seleccion
-                return (
-                  <div key={s.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '.7rem',
-                    padding: '.6rem .7rem',
-                    background: activo ? 'var(--color-surface)' : 'transparent',
-                    border: '1px solid var(--color-rim)',
-                    borderLeft: `3px solid ${activo ? 'var(--color-gold)' : 'var(--color-rim)'}`,
-                    borderRadius: 'var(--r-md)',
+
+              {/* Un solo servicio. Mismo patrón que el bloque del barbero:
+                  la fila elegida, y "Cambiar" despliega el catálogo debajo. */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '.6rem',
+                padding: '.65rem .75rem', background: 'var(--color-surface)',
+                border: '1px solid var(--color-rim)',
+                borderLeft: `3px solid ${servicioSel ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+                borderRadius: 'var(--r-md)',
+              }}>
+                <button onClick={() => setEligiendo(v => !v)} style={{
+                  flex: 1, minWidth: 0, textAlign: 'left', background: 'none',
+                  border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-body)',
+                }}>
+                  <p style={{
+                    fontSize: '.86rem', fontWeight: servicioSel ? 600 : 400,
+                    color: servicioSel ? 'var(--color-ink)' : 'var(--color-ink-ghost)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    <button onClick={() => alternar(s)} aria-label={activo ? 'Quitar' : 'Agregar'} style={{
-                      width: '1.5rem', height: '1.5rem', flexShrink: 0, display: 'grid', placeItems: 'center',
-                      background: activo ? 'var(--color-gold)' : 'var(--color-surface2)',
-                      border: `1px solid ${activo ? 'var(--color-gold)' : 'var(--color-rim-l)'}`,
-                      color: activo ? 'var(--color-on-gold)' : 'var(--color-ink-ghost)',
-                      cursor: 'pointer', padding: 0,
-                    }}>
-                      {activo ? <Check size={13} /> : <Plus size={13} />}
-                    </button>
+                    {servicioSel?.name ?? 'Elegí un servicio'}
+                  </p>
+                  <p style={{
+                    fontSize: '.64rem', letterSpacing: '.1em', textTransform: 'uppercase',
+                    color: 'var(--color-ink-ghost)', marginTop: '.1rem',
+                  }}>
+                    {servicioSel?.tag ?? 'Tocá para elegir'}
+                  </p>
+                </button>
 
-                    <button onClick={() => alternar(s)} style={{
-                      flex: 1, minWidth: 0, textAlign: 'left', background: 'none',
-                      border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'var(--font-body)',
-                    }}>
-                      <p style={{
-                        fontSize: '.84rem', fontWeight: activo ? 600 : 400,
-                        color: activo ? 'var(--color-ink)' : 'var(--color-ink-dim)',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{s.name}</p>
-                      {s.tag && (
-                        <p style={{ fontSize: '.64rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-                          {s.tag}
-                        </p>
-                      )}
+                <div style={{ display: 'flex', gap: '.25rem', flexShrink: 0 }}>
+                  {servicioSel && (
+                    <button
+                      onClick={() => { setServicioId(''); setServicioPrecio(0); setEligiendo(false) }}
+                      aria-label="Quitar servicio" title="Quitar servicio"
+                      style={{ ...btnIcono, color: 'var(--color-ink-ghost)' }}
+                    >
+                      <X size={14} />
                     </button>
+                  )}
+                  <button onClick={() => setEligiendo(v => !v)} aria-label="Cambiar servicio" style={btnIcono}>
+                    <ChevronDown size={14} style={{ transform: eligiendo ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+                  </button>
+                </div>
 
-                    {activo ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '.25rem', flexShrink: 0 }}>
-                        <span style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)' }}>Bs</span>
-                        <input
-                          type="number" inputMode="decimal" min="0" step="1"
-                          value={seleccion[s.id] || ''}
-                          onChange={e => setSeleccion(p => ({ ...p, [s.id]: Number(e.target.value) || 0 }))}
-                          style={{ ...input, width: '4.4rem', padding: '.4rem .5rem', textAlign: 'right', fontWeight: 600 }}
-                        />
-                      </div>
-                    ) : (
-                      <span style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', flexShrink: 0 }}>
-                        {s.price ?? ''}
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '.25rem', flexShrink: 0 }}>
+                  <span style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)' }}>Bs</span>
+                  <input
+                    type="number" inputMode="decimal" min="0" step="1"
+                    value={servicioPrecio || ''}
+                    onChange={e => setServicioPrecio(Number(e.target.value) || 0)}
+                    disabled={!servicioSel}
+                    placeholder="0"
+                    style={{
+                      ...input, width: '4.2rem', padding: '.45rem .5rem',
+                      textAlign: 'right', fontWeight: 600, opacity: servicioSel ? 1 : .45,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {eligiendo && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', marginBottom: '.2rem' }}>
+                  {catalogo.map(s => {
+                    const on = s.id === servicioId
+                    return (
+                      <button key={s.id}
+                        onClick={() => { elegirServicio(s.id); setEligiendo(false) }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '.7rem', width: '100%',
+                          padding: '.55rem .7rem', textAlign: 'left', cursor: 'pointer',
+                          background: on ? 'var(--color-gold-glow)' : 'var(--color-surface)',
+                          border: `1px solid ${on ? 'var(--color-gold)' : 'var(--color-rim)'}`,
+                          borderRadius: 'var(--r-md)', fontFamily: 'var(--font-body)',
+                        }}>
+                        <span style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{
+                            display: 'block', fontSize: '.82rem',
+                            color: on ? 'var(--color-gold)' : 'var(--color-ink-dim)',
+                            fontWeight: on ? 600 : 400,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>{s.name}</span>
+                          {s.tag && (
+                            <span style={{ display: 'block', fontSize: '.62rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
+                              {s.tag}
+                            </span>
+                          )}
+                        </span>
+                        <span style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', flexShrink: 0 }}>
+                          {s.price ?? ''}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
 
               {libres.map((l, i) => (
                 <div key={l.id} style={{
@@ -338,7 +404,7 @@ export default function CobroDialog({
                   fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 600,
                   letterSpacing: '.1em', textTransform: 'uppercase',
                 }}
-              ><Plus size={13} /> Agregar ítem</button>
+              ><Plus size={13} /> Agregar extra</button>
             </div>
           </section>
 
@@ -368,7 +434,7 @@ export default function CobroDialog({
               }}>Otro</button>
             </div>
             {propinaLibre && (
-              <input type="number" inputMode="decimal" min="0" step="1" autoFocus
+              <input ref={propinaRef} type="number" inputMode="decimal" min="0" step="1" autoFocus
                 value={propina || ''} onChange={e => setPropina(Number(e.target.value) || 0)}
                 placeholder="Monto de la propina"
                 style={{ ...input, marginTop: '.4rem', textAlign: 'right' }} />
@@ -400,31 +466,15 @@ export default function CobroDialog({
               })}
             </div>
 
-            {metodo === 'qr' && (
-              qrUrl ? (
-                <button onClick={() => setVerQr(true)} style={{
-                  width: '100%', marginTop: '.5rem',
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
-                  padding: '.8rem', borderRadius: 'var(--r-md)',
-                  background: 'var(--color-surface2)', border: '1px solid var(--color-rim-l)',
-                  color: 'var(--color-ink)', cursor: 'pointer',
-                  fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 600,
-                  letterSpacing: '.1em', textTransform: 'uppercase',
-                }}>
-                  <QrCode size={16} /> Mostrar QR de la barbería
-                </button>
-              ) : (
-                <p style={{
-                  marginTop: '.5rem', padding: '.7rem .85rem', borderRadius: 'var(--r-md)',
-                  background: 'var(--color-surface)', border: '1px dashed var(--color-rim-l)',
-                  fontSize: '.72rem', lineHeight: 1.5, color: 'var(--color-ink-ghost)',
-                }}>
-                  Todavía no hay un QR cargado. Se sube desde{' '}
-                  <a href={`/${slug}/setup`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)' }}>
-                    Panel → Pagos
-                  </a>.
-                </p>
-              )
+            {metodo === 'qr' && !qrUrl && (
+              <p style={{
+                marginTop: '.5rem', padding: '.7rem .85rem', borderRadius: 'var(--r-md)',
+                background: 'var(--color-surface)', border: '1px dashed var(--color-rim-l)',
+                fontSize: '.72rem', lineHeight: 1.5, color: 'var(--color-ink-ghost)',
+              }}>
+                Todavía no hay un QR cargado. El dueño puede subirlo desde la
+                pestaña <strong style={{ color: 'var(--color-ink-dim)' }}>Ajustes</strong>.
+              </p>
             )}
           </section>
 
@@ -435,6 +485,21 @@ export default function CobroDialog({
 
         {/* ── Total y acción ── */}
         <footer style={{ padding: '1rem 1.15rem', borderTop: '1px solid var(--color-rim)', background: 'var(--color-surface)' }}>
+          {/* El QR vive en el pie y no en la sección de pago: ahí quedaba
+              debajo del pliegue y había que volver a scrollear para verlo. */}
+          {metodo === 'qr' && qrUrl && (
+            <button onClick={() => setVerQr(true)} style={{
+              width: '100%', marginBottom: '.75rem',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+              padding: '.75rem', borderRadius: 'var(--r-md)',
+              background: 'var(--color-surface2)', border: '1px solid var(--color-rim-l)',
+              color: 'var(--color-ink)', cursor: 'pointer',
+              fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: 600,
+              letterSpacing: '.1em', textTransform: 'uppercase',
+            }}>
+              <QrCode size={15} /> Mostrar QR al cliente
+            </button>
+          )}
           {propina > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginBottom: '.3rem' }}>
               <span>Servicios {bs(subtotal)}</span>
@@ -531,6 +596,19 @@ function Avatar({ staff, chico }: { staff: StaffMember | null; chico?: boolean }
       {(staff?.shortName ?? staff?.name ?? '?').charAt(0).toUpperCase()}
     </div>
   )
+}
+
+const btnIcono: React.CSSProperties = {
+  width: '1.8rem',
+  height: '1.8rem',
+  flexShrink: 0,
+  display: 'grid',
+  placeItems: 'center',
+  background: 'var(--color-surface2)',
+  border: '1px solid var(--color-rim-l)',
+  color: 'var(--color-ink-dim)',
+  cursor: 'pointer',
+  padding: 0,
 }
 
 const input: React.CSSProperties = {

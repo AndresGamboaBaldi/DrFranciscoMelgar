@@ -215,7 +215,6 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           barberos={barberos}
           servicios={pro.services}
           qrUrl={qrUrl}
-          slug={pro.slug}
           prefill={prefill}
           onCerrar={() => setPrefill(null)}
           onCobrado={() => { setPrefill(null); cargar() }}
