@@ -7,7 +7,7 @@ import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getNombresUsuarios, t
 import { bs, bsCorto } from './cajaTheme'
 import { hoyISO, correrDias, etiquetaDia } from '../../lib/pos/fechas'
 import { btnPrimario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check, Info, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Scissors, Clock, Check, Info, X, ChevronLeft, ChevronRight, QrCode, Banknote, CreditCard } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -16,6 +16,12 @@ type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
 type Fila =
   | { tipo: 'pendiente'; key: string; hora: string; cliente: string; servicio: string; barberoId: string; appointmentId: string }
   | { tipo: 'cobrado';   key: string; hora: string; cliente: string; servicio: string; barberoId: string; venta: Venta }
+
+const ICONO_METODO: Record<string, typeof Banknote> = {
+  efectivo: Banknote,
+  qr: QrCode,
+  tarjeta: CreditCard,
+}
 
 const METODO_LABEL: Record<string, string> = {
   efectivo: 'Efectivo',
@@ -330,16 +336,23 @@ function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: '22rem',
+          width: '100%', maxWidth: '22rem', maxHeight: '90dvh',
           background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
           borderRadius: 'var(--r-xl)', overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
         }}
       >
         <header style={{
           padding: '1rem 1.15rem', borderBottom: '1px solid var(--color-rim)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
+          flexShrink: 0,
         }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+          <h2 style={{
+            display: 'inline-flex', alignItems: 'center', gap: '.45rem', minWidth: 0,
+            fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400,
+            color: 'var(--color-ink)', lineHeight: 1.1,
+          }}>
+            <Check size={16} color="var(--color-gold)" style={{ flexShrink: 0 }} />
             Detalle del cobro
           </h2>
           <button onClick={onCerrar} aria-label="Cerrar" style={{
@@ -349,37 +362,80 @@ function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
           }}><X size={15} /></button>
         </header>
 
-        <div style={{ padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '.55rem' }}>
-          <Dato etiqueta="Cobrado por" valor={cobradoPor} fuerte />
-          <Dato
-            etiqueta="Hora del cobro"
-            valor={momento.toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', hour12: false })}
-            fuerte
-          />
-          <Dato etiqueta="Fecha" valor={momento.toLocaleDateString('es-BO', { day: '2-digit', month: 'long', year: 'numeric' })} />
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
 
-          <div style={{ height: 1, background: 'var(--color-rim)', margin: '.3rem 0' }} />
+          {/* Quién y cuándo */}
+          <div style={{ background: 'var(--color-surface2)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-md)', padding: '.9rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '.9rem' }}>
+              <Campo rotulo="Cobrado por" valor={cobradoPor} />
+              <Campo
+                rotulo="Hora del cobro"
+                valor={momento.toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', hour12: false })}
+              />
+            </div>
+            <div style={{ marginTop: '.9rem' }}>
+              <Campo rotulo="Fecha" valor={momento.toLocaleDateString('es-BO', { day: '2-digit', month: 'long', year: 'numeric' })} />
+            </div>
+          </div>
 
-          <Dato etiqueta="Cliente" valor={venta.cliente_nombre ?? 'Sin nombre'} />
-          <Dato etiqueta="Atendió" valor={barbero} />
-          <Dato etiqueta="Método" valor={METODO_LABEL[venta.metodo_pago] ?? venta.metodo_pago} />
+          {/* Datos del cobro */}
+          <div style={{ background: 'var(--color-surface2)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-md)', padding: '.9rem', display: 'flex', flexDirection: 'column', gap: '.65rem' }}>
+            <Dato etiqueta="Cliente" valor={venta.cliente_nombre ?? 'Sin nombre'} />
+            <Dato etiqueta="Atendió" valor={barbero} icono={Scissors} acento />
+            <Dato
+              etiqueta="Método"
+              valor={METODO_LABEL[venta.metodo_pago] ?? venta.metodo_pago}
+              icono={ICONO_METODO[venta.metodo_pago] ?? Banknote}
+              acento
+            />
+          </div>
 
-          <div style={{ height: 1, background: 'var(--color-rim)', margin: '.3rem 0' }} />
+          {/* Concepto */}
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '.62rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginBottom: '.4rem' }}>
+              Concepto
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+              {venta.items.map((it, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem',
+                  background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+                  borderRadius: 'var(--r-md)', padding: '.65rem .8rem',
+                }}>
+                  <span style={{ fontSize: '.82rem', color: 'var(--color-ink)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {it.nombre}
+                    {Number(it.cantidad) > 1 && <span style={{ color: 'var(--color-ink-ghost)' }}> ×{it.cantidad}</span>}
+                  </span>
+                  <span style={{ fontSize: '.82rem', fontWeight: 600, color: 'var(--color-gold)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                    {bs(Number(it.precio) * Number(it.cantidad))}
+                  </span>
+                </div>
+              ))}
+              {Number(venta.propina) > 0 && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem',
+                  background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+                  borderRadius: 'var(--r-md)', padding: '.65rem .8rem',
+                }}>
+                  <span style={{ fontSize: '.82rem', color: 'var(--color-ink-dim)' }}>Propina</span>
+                  <span style={{ fontSize: '.82rem', fontWeight: 600, color: 'var(--color-gold)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                    {bs(Number(venta.propina))}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
 
-          {venta.items.map((it, i) => (
-            <Dato key={i} etiqueta={it.nombre} valor={bs(Number(it.precio) * Number(it.cantidad))} />
-          ))}
-          {Number(venta.propina) > 0 && (
-            <Dato etiqueta="Propina" valor={bs(Number(venta.propina))} />
-          )}
-
-          <div style={{ height: 1, background: 'var(--color-rim)', margin: '.3rem 0' }} />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.75rem' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-              Total
+          {/* Total */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.75rem',
+            background: 'var(--color-gold-glow)', border: '1px solid var(--color-gold)',
+            borderRadius: 'var(--r-md)', padding: '.85rem 1rem',
+          }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
+              Total cobrado
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-gold)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {bs(Number(venta.total))}
             </span>
           </div>
@@ -389,15 +445,45 @@ function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
   )
 }
 
-function Dato({ etiqueta, valor, fuerte }: { etiqueta: string; valor: string; fuerte?: boolean }) {
+/** Rótulo arriba y valor debajo, para la cuadrícula de quién/cuándo. */
+function Campo({ rotulo, valor }: { rotulo: string; valor: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.9rem' }}>
-      <span style={{ fontSize: '.76rem', color: 'var(--color-ink-ghost)', minWidth: 0 }}>{etiqueta}</span>
+    <div style={{ minWidth: 0 }}>
+      <p style={{
+        fontFamily: 'var(--font-body)', fontSize: '.6rem', fontWeight: 600,
+        letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)',
+        lineHeight: 1.35,
+      }}>{rotulo}</p>
+      <p style={{
+        fontSize: '.84rem', fontWeight: 600, color: 'var(--color-ink)', marginTop: '.2rem',
+        overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{valor}</p>
+    </div>
+  )
+}
+
+/** Etiqueta a la izquierda, valor a la derecha, con icono opcional. */
+function Dato({ etiqueta, valor, icono: Icono, acento }: {
+  etiqueta: string
+  valor: string
+  icono?: typeof Scissors
+  acento?: boolean
+}) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.9rem' }}>
       <span style={{
-        fontSize: '.8rem', flexShrink: 0, textAlign: 'right',
-        fontWeight: fuerte ? 600 : 400,
-        color: fuerte ? 'var(--color-ink)' : 'var(--color-ink-dim)',
-      }}>{valor}</span>
+        fontFamily: 'var(--font-body)', fontSize: '.62rem', fontWeight: 600,
+        letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)',
+        flexShrink: 0,
+      }}>{etiqueta}</span>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: '.35rem', minWidth: 0,
+        fontSize: '.84rem', fontWeight: 600, textAlign: 'right',
+        color: acento ? 'var(--color-gold)' : 'var(--color-ink)',
+      }}>
+        {Icono && <Icono size={13} style={{ flexShrink: 0 }} />}
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{valor}</span>
+      </span>
     </div>
   )
 }

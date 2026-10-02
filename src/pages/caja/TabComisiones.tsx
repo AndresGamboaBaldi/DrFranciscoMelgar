@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Check, Percent, Scissors, Info, X } from 'lucide-react'
+import { Check, Percent, Scissors, Info, X, CircleUser } from 'lucide-react'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
 import {
@@ -452,7 +452,12 @@ function DialogoAdelantos({ liquidaciones, nombres, barbero, onCerrar }: {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
         }}>
           <div style={{ minWidth: 0 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+            <h2 style={{
+              display: 'inline-flex', alignItems: 'center', gap: '.45rem', minWidth: 0,
+              fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 400,
+              color: 'var(--color-ink)', lineHeight: 1.1,
+            }}>
+              <Check size={16} color="var(--color-gold)" style={{ flexShrink: 0 }} />
               Ya adelantado
             </h2>
             <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -466,35 +471,58 @@ function DialogoAdelantos({ liquidaciones, nombres, barbero, onCerrar }: {
           }}><X size={15} /></button>
         </header>
 
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '1.15rem', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
-          {[...liquidaciones]
-            .sort((a, b) => a.cerrada_at.localeCompare(b.cerrada_at))
-            .map(l => (
-              <div key={l.id} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.9rem',
-                paddingBottom: '.5rem', borderBottom: '1px solid var(--color-rim)',
-              }}>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '.78rem', color: 'var(--color-ink)' }}>
-                    {new Date(l.cerrada_at).toLocaleDateString('es-BO', {
-                      day: '2-digit', month: 'short', year: 'numeric',
-                    })}
-                  </p>
-                  <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.1rem' }}>
-                    {nombres[l.cerrada_por] ?? 'Usuario desconocido'}
-                  </p>
-                </div>
-                <span style={{ fontSize: '.88rem', fontWeight: 600, color: 'var(--color-ink)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                  {bs(Number(l.a_pagar))}
-                </span>
-              </div>
-            ))}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
+          <div>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: '.62rem', fontWeight: 600,
+              letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)',
+              marginBottom: '.4rem',
+            }}>
+              {liquidaciones.length === 1 ? 'Pago' : 'Pagos'}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+              {[...liquidaciones]
+                .sort((a, b) => a.cerrada_at.localeCompare(b.cerrada_at))
+                .map(l => (
+                  <div key={l.id} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.9rem',
+                    background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+                    borderRadius: 'var(--r-md)', padding: '.7rem .85rem',
+                  }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: '.82rem', fontWeight: 600, color: 'var(--color-ink)' }}>
+                        {new Date(l.cerrada_at).toLocaleDateString('es-BO', {
+                          day: '2-digit', month: 'long', year: 'numeric',
+                        })}
+                      </p>
+                      <p style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '.3rem',
+                        fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem',
+                      }}>
+                        <CircleUser size={11} style={{ flexShrink: 0 }} />
+                        {nombres[l.cerrada_por] ?? 'Usuario desconocido'}
+                      </p>
+                    </div>
+                    <span style={{
+                      fontSize: '.86rem', fontWeight: 600, color: 'var(--color-gold)',
+                      flexShrink: 0, fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      {bs(Number(l.a_pagar))}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.9rem', marginTop: '.3rem' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-              Total
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
+            background: 'var(--color-gold-glow)', border: '1px solid var(--color-gold)',
+            borderRadius: 'var(--r-md)', padding: '.85rem 1rem',
+          }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)' }}>
+              Total adelantado
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-gold)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {bs(total)}
             </span>
           </div>
