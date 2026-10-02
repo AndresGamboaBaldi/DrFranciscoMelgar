@@ -1,5 +1,5 @@
 import { posSupabase } from './client'
-import { hoyISO } from '../../pages/caja/cajaTheme'
+import { hoyISO, rangoUtc } from './fechas'
 
 export type MetodoPago = 'efectivo' | 'qr' | 'tarjeta'
 
@@ -81,8 +81,7 @@ export async function getOAbrirArqueo(businessId: string, userId: string): Promi
 export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Promise<Venta[]> {
   if (!posSupabase) return []
 
-  const desde = `${fecha}T00:00:00`
-  const hasta = `${fecha}T23:59:59.999`
+  const { desde, hasta } = rangoUtc(fecha, fecha)
 
   const { data, error } = await posSupabase
     .from('pos_ventas')
@@ -107,13 +106,14 @@ export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Pro
 /** Total cobrado en una fecha — se usa para comparar hoy contra ayer. */
 export async function getTotalDelDia(businessId: string, fecha: string): Promise<number> {
   if (!posSupabase) return 0
+  const { desde, hasta } = rangoUtc(fecha, fecha)
   const { data } = await posSupabase
     .from('pos_ventas')
     .select('total')
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', `${fecha}T00:00:00`)
-    .lte('created_at', `${fecha}T23:59:59.999`)
+    .gte('created_at', desde)
+    .lte('created_at', hasta)
   return (data ?? []).reduce((s, v: { total: number }) => s + Number(v.total), 0)
 }
 

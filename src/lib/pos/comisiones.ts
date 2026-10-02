@@ -1,4 +1,5 @@
 import { posSupabase } from './client'
+import { iso, rangoUtc } from './fechas'
 
 /** Porcentaje que se aplica cuando el barbero no tiene uno configurado. */
 export const PORCENTAJE_POR_DEFECTO = 50
@@ -31,10 +32,6 @@ export interface ResumenBarbero {
 }
 
 export interface Periodo { desde: string; hasta: string }
-
-function iso(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 /** Hoy, la semana (desde el lunes) o el mes, siempre hasta hoy. */
 export function calcularPeriodo(cual: 'hoy' | 'semana' | 'mes'): Periodo {
@@ -92,8 +89,9 @@ export async function getResumen(
 ): Promise<ResumenBarbero[]> {
   if (!posSupabase) return []
 
-  const desdeTs = `${periodo.desde}T00:00:00`
-  const hastaTs = `${periodo.hasta}T23:59:59.999`
+  // Instantes UTC de la medianoche local: con literales sin offset, Postgres
+  // los lee en UTC y la ventana queda corrida cuatro horas.
+  const { desde: desdeTs, hasta: hastaTs } = rangoUtc(periodo.desde, periodo.hasta)
 
   const [ventasRes, gastosRes, liqRes, porcentajes] = await Promise.all([
     posSupabase

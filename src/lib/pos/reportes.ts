@@ -1,5 +1,6 @@
 import { posSupabase } from './client'
 import { getPorcentajes, PORCENTAJE_POR_DEFECTO, type Periodo } from './comisiones'
+import { iso, rangoUtc } from './fechas'
 
 export interface PuntoDia { fecha: string; total: number }
 export interface ServicioTotal { nombre: string; total: number; cantidad: number }
@@ -25,10 +26,6 @@ export interface Reporte {
   topBarberos: TopBarbero[]
 }
 
-function iso(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
 export function calcularPeriodoReporte(cual: 'hoy' | 'semana' | 'mes' | 'anio'): Periodo {
   const hoy = new Date()
   const hasta = iso(hoy)
@@ -52,20 +49,18 @@ function periodoPrevio(p: Periodo): Periodo {
   return { desde: iso(inicioPrevio), hasta: iso(finPrevio) }
 }
 
-const desdeTs = (f: string) => `${f}T00:00:00`
-const hastaTs = (f: string) => `${f}T23:59:59.999`
-
 interface VentaFila { id: string; barbero_business_id: string; subtotal: number; propina: number; created_at: string }
 
 async function traerVentas(businessId: string, p: Periodo): Promise<VentaFila[]> {
   if (!posSupabase) return []
+  const { desde, hasta } = rangoUtc(p.desde, p.hasta)
   const { data } = await posSupabase
     .from('pos_ventas')
     .select('id, barbero_business_id, subtotal, propina, created_at')
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', desdeTs(p.desde))
-    .lte('created_at', hastaTs(p.hasta))
+    .gte('created_at', desde)
+    .lte('created_at', hasta)
   return (data ?? []) as VentaFila[]
 }
 
@@ -75,6 +70,7 @@ export async function getReporte(
   barberoIds: string[],
 ): Promise<Reporte> {
   const previo = periodoPrevio(periodo)
+  const rango = rangoUtc(periodo.desde, periodo.hasta)
 
   const [ventas, ventasPrevias, itemsRes, gastosRes, porcentajes] = await Promise.all([
     traerVentas(businessId, periodo),
@@ -91,8 +87,8 @@ export async function getReporte(
           .select('monto, categoria')
           .eq('business_id', businessId)
           .neq('categoria', 'adelanto')
-          .gte('created_at', desdeTs(periodo.desde))
-          .lte('created_at', hastaTs(periodo.hasta))
+          .gte('created_at', rango.desde)
+          .lte('created_at', rango.hasta)
       : Promise.resolve({ data: [] }),
     getPorcentajes(businessId),
   ])
@@ -153,8 +149,8 @@ export async function getCurvaDiaria(businessId: string, dias = 14): Promise<Pun
     .select('subtotal, created_at')
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', desdeTs(iso(inicio)))
-    .lte('created_at', hastaTs(iso(fin)))
+    .gte('created_at', rangoUtc(iso(inicio), iso(fin)).desde)
+    .lte('created_at', rangoUtc(iso(inicio), iso(fin)).hasta)
 
   const porDia = new Map<string, number>()
   for (const v of (data ?? []) as { subtotal: number; created_at: string }[]) {
