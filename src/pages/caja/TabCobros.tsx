@@ -5,9 +5,9 @@ import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
 import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta, type Arqueo } from '../../lib/pos/cobros'
 import { bs, bsCorto } from './cajaTheme'
-import { hoyISO, correrDias, etiquetaDia } from '../../lib/pos/fechas'
+import { hoyISO, correrDias } from '../../lib/pos/fechas'
 import { btnPrimario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check, Info, X, ChevronLeft, ChevronRight, QrCode, Banknote, CreditCard } from 'lucide-react'
+import { Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -53,9 +53,9 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [falloCarga, setFalloCarga] = useState(false)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
-  /** Día que se está mirando. Arranca en hoy y se puede retroceder. */
-  const [fecha, setFecha] = useState(hoyISO())
-  const esHoy = fecha === hoyISO()
+  /** Por ahora siempre hoy. La columna `fecha` de pos_ventas ya permite
+   *  imputar un cobro a otro día si se vuelve a agregar el selector. */
+  const fecha = hoyISO()
   const [detalle, setDetalle] = useState<Venta | null>(null)
   const [nombres, setNombres] = useState<Record<string, string>>({})
 
@@ -162,44 +162,6 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,3.5vw,2.5rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)' }}>
           Cobros
         </h2>
-      </div>
-
-      {/* ── Día ── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '.5rem',
-        background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
-        borderRadius: 'var(--r-lg)', padding: '.4rem .5rem', marginBottom: '1rem',
-      }}>
-        <button onClick={() => setFecha(f => correrDias(f, -1))} aria-label="Día anterior" style={btnDia}>
-          <ChevronLeft size={16} />
-        </button>
-
-        <div style={{ textAlign: 'center', minWidth: 0 }}>
-          <p style={{
-            fontFamily: 'var(--font-body)', fontSize: '.84rem', fontWeight: 600,
-            color: 'var(--color-ink)', textTransform: 'capitalize',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
-            {etiquetaDia(fecha)}
-          </p>
-          {!esHoy && (
-            <button onClick={() => setFecha(hoyISO())} style={{
-              background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-              fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 600,
-              letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-gold)',
-            }}>Volver a hoy</button>
-          )}
-        </div>
-
-        {/* No se navega al futuro: no puede haber cobros que todavía no pasaron */}
-        <button
-          onClick={() => setFecha(f => correrDias(f, 1))}
-          disabled={esHoy}
-          aria-label="Día siguiente"
-          style={{ ...btnDia, opacity: esHoy ? .3 : 1, cursor: esHoy ? 'not-allowed' : 'pointer' }}
-        >
-          <ChevronRight size={16} />
-        </button>
       </div>
 
       {/* ── Resumen ── */}
@@ -610,19 +572,6 @@ function FilaCard({ fila, barbero, onCobrar, onVerDetalle }: {
       </div>
     </div>
   )
-}
-
-const btnDia: React.CSSProperties = {
-  width: '2.2rem',
-  height: '2.2rem',
-  flexShrink: 0,
-  display: 'grid',
-  placeItems: 'center',
-  background: 'var(--color-surface2)',
-  border: '1px solid var(--color-rim-l)',
-  color: 'var(--color-ink-dim)',
-  cursor: 'pointer',
-  padding: 0,
 }
 
 function Vacio({ filtro }: { filtro: Filtro }) {
