@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Banknote, Percent, ChartColumn, Settings } from 'lucide-react'
+import { Banknote, Percent, ChartColumn, Settings, CircleUser, ChevronDown, LogOut } from 'lucide-react'
 import { useHideOnScroll, useAltura, useEsMobile } from '../../lib/useHideOnScroll'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../../data/professionals'
@@ -93,43 +93,20 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
           transition: 'transform .25s ease',
         } : null),
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
-          <a href={`/${pro.slug}`} aria-label="Volver a la página"
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '2.1rem', height: '2.1rem', flexShrink: 0, color: 'var(--color-gold)', textDecoration: 'none', transition: 'opacity .2s' }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '.7' }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-          >
-            <svg width="16" height="14" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-          </a>
-          {pro.logo && <img src={pro.logo} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />}
-          <div style={{ minWidth: 0 }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Caja
-            </h1>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', minWidth: 0 }}>
+          {/* contain + ancho automático: el logo no es cuadrado (634×503),
+              recortarlo a un cuadrado o círculo le come los costados. */}
+          {pro.logo && (
+            <img src={pro.logo} alt="" style={{
+              height: '2.1rem', width: 'auto', objectFit: 'contain', flexShrink: 0,
+            }} />
+          )}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+            {pro.shortName ?? pro.name}
+          </h1>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.9rem', flexShrink: 0 }}>
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '.8rem', fontWeight: 500, color: 'var(--color-ink)' }}>{usuario.nombre}</p>
-            <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)' }}>{esDueno ? 'Dueño' : 'Cajera'}</p>
-          </div>
-          <button
-            onClick={() => signOut()} title="Cerrar sesión" aria-label="Cerrar sesión"
-            style={{
-              background: 'none', border: '1px solid var(--color-rim-l)',
-              color: 'var(--color-ink-ghost)', cursor: 'pointer',
-              width: '2.1rem', height: '2.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all .2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-gold)'; e.currentTarget.style.color = 'var(--color-gold)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-rim-l)'; e.currentTarget.style.color = 'var(--color-ink-ghost)' }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-          </button>
-        </div>
+        <MenuCuenta nombre={usuario.nombre} rol={esDueno ? 'Dueño' : 'Cajera'} />
       </header>
 
       {/* ── Pestañas (desktop/tablet) ── */}
@@ -209,6 +186,75 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
           )
         })}
       </nav>
+    </div>
+  )
+}
+
+/** Identidad del usuario con menú desplegable. Por ahora solo cierra sesión. */
+function MenuCuenta({ nombre, rol }: { nombre: string; rol: string }) {
+  const [abierto, setAbierto] = useState(false)
+  const cajaRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!abierto) return
+    const fuera = (e: MouseEvent) => {
+      if (!cajaRef.current?.contains(e.target as Node)) setAbierto(false)
+    }
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false) }
+    document.addEventListener('mousedown', fuera)
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.removeEventListener('mousedown', fuera)
+      document.removeEventListener('keydown', esc)
+    }
+  }, [abierto])
+
+  return (
+    <div ref={cajaRef} style={{ position: 'relative', flexShrink: 0 }}>
+      <button
+        onClick={() => setAbierto(v => !v)}
+        aria-haspopup="menu" aria-expanded={abierto}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '.55rem',
+          padding: '.3rem .5rem .3rem .4rem',
+          background: abierto ? 'var(--color-surface2)' : 'none',
+          border: `1px solid ${abierto ? 'var(--color-rim-l)' : 'transparent'}`,
+          cursor: 'pointer', fontFamily: 'var(--font-body)', maxWidth: '11rem',
+        }}
+      >
+        <CircleUser size={24} color="var(--color-gold)" strokeWidth={1.5} style={{ flexShrink: 0 }} />
+        <span style={{ textAlign: 'left', minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: '.78rem', fontWeight: 500, color: 'var(--color-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {nombre}
+          </span>
+          <span style={{ display: 'block', fontSize: '.66rem', color: 'var(--color-ink-ghost)' }}>{rol}</span>
+        </span>
+        <ChevronDown size={13} color="var(--color-ink-ghost)" style={{ flexShrink: 0, transform: abierto ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+      </button>
+
+      {abierto && (
+        <div role="menu" style={{
+          position: 'absolute', top: 'calc(100% + .4rem)', right: 0, zIndex: 60,
+          minWidth: '11rem', background: 'var(--color-surface)',
+          border: '1px solid var(--color-rim)', borderRadius: 'var(--r-md)',
+          boxShadow: '0 8px 24px rgba(0,0,0,.35)', overflow: 'hidden',
+        }}>
+          <button
+            role="menuitem"
+            onClick={() => { setAbierto(false); signOut() }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '.6rem', width: '100%',
+              padding: '.75rem .9rem', background: 'none', border: 'none',
+              borderRadius: 0, cursor: 'pointer', textAlign: 'left',
+              fontFamily: 'var(--font-body)', fontSize: '.78rem', color: 'var(--color-ink-dim)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-surface2)'; e.currentTarget.style.color = 'var(--color-ink)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--color-ink-dim)' }}
+          >
+            <LogOut size={15} /> Cerrar sesión
+          </button>
+        </div>
+      )}
     </div>
   )
 }

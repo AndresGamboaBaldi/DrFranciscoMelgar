@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, QrCode, Upload, Briefcase } from 'lucide-react'
+import { CalendarDays, Clock, Settings, Smartphone, Bell, BellOff, ChevronRight, Check, MessageCircle, AlertTriangle, QrCode, Upload, Briefcase, CircleUser } from 'lucide-react'
 import { useProfessional } from '../context/ProfessionalContext'
 import { useStaff } from '../context/StaffContext'
 import ScheduleEditor from '../components/ScheduleEditor'
@@ -220,20 +220,29 @@ export default function SetupPage() {
           transition: 'transform .25s ease',
         } : null),
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '.75rem', minWidth: 0 }}>
-          <a href={`/${pro.slug}`} aria-label="Volver a mi página"
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '2.1rem', height: '2.1rem', flexShrink: 0, color: 'var(--color-gold)', background: 'transparent', textDecoration: 'none', border: 'none', transition: 'opacity .2s' }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '.7' }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-          >
-            <svg width="16" height="14" viewBox="0 0 12 10" fill="none"><path d="M4.5 1L1 5l3.5 4M1 5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
-          </a>
-          {pro.logo && <img src={pro.logo} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />}
-          <div style={{ minWidth: 0 }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {displayName}
-            </h1>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', minWidth: 0 }}>
+          {/* contain + ancho automático: el logo no es cuadrado (634×503),
+              recortarlo a un cuadrado o círculo le come los costados. */}
+          {pro.logo && (
+            <img src={pro.logo} alt="" style={{
+              height: '2.1rem', width: 'auto', objectFit: 'contain', flexShrink: 0,
+            }} />
+          )}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,3.8vw,2.1rem)', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+            {pro.shortName ?? pro.name}
+          </h1>
+        </div>
+
+        {/* Identidad de quien entró. Sin menú: el panel no tiene sesión que
+            cerrar, el acceso es por contraseña guardada en el dispositivo. */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.55rem', flexShrink: 0, maxWidth: '11rem' }}>
+          <CircleUser size={24} color="var(--color-gold)" strokeWidth={1.5} style={{ flexShrink: 0 }} />
+          <span style={{
+            fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500,
+            color: 'var(--color-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {displayName}
+          </span>
         </div>
       </header>
 
