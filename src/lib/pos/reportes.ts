@@ -1,6 +1,6 @@
 import { posSupabase } from './client'
 import { getPorcentajes, PORCENTAJE_POR_DEFECTO, type Periodo } from './comisiones'
-import { iso, rangoUtc } from './fechas'
+import { iso } from './fechas'
 import type { MetodoPago } from './cobros'
 
 export interface PuntoDia { fecha: string; total: number }
@@ -64,19 +64,20 @@ interface VentaFila {
   subtotal: number
   propina: number
   metodo_pago: MetodoPago
-  created_at: string
+  fecha: string
 }
 
 async function traerVentas(businessId: string, p: Periodo): Promise<VentaFila[]> {
   if (!posSupabase) return []
-  const { desde, hasta } = rangoUtc(p.desde, p.hasta)
   const { data } = await posSupabase
     .from('pos_ventas')
-    .select('id, barbero_business_id, subtotal, propina, metodo_pago, created_at')
+    .select('id, barbero_business_id, subtotal, propina, metodo_pago, fecha')
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', desde)
-    .lte('created_at', hasta)
+    // Por `fecha`: es el día al que pertenece el cobro, y comparar un date
+    // contra 'YYYY-MM-DD' no depende de la zona de la sesión.
+    .gte('fecha', p.desde)
+    .lte('fecha', p.hasta)
   return (data ?? []) as VentaFila[]
 }
 
@@ -86,7 +87,6 @@ export async function getReporte(
   barberoIds: string[],
 ): Promise<Reporte> {
   const previo = periodoPrevio(periodo)
-  const rango = rangoUtc(periodo.desde, periodo.hasta)
 
   const [ventas, ventasPrevias, itemsRes, gastosRes, porcentajes] = await Promise.all([
     traerVentas(businessId, periodo),
@@ -103,8 +103,8 @@ export async function getReporte(
           .select('monto, categoria')
           .eq('business_id', businessId)
           .neq('categoria', 'adelanto')
-          .gte('created_at', rango.desde)
-          .lte('created_at', rango.hasta)
+          .gte('fecha', periodo.desde)
+          .lte('fecha', periodo.hasta)
       : Promise.resolve({ data: [] }),
     getPorcentajes(businessId),
   ])
@@ -178,17 +178,18 @@ export async function getCurvaDiaria(businessId: string, dias = 14): Promise<Pun
 
   const { data } = await posSupabase
     .from('pos_ventas')
-    .select('subtotal, created_at')
+    // Propina incluida: el titular del reporte es el bruto, y si la curva
+    // sumara solo los servicios no cuadraría con él.
+    .select('subtotal, propina, fecha')
     .eq('business_id', businessId)
     .eq('anulada', false)
-    .gte('created_at', rangoUtc(iso(inicio), iso(fin)).desde)
-    .lte('created_at', rangoUtc(iso(inicio), iso(fin)).hasta)
+    // Por `fecha` y no por `created_at`: es el día al que pertenece el cobro.
+    .gte('fecha', iso(inicio))
+    .lte('fecha', iso(fin))
 
   const porDia = new Map<string, number>()
-  for (const v of (data ?? []) as { subtotal: number; created_at: string }[]) {
-    // Fecha local, no UTC: a las 20:00 en Bolivia UTC ya es el día siguiente.
-    const f = iso(new Date(v.created_at))
-    porDia.set(f, (porDia.get(f) ?? 0) + Number(v.subtotal))
+  for (const v of (data ?? []) as { subtotal: number; propina: number; fecha: string }[]) {
+    porDia.set(v.fecha, (porDia.get(v.fecha) ?? 0) + Number(v.subtotal) + Number(v.propina))
   }
 
   // Los días vacíos van en 0: si se omiten, la curva miente sobre el ritmo.

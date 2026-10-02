@@ -118,8 +118,8 @@ export default function TabComisiones({ pro, usuario }: { pro: Professional; usu
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.4rem', marginBottom: '1rem' }}>
         {RANGOS.map(r => (
           <button key={r.id} onClick={() => setRango(r.id)} style={{
-            ...chip(r.id === rango), padding: '.55rem .35rem', fontSize: '.66rem',
-            letterSpacing: '.06em', whiteSpace: 'normal', lineHeight: 1.25,
+            ...chip(r.id === rango), width: '100%', padding: '.7rem .35rem',
+            fontSize: '.7rem', letterSpacing: '.06em', whiteSpace: 'nowrap', lineHeight: 1.25,
           }}>{r.label}</button>
         ))}
       </div>
