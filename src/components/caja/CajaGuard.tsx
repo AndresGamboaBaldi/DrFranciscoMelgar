@@ -15,6 +15,10 @@ const MENSAJES: Record<PosAccesoError, { titulo: string; detalle: string }> = {
     titulo: 'Cuenta desactivada',
     detalle: 'El dueño desactivó este acceso. Si crees que es un error, habla con él.',
   },
+  'error-red': {
+    titulo: 'No se pudo verificar tu acceso',
+    detalle: 'La conexión tardó demasiado. Revisa el internet del local y volvé a intentar.',
+  },
 }
 
 interface Props {
@@ -36,11 +40,18 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
   const [enviando, setEnviando] = useState(false)
 
   const revisar = useCallback(async () => {
-    const r = await getAcceso(businessId)
-    if (!r) { setUsuario(null); setRechazo(null) }
-    else if ('error' in r) { setUsuario(null); setRechazo(r.error) }
-    else { setUsuario(r.usuario); setRechazo(null) }
-    setVerificando(false)
+    try {
+      const r = await getAcceso(businessId)
+      if (!r) { setUsuario(null); setRechazo(null) }
+      else if ('error' in r) { setUsuario(null); setRechazo(r.error) }
+      else { setUsuario(r.usuario); setRechazo(null) }
+    } catch {
+      setUsuario(null)
+      setRechazo('error-red')
+    } finally {
+      // En finally sí o sí: si esto no corre, la pantalla queda cargando para siempre.
+      setVerificando(false)
+    }
   }, [businessId])
 
   useEffect(() => { revisar() }, [revisar])
@@ -56,15 +67,34 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
     // Si salió bien, onAuthChange dispara revisar() y el guard se abre solo.
   }
 
+  // Skeleton con la forma real de la caja (cabecera, pestañas, tarjetas):
+  // da idea de lo que viene en vez de un spinner que no dice nada.
   if (verificando) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
-        <div style={{
-          width: '2rem', height: '2rem', borderRadius: '50%',
-          border: '2px solid var(--color-rim)', borderTopColor: 'var(--color-gold)',
-          animation: 'caja-spin .7s linear infinite',
-        }} />
-        <style>{'@keyframes caja-spin{to{transform:rotate(360deg)}}'}</style>
+      <div className="panel-shell" style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column' }}>
+        <header style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '.85rem clamp(1rem,4vw,2.5rem)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+          <div className="skeleton" style={{ height: '2rem', width: '7rem' }} />
+          <div className="skeleton" style={{ height: '2rem', width: '5rem', animationDelay: '80ms' }} />
+        </header>
+
+        <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-rim)', padding: '0 clamp(1rem,4vw,2.5rem)', display: 'flex', gap: '1.5rem', height: '2.9rem', alignItems: 'center' }}>
+          {['4rem', '5.5rem', '4.5rem'].map((w, i) => (
+            <div key={i} className="skeleton" style={{ height: '.75rem', width: w, animationDelay: `${i * 60}ms` }} />
+          ))}
+        </div>
+
+        <main style={{ flex: 1, padding: 'clamp(1.5rem,3vw,2.5rem) clamp(1rem,4vw,2.5rem)' }}>
+          <div style={{ maxWidth: '48rem', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+            <div className="skeleton" style={{ height: '2.8rem', width: '12rem', marginBottom: '.75rem' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.5rem', marginBottom: '.75rem' }}>
+              <div className="skeleton" style={{ height: '5rem' }} />
+              <div className="skeleton" style={{ height: '5rem', animationDelay: '60ms' }} />
+            </div>
+            {[0, 1, 2].map(i => (
+              <div key={i} className="skeleton" style={{ height: '5rem', animationDelay: `${120 + i * 80}ms` }} />
+            ))}
+          </div>
+        </main>
       </div>
     )
   }
@@ -91,10 +121,18 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
             <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, marginBottom: '1.75rem' }}>
               {msg.detalle}
             </p>
-            <button onClick={async () => { await signOut(); setRechazo(null) }}
-              style={{ ...btnSecundario('md'), width: '100%' }}>
-              Entrar con otra cuenta
-            </button>
+            {rechazo === 'error-red' ? (
+              // Es un fallo de red, no de permisos: cerrar sesión no arregla nada.
+              <button onClick={() => { setRechazo(null); setVerificando(true); revisar() }}
+                style={{ ...btnPrimario('md'), width: '100%' }}>
+                Reintentar
+              </button>
+            ) : (
+              <button onClick={async () => { await signOut(); setRechazo(null) }}
+                style={{ ...btnSecundario('md'), width: '100%' }}>
+                Entrar con otra cuenta
+              </button>
+            )}
           </>
         ) : (
           <>

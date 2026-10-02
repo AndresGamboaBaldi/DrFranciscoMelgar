@@ -1,4 +1,5 @@
 import { posSupabase } from './client'
+import { withTimeout } from '../supabase'
 
 export type PosRol = 'dueno' | 'cajera'
 
@@ -15,6 +16,7 @@ export type PosAccesoError =
   | 'sin-cuenta'      // hay sesión, pero ningún registro en pos_usuarios
   | 'otro-negocio'    // la cuenta existe pero pertenece a otra barbería
   | 'inactiva'        // el dueño la desactivó
+  | 'error-red'       // no se pudo averiguar: timeout o conexión caída
 
 export async function signIn(email: string, password: string): Promise<string | null> {
   if (!posSupabase) return 'Supabase no está configurado'
@@ -43,28 +45,50 @@ export async function getAcceso(
 ): Promise<{ usuario: PosUsuario } | { error: PosAccesoError } | null> {
   if (!posSupabase) return null
 
-  const { data: sesion } = await posSupabase.auth.getSession()
-  if (!sesion.session) return null
+  try {
+    const { data: sesion } = await withTimeout(posSupabase.auth.getSession(), 8000)
+    if (!sesion.session) return null
 
-  const { data, error } = await posSupabase
-    .from('pos_usuarios')
-    .select('user_id, business_id, rol, nombre, activo')
-    .eq('user_id', sesion.session.user.id)
-    .maybeSingle()
+    // Promise.resolve porque el query builder es un thenable, no una Promise:
+    // withTimeout necesita una promesa de verdad para la carrera.
+    const { data, error } = await withTimeout(
+      Promise.resolve(
+        posSupabase
+          .from('pos_usuarios')
+          .select('user_id, business_id, rol, nombre, activo')
+          .eq('user_id', sesion.session.user.id)
+          .maybeSingle(),
+      ),
+      8000,
+    )
 
-  // Sin fila, o RLS la filtró: en ambos casos esta cuenta no tiene caja.
-  if (error || !data) return { error: 'sin-cuenta' }
+    // Sin fila, o RLS la filtró: en ambos casos esta cuenta no tiene caja.
+    if (error || !data) return { error: 'sin-cuenta' }
 
-  const usuario = data as PosUsuario
-  if (!usuario.activo) return { error: 'inactiva' }
-  if (usuario.business_id !== businessId) return { error: 'otro-negocio' }
+    const usuario = data as PosUsuario
+    if (!usuario.activo) return { error: 'inactiva' }
+    if (usuario.business_id !== businessId) return { error: 'otro-negocio' }
 
-  return { usuario }
+    return { usuario }
+  } catch {
+    // Timeout o red caída. Se distingue de 'sin-cuenta' a propósito: una cosa
+    // es que no tengas permiso y otra que no se haya podido averiguar.
+    return { error: 'error-red' }
+  }
 }
 
-/** Avisa cuando la sesión cambia (login, logout, refresh vencido). */
+/**
+ * Avisa cuando la sesión cambia (login, logout, refresh vencido).
+ *
+ * El callback se difiere con setTimeout a propósito: supabase-js mantiene un
+ * lock interno mientras lo ejecuta, y si adentro se llama a getSession() o a
+ * otra operación de auth, se traba esperando ese mismo lock. Salir del tick
+ * libera el lock antes de que el callback haga su trabajo.
+ */
 export function onAuthChange(cb: () => void): () => void {
   if (!posSupabase) return () => {}
-  const { data } = posSupabase.auth.onAuthStateChange(() => cb())
+  const { data } = posSupabase.auth.onAuthStateChange(() => {
+    setTimeout(cb, 0)
+  })
   return () => data.subscription.unsubscribe()
 }

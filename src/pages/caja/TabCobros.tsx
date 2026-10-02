@@ -48,24 +48,32 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   // El mismo QR que ya usa el flujo de pago de reservas; se sube desde Setup → Pagos
   const [qrUrl, setQrUrl] = useState<string | null>(null)
   const [cargando, setCargando] = useState(true)
+  const [falloCarga, setFalloCarga] = useState(false)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
 
   const cargar = useCallback(async () => {
     const hoy = hoyISO()
-    const [cs, vs, ayer, arq, cfg] = await Promise.all([
-      getAppointmentsByDate(businessIds, hoy),
-      getVentasDelDia(pro.businessId, hoy),
-      getTotalDelDia(pro.businessId, ayerISO()),
-      getOAbrirArqueo(pro.businessId, usuario.user_id),
-      getScheduleSettings(pro.businessId),
-    ])
-    setCitas(cs)
-    setVentas(vs)
-    setTotalAyer(ayer)
-    setArqueo(arq)
-    setQrUrl(cfg?.qr_image_url ?? null)
-    setCargando(false)
+    try {
+      const [cs, vs, ayer, arq, cfg] = await Promise.all([
+        getAppointmentsByDate(businessIds, hoy),
+        getVentasDelDia(pro.businessId, hoy),
+        getTotalDelDia(pro.businessId, ayerISO()),
+        getOAbrirArqueo(pro.businessId, usuario.user_id),
+        getScheduleSettings(pro.businessId),
+      ])
+      setCitas(cs)
+      setVentas(vs)
+      setTotalAyer(ayer)
+      setArqueo(arq)
+      setQrUrl(cfg?.qr_image_url ?? null)
+      setFalloCarga(false)
+    } catch {
+      setFalloCarga(true)
+    } finally {
+      // En finally: sin esto, un fallo deja la pantalla cargando para siempre.
+      setCargando(false)
+    }
   }, [businessIds, pro.businessId, usuario.user_id])
 
   useEffect(() => { cargar() }, [cargar])
@@ -122,6 +130,22 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const nPendientes = filas.filter(f => f.tipo === 'pendiente').length
 
   if (cargando) return <Cargando />
+
+  if (falloCarga) {
+    return (
+      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-rim)', borderRadius: 'var(--r-lg)', padding: '2.5rem 1.5rem', textAlign: 'center' }}>
+        <p style={{ fontSize: '.95rem', fontWeight: 500, color: 'var(--color-ink)' }}>
+          No se pudieron cargar los datos del día
+        </p>
+        <p style={{ fontSize: '.82rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, margin: '.4rem 0 1.25rem' }}>
+          Revisá la conexión del local y volvé a intentar.
+        </p>
+        <button onClick={() => { setCargando(true); cargar() }} style={btnPrimario('md')}>
+          Reintentar
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div>
