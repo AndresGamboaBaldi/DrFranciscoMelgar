@@ -176,8 +176,11 @@ export async function registrarCobro(c: NuevoCobro): Promise<string> {
     .single()
 
   if (error) {
+    // Sin esto, cualquier fallo se ve igual en pantalla y no hay forma de
+    // saber qué constraint saltó.
+    console.error('[registrarCobro] venta', error.code, error.message, error.details, error.hint)
     if (error.code === '23505') throw new CitaYaCobradaError()
-    throw new Error(error.message)
+    throw new ErrorCobro(error.code ?? '', error.message)
   }
 
   const ventaId = (venta as { id: string }).id
@@ -194,11 +197,39 @@ export async function registrarCobro(c: NuevoCobro): Promise<string> {
     })))
 
   if (errItems) {
-    // Sin items la venta queda sin detalle y ensucia los reportes.
-    // Preferimos deshacerla y que la cajera la vuelva a cargar.
-    await posSupabase.from('pos_ventas').delete().eq('id', ventaId)
-    throw new Error(errItems.message)
+    console.error('[registrarCobro] items', errItems.code, errItems.message, errItems.details)
+    // Sin items la venta queda sin detalle y ensucia los reportes. Se intenta
+    // deshacer, pero el borrado puede no tener permiso: si falla, la venta
+    // queda huérfana y su cita no se puede volver a cobrar.
+    const { error: errBorrado } = await posSupabase.from('pos_ventas').delete().eq('id', ventaId)
+    if (errBorrado) console.error('[registrarCobro] no se pudo deshacer la venta', ventaId, errBorrado.message)
+    throw new ErrorCobro(errItems.code ?? '', errItems.message)
   }
 
   return ventaId
+}
+
+/** Error con el código de Postgres a la vista, para poder explicarlo en pantalla. */
+export class ErrorCobro extends Error {
+  codigo: string
+
+  constructor(codigo: string, mensaje: string) {
+    super(mensaje)
+    this.name = 'ErrorCobro'
+    this.codigo = codigo
+  }
+
+  /** Texto para la cajera según el constraint que haya saltado. */
+  get explicacion(): string {
+    switch (this.codigo) {
+      case '23503':
+        return 'Falta un dato relacionado (la caja del día, el barbero o la cita). Actualizá la pantalla e intentá de nuevo.'
+      case '23514':
+        return 'Hay un monto o un método de pago inválido.'
+      case '42501':
+        return 'Tu cuenta no tiene permiso para registrar cobros en este negocio.'
+      default:
+        return 'No se pudo registrar el cobro. Revisá la conexión e intentá de nuevo.'
+    }
+  }
 }

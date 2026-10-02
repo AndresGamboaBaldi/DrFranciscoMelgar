@@ -132,6 +132,10 @@ export default function SetupPage() {
     } finally { setStaffLockedSaving(null) }
   }
 
+  // Foto de quien entró: la del staff si es el panel de un profesional de la
+  // agencia, si no la primera del negocio.
+  const fotoPerfil = staff?.photo ?? pro.photos?.[0] ?? pro.heroPhoto ?? null
+
   // Barras que se esconden al bajar, estilo Instagram. Solo en mobile, y solo
   // si hay contenido suficiente como para que valga la pena.
   const mainRef   = useRef<HTMLElement | null>(null)
@@ -234,9 +238,17 @@ export default function SetupPage() {
         </div>
 
         {/* Identidad de quien entró. Sin menú: el panel no tiene sesión que
-            cerrar, el acceso es por contraseña guardada en el dispositivo. */}
+            cerrar, el acceso es por contraseña guardada en el dispositivo.
+            Si hay foto se usa esa; el icono genérico es el respaldo. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '.55rem', flexShrink: 0, maxWidth: '11rem' }}>
-          <CircleUser size={24} color="var(--color-gold)" strokeWidth={1.5} style={{ flexShrink: 0 }} />
+          {fotoPerfil ? (
+            <img src={fotoPerfil} alt="" style={{
+              width: '2rem', height: '2rem', flexShrink: 0, objectFit: 'cover',
+              borderRadius: '50%', border: '1px solid var(--color-rim-l)',
+            }} />
+          ) : (
+            <CircleUser size={24} color="var(--color-gold)" strokeWidth={1.5} style={{ flexShrink: 0 }} />
+          )}
           <span style={{
             fontFamily: 'var(--font-body)', fontSize: '.78rem', fontWeight: 500,
             color: 'var(--color-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

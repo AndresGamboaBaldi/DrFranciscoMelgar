@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { X, Plus, QrCode, Banknote, CreditCard, ChevronDown } from 'lucide-react'
 import { bs } from './cajaTheme'
 import { btnPrimario } from '../../lib/panelUI'
-import { registrarCobro, CitaYaCobradaError, type MetodoPago, type VentaItem } from '../../lib/pos/cobros'
+import { registrarCobro, CitaYaCobradaError, ErrorCobro, type MetodoPago, type VentaItem } from '../../lib/pos/cobros'
 import type { ProService, StaffMember } from '../../types/professional'
 
 export interface CobroPrefill {
@@ -152,7 +152,9 @@ export default function CobroDialog({
       setError(
         e instanceof CitaYaCobradaError
           ? 'Esta cita ya fue cobrada. Actualizá la lista para ver el cobro.'
-          : 'No se pudo registrar el cobro. Revisá la conexión e intentá de nuevo.',
+          : e instanceof ErrorCobro
+            ? e.explicacion
+            : 'No se pudo registrar el cobro. Revisá la conexión e intentá de nuevo.',
       )
       setGuardando(false)
     }

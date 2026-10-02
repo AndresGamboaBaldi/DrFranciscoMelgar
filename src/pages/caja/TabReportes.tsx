@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet } from 'lucide-react'
+import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet, Download } from 'lucide-react'
 import type { Professional, StaffMember } from '../../types/professional'
 import {
   calcularPeriodoReporte, getReporte, getCurvaDiaria,
@@ -88,14 +88,28 @@ export default function TabReportes({ pro }: { pro: Professional }) {
 
   return (
     <div>
-      <div style={{ marginBottom: '1.25rem' }}>
+      <div style={{ marginBottom: '1.25rem' }} data-no-print>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,3.5vw,2.5rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)' }}>
           Reportes
         </h2>
       </div>
 
+      {/* Encabezado que solo sale en el papel: sin esto el PDF no dice
+          de qué negocio ni de qué período es. */}
+      <div className="solo-impresion" style={{ marginBottom: '1.25rem', borderBottom: '2px solid var(--color-ink)', paddingBottom: '.75rem' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
+          {pro.shortName ?? pro.name}
+        </p>
+        <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', marginTop: '.3rem' }}>
+          Reporte {RANGOS.find(r => r.id === rango)?.label.toLowerCase()} · {periodo.desde === periodo.hasta ? periodo.desde : `${periodo.desde} a ${periodo.hasta}`}
+        </p>
+        <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem' }}>
+          Generado el {new Date().toLocaleString('es-BO', { dateStyle: 'long', timeStyle: 'short' })}
+        </p>
+      </div>
+
       {/* ── Período ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '.35rem', marginBottom: '1rem' }}>
+      <div data-no-print style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '.35rem', marginBottom: '1rem' }}>
         {RANGOS.map(r => (
           <button key={r.id} onClick={() => setRango(r.id)} style={{
             ...chip(r.id === rango), padding: '.55rem .25rem', fontSize: '.64rem', letterSpacing: '.06em',
@@ -162,7 +176,7 @@ export default function TabReportes({ pro }: { pro: Professional }) {
           resaltado
         />
         <Tile
-          icono={Scissors} label="Comisiones pagadas"
+          icono={Scissors} label="Comisiones"
           valor={`Bs. ${bsCorto(rep.comisiones)}`}
           pie={`${barberoIds.length} ${barberoIds.length === 1 ? 'barbero' : 'barberos'}`}
           pieAcento resaltado
@@ -266,6 +280,16 @@ export default function TabReportes({ pro }: { pro: Professional }) {
           </div>
         )}
       </Seccion>
+
+      {/* ── Descargar ── */}
+      <div data-no-print style={{ marginTop: '1.25rem' }}>
+        <button onClick={() => window.print()} style={{ ...btnPrimario('lg'), width: '100%' }}>
+          <Download size={16} /> Descargar PDF
+        </button>
+        <p style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', textAlign: 'center', marginTop: '.5rem', lineHeight: 1.5 }}>
+          Se abre el diálogo de impresión: elegí «Guardar como PDF» como destino.
+        </p>
+      </div>
     </div>
   )
 }
@@ -344,7 +368,7 @@ function Curva({ puntos }: { puntos: PuntoDia[] }) {
 
 function Seccion({ titulo, sub, children }: { titulo: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div style={{
+    <div className="reporte-bloque" style={{
       background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
       borderRadius: 'var(--r-lg)', padding: '1rem', marginBottom: '.75rem',
     }}>
@@ -370,7 +394,7 @@ function Tile({ icono: Icono, label, valor, pie, pieAcento, resaltado }: {
   resaltado?: boolean
 }) {
   return (
-    <div style={{
+    <div className="reporte-bloque" style={{
       background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
       borderRadius: 'var(--r-lg)', padding: '1rem 1.1rem',
       display: 'flex', flexDirection: 'column', gap: '.45rem',
