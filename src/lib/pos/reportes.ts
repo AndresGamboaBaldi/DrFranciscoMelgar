@@ -5,6 +5,7 @@ import type { MetodoPago } from './cobros'
 
 export interface PuntoDia { fecha: string; total: number }
 export interface TotalPorMetodo { metodo: MetodoPago; total: number; n: number }
+export interface TotalPorHora { hora: number; n: number; total: number }
 export interface ServicioTotal { nombre: string; total: number; cantidad: number }
 export interface TopBarbero {
   barberoBusinessId: string
@@ -31,6 +32,8 @@ export interface Reporte {
   facturadoPrevio: number
   /** Desglose del facturado por forma de cobro. Los tres suman `facturado`. */
   porMetodo: TotalPorMetodo[]
+  /** Reparto del movimiento por hora del día. */
+  porHora: TotalPorHora[]
   porServicio: ServicioTotal[]
   topBarberos: TopBarbero[]
 }
@@ -65,13 +68,14 @@ interface VentaFila {
   propina: number
   metodo_pago: MetodoPago
   fecha: string
+  created_at: string
 }
 
 async function traerVentas(businessId: string, p: Periodo): Promise<VentaFila[]> {
   if (!posSupabase) return []
   const { data } = await posSupabase
     .from('pos_ventas')
-    .select('id, barbero_business_id, subtotal, propina, metodo_pago, fecha')
+    .select('id, barbero_business_id, subtotal, propina, metodo_pago, fecha, created_at')
     .eq('business_id', businessId)
     .eq('anulada', false)
     // Por `fecha`: es el día al que pertenece el cobro, y comparar un date
@@ -157,6 +161,32 @@ export async function getReporte(
     }
   })
 
+  // Hora del día en que se registró cada cobro. getHours() es hora local, así
+  // que no hace falta convertir nada.
+  const horas = new Map<number, { n: number; total: number }>()
+  for (const v of ventas) {
+    const h = new Date(v.created_at).getHours()
+    const prev = horas.get(h) ?? { n: 0, total: 0 }
+    prev.n += 1
+    prev.total += Number(v.subtotal) + Number(v.propina)
+    horas.set(h, prev)
+  }
+
+  // Rango continuo desde la primera hasta la última hora con movimiento, con
+  // los ceros intermedios. Si solo se devuelven las horas ocupadas, todas
+  // quedan pegadas y con alturas parecidas: no se ve ninguna distribución.
+  // Se ensancha una hora a cada lado para que el pico no quede contra el borde.
+  const porHora: TotalPorHora[] = []
+  if (horas.size > 0) {
+    const claves = [...horas.keys()]
+    const ini = Math.max(0, Math.min(...claves) - 1)
+    const fin = Math.min(23, Math.max(...claves) + 1)
+    for (let h = ini; h <= fin; h++) {
+      const x = horas.get(h) ?? { n: 0, total: 0 }
+      porHora.push({ hora: h, ...x })
+    }
+  }
+
   const comisionesMasPropinas = comisiones + propinas
 
   return {
@@ -164,7 +194,7 @@ export async function getReporte(
     comisiones, comisionesMasPropinas, gastos,
     // Las propinas entran y salen: el neto no cambia por contarlas en el bruto.
     neto: facturado - comisionesMasPropinas - gastos,
-    facturadoPrevio, porMetodo, porServicio, topBarberos,
+    facturadoPrevio, porMetodo, porHora, porServicio, topBarberos,
   }
 }
 

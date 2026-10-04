@@ -61,7 +61,9 @@ export async function getOAbrirArqueo(businessId: string, userId: string): Promi
 
   const { data: nuevo, error } = await posSupabase
     .from('pos_arqueos')
-    .insert([{ business_id: businessId, fondo_inicial: 0, abierto_por: userId }])
+    // `fecha` explícita: el default de la columna es current_date, que en
+    // Supabase corre en UTC y desde las 20:00 en Bolivia ya marca el día siguiente.
+    .insert([{ business_id: businessId, fecha: hoyISO(), fondo_inicial: 0, abierto_por: userId }])
     .select('id, fecha, fondo_inicial, estado')
     .single()
 

@@ -75,48 +75,6 @@ body::after {
 .panel-shell textarea {
   border-radius: var(--r-md);
 }
-/* ── Impresión de reportes ───────────────────────────────────
-   Sin librería de PDF: el navegador ya sabe generar uno. Acá solo
-   se esconde el cromo de la app y se fuerza tinta oscura sobre
-   papel blanco — imprimir el tema oscuro gasta tóner y no se lee. */
-.solo-impresion { display: none; }
-
-@media print {
-  @page { margin: 14mm; }
-
-  .panel-shell > header,
-  .panel-tabbar-top,
-  .panel-tabbar-bottom,
-  [data-no-print] { display: none !important; }
-
-  .panel-shell,
-  .panel-shell main {
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    position: static !important;
-    padding: 0 !important;
-  }
-
-  .panel-shell {
-    --color-bg: #ffffff;
-    --color-surface: #ffffff;
-    --color-surface2: #f1f1f0;
-    --color-rim: #d4d4d2;
-    --color-rim-l: #b4b4b1;
-    --color-ink: #141412;
-    --color-ink-dim: #3a3a37;
-    --color-ink-ghost: #6b6b67;
-  }
-
-  .solo-impresion { display: block !important; }
-
-  /* Sin esto el navegador descarta los fondos y las barras quedan vacías */
-  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-  /* Que no se parta una tarjeta entre dos hojas */
-  .reporte-bloque { break-inside: avoid; }
-}
 
 /* Las pestañas son solapas, no botones: se quedan rectas */
 .panel-shell .panel-tabbar-top button,

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet, Download, Banknote, QrCode, CreditCard } from 'lucide-react'
+import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet, Banknote, QrCode, CreditCard } from 'lucide-react'
 import type { Professional, StaffMember } from '../../types/professional'
 import {
   calcularPeriodoReporte, getReporte, getCurvaDiaria,
-  type Reporte, type PuntoDia,
+  type Reporte, type PuntoDia, type TotalPorHora,
 } from '../../lib/pos/reportes'
 import { bs, bsCorto } from './cajaTheme'
 import { btnPrimario, chip } from '../../lib/panelUI'
@@ -91,28 +91,14 @@ export default function TabReportes({ pro }: { pro: Professional }) {
 
   return (
     <div>
-      <div style={{ marginBottom: '1.25rem' }} data-no-print>
+      <div style={{ marginBottom: '1.25rem' }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,3.5vw,2.5rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)' }}>
           Reportes
         </h2>
       </div>
 
-      {/* Encabezado que solo sale en el papel: sin esto el PDF no dice
-          de qué negocio ni de qué período es. */}
-      <div className="solo-impresion" style={{ marginBottom: '1.25rem', borderBottom: '2px solid var(--color-ink)', paddingBottom: '.75rem' }}>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.1 }}>
-          {pro.shortName ?? pro.name}
-        </p>
-        <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', marginTop: '.3rem' }}>
-          Reporte {RANGOS.find(r => r.id === rango)?.label.toLowerCase()} · {periodo.desde === periodo.hasta ? periodo.desde : `${periodo.desde} a ${periodo.hasta}`}
-        </p>
-        <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', marginTop: '.15rem' }}>
-          Generado el {new Date().toLocaleString('es-BO', { dateStyle: 'long', timeStyle: 'short' })}
-        </p>
-      </div>
-
       {/* ── Período ── */}
-      <div data-no-print style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '.35rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '.35rem', marginBottom: '1rem' }}>
         {RANGOS.map(r => (
           <button key={r.id} onClick={() => setRango(r.id)} style={{
             ...chip(r.id === rango), padding: '.55rem .25rem', fontSize: '.64rem', letterSpacing: '.06em',
@@ -227,6 +213,18 @@ export default function TabReportes({ pro }: { pro: Professional }) {
         <Curva puntos={curva} />
       </Seccion>
 
+      {/* ── Horas ── */}
+      <Seccion
+        titulo="Horas más llenas"
+        sub={rep.porHora.length ? `Pico: ${String(rep.porHora.reduce((a, b) => (b.n > a.n ? b : a)).hora).padStart(2, '0')}:00` : undefined}
+      >
+        {rep.porHora.length === 0 ? (
+          <Vacio texto="Sin cobros en este período." />
+        ) : (
+          <Horas datos={rep.porHora} />
+        )}
+      </Seccion>
+
       {/* ── Servicios ── */}
       <Seccion titulo="Servicios más vendidos" sub={rep.porServicio.length ? `${rep.porServicio.length} distintos` : undefined}>
         {rep.porServicio.length === 0 ? (
@@ -314,16 +312,6 @@ export default function TabReportes({ pro }: { pro: Professional }) {
           </div>
         )}
       </Seccion>
-
-      {/* ── Descargar ── */}
-      <div data-no-print style={{ marginTop: '1.25rem' }}>
-        <button onClick={() => window.print()} style={{ ...btnPrimario('lg'), width: '100%' }}>
-          <Download size={16} /> Descargar PDF
-        </button>
-        <p style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', textAlign: 'center', marginTop: '.5rem', lineHeight: 1.5 }}>
-          Se abre el diálogo de impresión: elegí «Guardar como PDF» como destino.
-        </p>
-      </div>
     </div>
   )
 }
@@ -398,11 +386,97 @@ function Curva({ puntos }: { puntos: PuntoDia[] }) {
   )
 }
 
+/* ── Horas ────────────────────────────────────────────────── */
+
+/**
+ * Barras verticales por hora. El alto codifica la cantidad de servicios, que
+ * es lo que dice cuándo hay gente — el monto depende de qué se vendió.
+ */
+function Horas({ datos }: { datos: TotalPorHora[] }) {
+  const [sel, setSel] = useState<number | null>(null)
+
+  const max = Math.max(...datos.map(h => h.n), 1)
+  const pico = datos.reduce((a, b) => (b.n > a.n ? b : a))
+  const activa = datos.find(h => h.hora === sel) ?? pico
+
+  // Con muchas horas no entran todas las etiquetas: se muestra una de cada
+  // dos, siempre incluyendo los extremos y el pico.
+  const salto = datos.length > 10 ? 2 : 1
+  const etiquetar = (h: TotalPorHora, i: number) =>
+    i === 0 || i === datos.length - 1 || h.hora === pico.hora || i % salto === 0
+
+  return (
+    <div>
+      {/* Lectura de la barra activa, como en la curva diaria */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.5rem' }}>
+        <span style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', fontVariantNumeric: 'tabular-nums' }}>
+          {String(activa.hora).padStart(2, '0')}:00–{String(activa.hora + 1).padStart(2, '0')}:00
+          {activa.hora === pico.hora && sel === null ? ' · hora pico' : ''}
+        </span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums' }}>
+          {activa.n} {activa.n === 1 ? 'cobro' : 'cobros'}
+        </span>
+      </div>
+
+      <div style={{ position: 'relative', height: '7rem' }}>
+        {/* Grilla: la misma referencia de tres líneas que usa la curva */}
+        {[0, 0.5, 1].map(f => (
+          <div key={f} style={{
+            position: 'absolute', left: 0, right: 0, bottom: `${f * 100}%`,
+            borderTop: `1px ${f === 0 ? 'solid' : 'dashed'} var(--color-rim)`,
+          }} />
+        ))}
+
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', gap: '2px' }}>
+          {datos.map(h => {
+            const esActiva = h.hora === activa.hora
+            return (
+              <div
+                key={h.hora}
+                onClick={() => setSel(h.hora)}
+                onMouseEnter={() => setSel(h.hora)}
+                title={`${String(h.hora).padStart(2, '0')}:00 · ${h.n} ${h.n === 1 ? 'cobro' : 'cobros'} · ${bs(h.total)}`}
+                style={{
+                  flex: 1, minWidth: 0, height: '100%', cursor: 'pointer',
+                  display: 'flex', alignItems: 'flex-end',
+                }}
+              >
+                <div style={{
+                  width: '100%',
+                  // Una hora sin movimiento queda en cero de verdad: es lo que
+                  // le da forma a la distribución.
+                  height: h.n === 0 ? '2px' : `${(h.n / max) * 100}%`,
+                  background: h.n === 0
+                    ? 'var(--color-rim)'
+                    : esActiva ? 'var(--color-gold)' : 'var(--color-gold-glow)',
+                  borderTop: h.n > 0 && !esActiva ? '2px solid var(--color-gold)' : undefined,
+                  borderRadius: 'var(--r-sm) var(--r-sm) 0 0',
+                }} />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '2px', marginTop: '.35rem' }}>
+        {datos.map((h, i) => (
+          <span key={h.hora} style={{
+            flex: 1, textAlign: 'center', fontSize: '.58rem', minWidth: 0,
+            color: h.hora === activa.hora ? 'var(--color-gold)' : 'var(--color-ink-ghost)',
+            fontWeight: h.hora === activa.hora ? 600 : 400,
+            fontVariantNumeric: 'tabular-nums',
+          }}>{etiquetar(h, i) ? String(h.hora).padStart(2, '0') : ''}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /* ── Piezas ───────────────────────────────────────────────── */
 
 function Seccion({ titulo, sub, children }: { titulo: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="reporte-bloque" style={{
+    <div style={{
       background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
       borderRadius: 'var(--r-lg)', padding: '1rem', marginBottom: '.75rem',
     }}>
@@ -428,7 +502,7 @@ function Tile({ icono: Icono, label, valor, pie, pieAcento, resaltado }: {
   resaltado?: boolean
 }) {
   return (
-    <div className="reporte-bloque" style={{
+    <div style={{
       background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
       borderRadius: 'var(--r-lg)', padding: '1rem 1.1rem',
       display: 'flex', flexDirection: 'column', gap: '.45rem',

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Banknote, Percent, ChartColumn, Settings, CircleUser, ChevronDown, LogOut } from 'lucide-react'
+import { Banknote, Vault, Percent, ChartColumn, Settings, CircleUser, ChevronDown, LogOut } from 'lucide-react'
 import { useHideOnScroll, useAltura, useEsMobile } from '../../lib/useHideOnScroll'
 import { useParams } from 'react-router-dom'
 import { getProfessional } from '../../data/professionals'
@@ -7,15 +7,18 @@ import { buildThemeVars, PANEL_FONT_VARS, PANEL_FONTS_URL } from '../../lib/them
 import CajaGuard from '../../components/caja/CajaGuard'
 import { signOut, type PosUsuario } from '../../lib/pos/auth'
 import TabCobros from './TabCobros'
+import TabCaja from './TabCaja'
 import TabComisiones from './TabComisiones'
 import TabReportes from './TabReportes'
 import TabConfig from './TabConfig'
 import type { Professional } from '../../types/professional'
 
-type Pestana = 'cobros' | 'comisiones' | 'reportes' | 'config'
+type Pestana = 'cobros' | 'caja' | 'comisiones' | 'reportes' | 'config'
 
+// La caja la arquea quien está en el mostrador, así que no es soloDueno.
 const PESTANAS: { id: Pestana; label: string; icon: typeof Banknote; soloDueno?: boolean }[] = [
   { id: 'cobros',     label: 'Cobros',     icon: Banknote },
+  { id: 'caja',       label: 'Caja',       icon: Vault },
   { id: 'comisiones', label: 'Comisiones', icon: Percent,     soloDueno: true },
   { id: 'reportes',   label: 'Reportes',   icon: ChartColumn, soloDueno: true },
   { id: 'config',     label: 'Ajustes',    icon: Settings,    soloDueno: true },
@@ -151,6 +154,7 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
       }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
           {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} />
+            : activa === 'caja' ? <TabCaja pro={pro} usuario={usuario} />
             : activa === 'comisiones' ? <TabComisiones pro={pro} usuario={usuario} />
             : activa === 'reportes' ? <TabReportes pro={pro} />
             : activa === 'config' ? <TabConfig pro={pro} />
@@ -179,8 +183,14 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
                 borderTop: `2px solid ${active ? 'var(--color-gold)' : 'transparent'}`,
                 marginTop: -1, cursor: 'pointer',
                 color: active ? 'var(--color-gold)' : 'var(--color-ink-dim)',
-                fontFamily: 'var(--font-body)', fontSize: '.68rem',
-                fontWeight: active ? 500 : 300, letterSpacing: '.04em', textTransform: 'uppercase',
+                fontFamily: 'var(--font-body)',
+                // Con cinco pestañas cada una queda en ~67px útiles y
+                // "COMISIONES" no entra: se achica el tipo en vez de cortar
+                // la palabra en dos líneas, que descuadraría la barra.
+                fontSize: visibles.length >= 5 ? '.6rem' : '.68rem',
+                fontWeight: active ? 500 : 300,
+                letterSpacing: visibles.length >= 5 ? '.02em' : '.04em',
+                textTransform: 'uppercase', whiteSpace: 'nowrap',
                 transition: 'color .2s, border-color .2s',
               }}
             >
