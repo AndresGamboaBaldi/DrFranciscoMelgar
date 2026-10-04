@@ -30,6 +30,9 @@ export interface Venta {
   created_at: string
   cobrado_por: string
   anulada: boolean
+  /** Null si nunca se corrigió. Ver migration_pos_editar_venta.sql. */
+  editada_at: string | null
+  editada_por: string | null
   items: VentaItem[]
 }
 
@@ -91,6 +94,7 @@ export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Pro
     .select(`
       id, barbero_business_id, appointment_id, cliente_nombre,
       subtotal, propina, total, metodo_pago, fecha, created_at, cobrado_por, anulada,
+      editada_at, editada_por,
       items:pos_venta_items ( service_id, nombre, precio, cantidad )
     `)
     .eq('business_id', businessId)
@@ -225,6 +229,98 @@ export async function registrarCobro(c: NuevoCobro): Promise<string> {
   }
 
   return ventaId
+}
+
+export interface EdicionCobro {
+  ventaId: string
+  businessId: string
+  barberoBusinessId: string
+  clienteNombre?: string | null
+  items: VentaItem[]
+  propina: number
+  metodoPago: MetodoPago
+  /** Quién está corrigiendo. Queda en editada_por. */
+  editadoPor: string
+}
+
+/**
+ * La fila no se dejó tocar.
+ *
+ * Con RLS, un UPDATE que la política rechaza no devuelve error: devuelve cero
+ * filas. Sin distinguirlo, la cajera vería "guardado" y nada habría cambiado.
+ */
+export class SinPermisoEditarError extends Error {
+  constructor() {
+    super('sin-permiso-editar')
+    this.name = 'SinPermisoEditarError'
+  }
+}
+
+/**
+ * Corrige un cobro ya registrado: montos, método, barbero, cliente y detalle.
+ *
+ * No toca `appointment_id` ni `arqueo_id`: el cobro sigue perteneciendo a la
+ * misma cita y al mismo turno de caja. Lo que cambia es cuánto y cómo se cobró.
+ */
+export async function editarCobro(e: EdicionCobro): Promise<void> {
+  if (!posSupabase) throw new Error('Supabase no está configurado')
+
+  const subtotal = e.items.reduce((s, i) => s + i.precio * i.cantidad, 0)
+  const total = subtotal + e.propina
+
+  // Primero la venta: es la que tiene la política restrictiva, así que si no
+  // hay permiso cortamos acá sin haber tocado los items.
+  const { data, error } = await posSupabase
+    .from('pos_ventas')
+    .update({
+      barbero_business_id: e.barberoBusinessId,
+      cliente_nombre: e.clienteNombre ?? null,
+      subtotal,
+      propina: e.propina,
+      total,
+      metodo_pago: e.metodoPago,
+      editada_at: new Date().toISOString(),
+      editada_por: e.editadoPor,
+    })
+    .eq('id', e.ventaId)
+    .eq('anulada', false)
+    .select('id')
+
+  if (error) {
+    console.error('[editarCobro] venta', error.code, error.message, error.details)
+    throw new ErrorCobro(error.code ?? '', error.message)
+  }
+  if (!data || data.length === 0) throw new SinPermisoEditarError()
+
+  // El detalle se reemplaza entero: emparejar línea por línea sería más
+  // trabajo del que vale para un ticket de tres renglones.
+  const { error: errBorrar } = await posSupabase
+    .from('pos_venta_items')
+    .delete()
+    .eq('venta_id', e.ventaId)
+
+  if (errBorrar) {
+    console.error('[editarCobro] borrar items', errBorrar.code, errBorrar.message)
+    throw new ErrorCobro(errBorrar.code ?? '', errBorrar.message)
+  }
+
+  const { error: errItems } = await posSupabase
+    .from('pos_venta_items')
+    .insert(e.items.map(i => ({
+      venta_id: e.ventaId,
+      business_id: e.businessId,
+      service_id: i.service_id,
+      nombre: i.nombre,
+      precio: i.precio,
+      cantidad: i.cantidad,
+    })))
+
+  if (errItems) {
+    // Los totales de la venta ya quedaron bien, así que los reportes y las
+    // comisiones cuadran; lo que falta es el desglose por servicio.
+    console.error('[editarCobro] items', errItems.code, errItems.message)
+    throw new ErrorCobro(errItems.code ?? '', errItems.message)
+  }
 }
 
 /** Error con el código de Postgres a la vista, para poder explicarlo en pantalla. */

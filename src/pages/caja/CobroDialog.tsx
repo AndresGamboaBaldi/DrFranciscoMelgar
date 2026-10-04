@@ -2,7 +2,10 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { X, Plus, QrCode, Banknote, CreditCard, ChevronDown } from 'lucide-react'
 import { bs } from './cajaTheme'
 import { btnPrimario } from '../../lib/panelUI'
-import { registrarCobro, CitaYaCobradaError, ErrorCobro, type MetodoPago, type VentaItem } from '../../lib/pos/cobros'
+import {
+  registrarCobro, editarCobro, CitaYaCobradaError, ErrorCobro, SinPermisoEditarError,
+  type MetodoPago, type VentaItem, type Venta,
+} from '../../lib/pos/cobros'
 import type { ProService, StaffMember } from '../../types/professional'
 
 export interface CobroPrefill {
@@ -24,8 +27,42 @@ interface Props {
   /** Día al que se imputa el cobro — el que se está mirando en la lista. */
   fecha: string
   prefill: CobroPrefill
+  /**
+   * Cuando viene, el diálogo corrige esa venta en vez de crear una nueva.
+   * Es el mismo formulario a propósito: los campos de un cobro y los de su
+   * corrección son los mismos, y mantener dos pantallas las desincroniza.
+   */
+  venta?: Venta | null
   onCerrar: () => void
   onCobrado: () => void
+}
+
+/**
+ * Reparte los items guardados entre el servicio principal y los extras.
+ *
+ * Solo se toma como principal un item de catálogo con cantidad 1: así el
+ * campo de precio único del formulario nunca cambia en silencio un item
+ * que venía con cantidad mayor.
+ */
+function repartirItems(items: VentaItem[], catalogo: ProService[]) {
+  const i = items.findIndex(
+    it => it.service_id && Number(it.cantidad) === 1 && catalogo.some(s => s.id === it.service_id),
+  )
+  const principal = i >= 0 ? items[i] : null
+  return {
+    servicioId: principal?.service_id ?? '',
+    servicioPrecio: principal ? Number(principal.precio) : 0,
+    libres: items
+      .filter((_, n) => n !== i)
+      .map((it, n): Linea => ({
+        id: `libre-${n}`,
+        service_id: it.service_id,
+        nombre: it.nombre,
+        precio: Number(it.precio),
+        cantidad: Number(it.cantidad),
+        libre: true,
+      })),
+  }
 }
 
 const METODOS: { id: MetodoPago; label: string; icono: typeof QrCode }[] = [
@@ -46,47 +83,56 @@ function precioSugerido(price?: string): number {
 interface Linea extends VentaItem { id: string; libre?: boolean }
 
 export default function CobroDialog({
-  businessId, arqueoId, userId, barberos, servicios, qrUrl, fecha, prefill, onCerrar, onCobrado,
+  businessId, arqueoId, userId, barberos, servicios, qrUrl, fecha, prefill, venta, onCerrar, onCobrado,
 }: Props) {
+  const editando = !!venta
+
   const [verQr, setVerQr] = useState(false)
   const [barbero, setBarbero] = useState(
-    prefill.barberoBusinessId ?? barberos[0]?.businessId ?? businessId,
+    venta?.barbero_business_id ?? prefill.barberoBusinessId ?? barberos[0]?.businessId ?? businessId,
   )
   const [cambiandoBarbero, setCambiandoBarbero] = useState(false)
   const [eligiendo, setEligiendo] = useState(false)
-  const [cliente, setCliente] = useState(prefill.clienteNombre ?? '')
+  const [cliente, setCliente] = useState(venta?.cliente_nombre ?? prefill.clienteNombre ?? '')
 
   const barberoSel = barberos.find(b => b.businessId === barbero) ?? null
   // Un barbero puede tener catálogo propio; si no, usa el del negocio.
   const catalogo = barberoSel?.services ?? servicios
 
-  // El servicio principal: viene de la cita si coincide con el catálogo.
-  const [servicioId, setServicioId] = useState<string>(() => {
-    const base = barberos.find(b => b.businessId === (prefill.barberoBusinessId ?? ''))?.services ?? servicios
+  // Estado inicial del detalle: de la venta cuando se corrige, de la cita
+  // cuando es un cobro nuevo. Se calcula una sola vez.
+  const [inicial] = useState(() => {
+    const base = barberos.find(
+      b => b.businessId === (venta?.barbero_business_id ?? prefill.barberoBusinessId ?? ''),
+    )?.services ?? servicios
+
+    if (venta) return repartirItems(venta.items, base)
+
     const coincide = prefill.servicioNombre
       ? base.find(s => s.name.toLowerCase() === prefill.servicioNombre!.toLowerCase())
       : null
-    return coincide?.id ?? ''
-  })
-  const [servicioPrecio, setServicioPrecio] = useState(() => {
-    const base = barberos.find(b => b.businessId === (prefill.barberoBusinessId ?? ''))?.services ?? servicios
-    const coincide = prefill.servicioNombre
-      ? base.find(s => s.name.toLowerCase() === prefill.servicioNombre!.toLowerCase())
-      : null
-    return coincide ? precioSugerido(coincide.price) : 0
+
+    return {
+      servicioId: coincide?.id ?? '',
+      servicioPrecio: coincide ? precioSugerido(coincide.price) : 0,
+      // El servicio de la cita que no figura en el catálogo entra como extra.
+      libres: prefill.servicioNombre && !coincide
+        ? [{ id: 'libre-0', service_id: null, nombre: prefill.servicioNombre, precio: 0, cantidad: 1, libre: true } as Linea]
+        : [],
+    }
   })
 
-  // Extras: lo que se suma al servicio principal, o el servicio de la cita
-  // cuando no figura en el catálogo.
-  const [libres, setLibres] = useState<Linea[]>(() =>
-    prefill.servicioNombre && !servicios.some(s => s.name.toLowerCase() === prefill.servicioNombre!.toLowerCase())
-      ? [{ id: 'libre-0', service_id: null, nombre: prefill.servicioNombre, precio: 0, cantidad: 1, libre: true }]
-      : [],
+  const [servicioId, setServicioId] = useState(inicial.servicioId)
+  const [servicioPrecio, setServicioPrecio] = useState(inicial.servicioPrecio)
+  const [libres, setLibres] = useState<Linea[]>(inicial.libres)
+
+  const [propina, setPropina] = useState(venta ? Number(venta.propina) : 0)
+  const [propinaLibre, setPropinaLibre] = useState(
+    // Una propina que no es uno de los montos rápidos nace en el campo libre,
+    // o el botón quedaría sin marcar y parecería que no hay propina.
+    venta ? !PROPINAS_RAPIDAS.includes(Number(venta.propina)) : false,
   )
-
-  const [propina, setPropina] = useState(0)
-  const [propinaLibre, setPropinaLibre] = useState(false)
-  const [metodo, setMetodo] = useState<MetodoPago>('efectivo')
+  const [metodo, setMetodo] = useState<MetodoPago>(venta?.metodo_pago ?? 'efectivo')
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
 
@@ -104,8 +150,10 @@ export default function CobroDialog({
     return () => cancelAnimationFrame(id)
   }, [propinaLibre])
 
+  // Por cantidad: los extras que se agregan acá siempre nacen en 1, pero una
+  // venta vieja puede traer un item con cantidad mayor y no hay que perderla.
   const subtotal = useMemo(
-    () => servicioPrecio + libres.reduce((s, l) => s + l.precio, 0),
+    () => servicioPrecio + libres.reduce((s, l) => s + l.precio * l.cantidad, 0),
     [servicioPrecio, libres],
   )
   const total = subtotal + propina
@@ -133,7 +181,7 @@ export default function CobroDialog({
         ? [{ service_id: servicioSel.id, nombre: servicioSel.name, precio: servicioPrecio, cantidad: 1 }]
         : []),
       ...libres.filter(l => l.nombre.trim()).map(l => ({
-        service_id: null, nombre: l.nombre.trim(), precio: l.precio, cantidad: 1,
+        service_id: l.service_id, nombre: l.nombre.trim(), precio: l.precio, cantidad: l.cantidad,
       })),
     ].filter(i => i.precio > 0)
 
@@ -142,21 +190,34 @@ export default function CobroDialog({
     setGuardando(true)
     setError('')
     try {
-      await registrarCobro({
-        businessId, arqueoId, fecha,
-        barberoBusinessId: barbero,
-        appointmentId: prefill.appointmentId ?? null,
-        clienteNombre: cliente.trim() || null,
-        items, propina, metodoPago: metodo, cobradoPor: userId,
-      })
+      if (venta) {
+        await editarCobro({
+          ventaId: venta.id, businessId,
+          barberoBusinessId: barbero,
+          clienteNombre: cliente.trim() || null,
+          items, propina, metodoPago: metodo, editadoPor: userId,
+        })
+      } else {
+        await registrarCobro({
+          businessId, arqueoId, fecha,
+          barberoBusinessId: barbero,
+          appointmentId: prefill.appointmentId ?? null,
+          clienteNombre: cliente.trim() || null,
+          items, propina, metodoPago: metodo, cobradoPor: userId,
+        })
+      }
       onCobrado()
     } catch (e) {
       setError(
-        e instanceof CitaYaCobradaError
-          ? 'Esta cita ya fue cobrada. Actualizá la lista para ver el cobro.'
-          : e instanceof ErrorCobro
-            ? e.explicacion
-            : 'No se pudo registrar el cobro. Revisá la conexión e intentá de nuevo.',
+        e instanceof SinPermisoEditarError
+          ? 'Tu cuenta no puede corregir cobros. Solo el dueño puede hacerlo.'
+          : e instanceof CitaYaCobradaError
+            ? 'Esta cita ya fue cobrada. Actualizá la lista para ver el cobro.'
+            : e instanceof ErrorCobro
+              ? e.explicacion
+              : venta
+                ? 'No se pudo guardar la corrección. Revisá la conexión e intentá de nuevo.'
+                : 'No se pudo registrar el cobro. Revisá la conexión e intentá de nuevo.',
       )
       setGuardando(false)
     }
@@ -197,11 +258,13 @@ export default function CobroDialog({
             <p style={{ display: 'flex', alignItems: 'center', gap: '.45rem' }}>
               <span style={{ width: '.45rem', height: '.45rem', borderRadius: '50%', background: 'var(--color-gold)', flexShrink: 0 }} />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1 }}>
-                Nuevo cobro
+                {editando ? 'Corregir cobro' : 'Nuevo cobro'}
               </span>
             </p>
             <p style={{ fontSize: '.64rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)', marginTop: '.35rem' }}>
-              {prefill.appointmentId ? 'Cita agendada' : 'Sin cita previa'}
+              {editando
+                ? `Cobrado ${new Date(venta!.created_at).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', hour12: false })}`
+                : prefill.appointmentId ? 'Cita agendada' : 'Sin cita previa'}
             </p>
           </div>
           <button onClick={onCerrar} disabled={guardando} aria-label="Cerrar" style={{
@@ -520,15 +583,27 @@ export default function CobroDialog({
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.85rem' }}>
             <span style={{ fontSize: '.66rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-              Total a cobrar
+              {editando ? 'Nuevo total' : 'Total a cobrar'}
             </span>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {bs(total)}
             </span>
           </div>
+
+          {/* El total viejo, al lado del nuevo: sin esto no se ve qué cambió
+              ni cuánto se movió la caja del día. */}
+          {editando && Math.abs(total - Number(venta!.total)) > 0.005 && (
+            <p style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', textAlign: 'right', marginTop: '-.6rem', marginBottom: '.85rem' }}>
+              Antes {bs(Number(venta!.total))} · {total > Number(venta!.total) ? '+' : '−'}
+              {' '}{bs(Math.abs(total - Number(venta!.total)))}
+            </p>
+          )}
+
           <button onClick={guardar} disabled={guardando}
             style={{ ...btnPrimario('lg', guardando), width: '100%' }}>
-            {guardando ? 'Registrando…' : 'Registrar cobro'}
+            {guardando
+              ? (editando ? 'Guardando…' : 'Registrando…')
+              : (editando ? 'Guardar cambios' : 'Registrar cobro')}
           </button>
         </footer>
       </div>

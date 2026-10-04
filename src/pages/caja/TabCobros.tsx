@@ -6,8 +6,8 @@ import type { PosUsuario } from '../../lib/pos/auth'
 import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta, type Arqueo } from '../../lib/pos/cobros'
 import { bs, bsCorto } from './cajaTheme'
 import { hoyISO, correrDias } from '../../lib/pos/fechas'
-import { btnPrimario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard } from 'lucide-react'
+import { btnPrimario, btnSecundario, chip } from '../../lib/panelUI'
+import { Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard, Pencil } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -53,6 +53,8 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [falloCarga, setFalloCarga] = useState(false)
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
+  /** La venta que se está corrigiendo. Solo el dueño puede (política pos_ventas_update). */
+  const [editando, setEditando] = useState<Venta | null>(null)
   /** Por ahora siempre hoy. La columna `fecha` de pos_ventas ya permite
    *  imputar un cobro a otro día si se vuelve a agregar el selector. */
   const fecha = hoyISO()
@@ -246,7 +248,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
         </div>
       )}
 
-      {prefill && arqueo && (
+      {(prefill || editando) && arqueo && (
         <CobroDialog
           businessId={pro.businessId}
           arqueoId={arqueo.id}
@@ -255,9 +257,13 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
           servicios={pro.services}
           qrUrl={qrUrl}
           fecha={fecha}
-          prefill={prefill}
-          onCerrar={() => setPrefill(null)}
-          onCobrado={() => { setPrefill(null); cargar() }}
+          prefill={prefill ?? {}}
+          venta={editando}
+          // key: al pasar de un cobro a otro hay que remontar el formulario,
+          // porque su estado inicial se calcula una sola vez.
+          key={editando ? `edit-${editando.id}` : 'nuevo'}
+          onCerrar={() => { setPrefill(null); setEditando(null) }}
+          onCobrado={() => { setPrefill(null); setEditando(null); cargar() }}
         />
       )}
 
@@ -265,7 +271,11 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
         <DetalleCobro
           venta={detalle}
           cobradoPor={nombres[detalle.cobrado_por] ?? 'Usuario desconocido'}
+          editadoPor={detalle.editada_por ? nombres[detalle.editada_por] ?? 'Usuario desconocido' : null}
           barbero={nombrePorId.get(detalle.barbero_business_id) ?? detalle.barbero_business_id}
+          onEditar={usuario.rol === 'dueno'
+            ? () => { setEditando(detalle); setDetalle(null) }
+            : undefined}
           onCerrar={() => setDetalle(null)}
         />
       )}
@@ -275,8 +285,15 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
 
 /* ── Detalle del cobro ────────────────────────────────────── */
 
-function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
-  venta: Venta; cobradoPor: string; barbero: string; onCerrar: () => void
+function DetalleCobro({ venta, cobradoPor, editadoPor, barbero, onEditar, onCerrar }: {
+  venta: Venta
+  cobradoPor: string
+  /** Null si nunca se corrigió. */
+  editadoPor: string | null
+  barbero: string
+  /** Sin esto el detalle queda de solo lectura: la cajera no corrige cobros. */
+  onEditar?: () => void
+  onCerrar: () => void
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar() }
@@ -338,6 +355,20 @@ function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
             <div style={{ marginTop: '.9rem' }}>
               <Campo rotulo="Fecha" valor={momento.toLocaleDateString('es-BO', { day: '2-digit', month: 'long', year: 'numeric' })} />
             </div>
+
+            {/* Un cobro corregido tiene que decirlo: si no, el monto que se ve
+                no es el que se registró y nadie se entera. */}
+            {venta.editada_at && (
+              <p style={{
+                display: 'flex', alignItems: 'center', gap: '.35rem',
+                marginTop: '.9rem', paddingTop: '.75rem', borderTop: '1px solid var(--color-rim)',
+                fontSize: '.68rem', color: 'var(--color-ink-ghost)', lineHeight: 1.45,
+              }}>
+                <Pencil size={11} style={{ flexShrink: 0 }} />
+                Corregido por {editadoPor} el{' '}
+                {new Date(venta.editada_at).toLocaleString('es-BO', { dateStyle: 'short', timeStyle: 'short' })}
+              </p>
+            )}
           </div>
 
           {/* Datos del cobro */}
@@ -402,6 +433,14 @@ function DetalleCobro({ venta, cobradoPor, barbero, onCerrar }: {
             </span>
           </div>
         </div>
+
+        {onEditar && (
+          <footer style={{ padding: '.85rem 1rem', borderTop: '1px solid var(--color-rim)', flexShrink: 0 }}>
+            <button onClick={onEditar} style={{ ...btnSecundario('md'), width: '100%' }}>
+              <Pencil size={14} /> Corregir cobro
+            </button>
+          </footer>
+        )}
       </div>
     </div>
   )
