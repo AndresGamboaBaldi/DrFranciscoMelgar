@@ -18,16 +18,56 @@ export type PosAccesoError =
   | 'inactiva'        // el dueño la desactivó
   | 'error-red'       // no se pudo averiguar: timeout o conexión caída
 
-export async function signIn(email: string, password: string): Promise<string | null> {
+/**
+ * Dominio de los correos internos.
+ *
+ * Supabase Auth no sabe de nombres de usuario: pide un correo. Para que la
+ * cajera entre con «caja1» y nada más, se guarda un correo sintético bajo este
+ * dominio. No existe, no recibe nada y nunca se le manda nada: las cuentas se
+ * crean ya confirmadas y la clave la repone el dueño a mano.
+ */
+const DOMINIO_INTERNO = 'caja.probo.pro'
+
+/** 'Caja 1' → 'caja1'. Minúsculas, sin acentos ni espacios. */
+export function normalizarUsuario(u: string): string {
+  return u.trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9._-]/g, '')
+}
+
+/**
+ * Usuario → correo interno.
+ *
+ * El businessId va adentro para que dos negocios puedan tener los dos una
+ * «caja1» sin chocar. Si lo que llega ya es un correo, pasa tal cual: las
+ * cuentas viejas se crearon con correos de verdad y tienen que seguir entrando.
+ */
+export function usuarioAEmail(usuario: string, businessId: string): string {
+  const txt = usuario.trim().toLowerCase()
+  if (txt.includes('@')) return txt
+  return `${normalizarUsuario(txt)}.${businessId}@${DOMINIO_INTERNO}`
+}
+
+/** El inverso, para mostrar en pantalla. Un correo real se muestra entero. */
+export function emailAUsuario(email: string, businessId: string): string {
+  const sufijo = `.${businessId}@${DOMINIO_INTERNO}`
+  return email.endsWith(sufijo) ? email.slice(0, -sufijo.length) : email
+}
+
+export async function signIn(
+  identificador: string,
+  password: string,
+  businessId: string,
+): Promise<string | null> {
   if (!posSupabase) return 'Supabase no está configurado'
   const { error } = await posSupabase.auth.signInWithPassword({
-    email: email.trim(),
+    email: usuarioAEmail(identificador, businessId),
     password,
   })
   if (!error) return null
   // Supabase devuelve el mismo error para usuario inexistente y clave mala,
-  // a propósito — no conviene revelar qué correos existen.
-  if (error.message.includes('Invalid login credentials')) return 'Correo o contraseña incorrectos'
+  // a propósito — no conviene revelar qué cuentas existen.
+  if (error.message.includes('Invalid login credentials')) return 'Usuario o contraseña incorrectos'
   if (error.message.includes('Email not confirmed')) return 'Falta confirmar el correo de esta cuenta'
   return error.message
 }

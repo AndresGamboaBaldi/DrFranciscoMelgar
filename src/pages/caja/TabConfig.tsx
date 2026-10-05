@@ -2,9 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { QrCode, Upload, Trash2 } from 'lucide-react'
 import { getScheduleSettings, uploadQrImage, savePaymentSettings } from '../../lib/supabase'
 import { btnFantasma } from '../../lib/panelUI'
+import SeccionEquipo from './SeccionEquipo'
 import type { Professional } from '../../types/professional'
+import type { PosUsuario } from '../../lib/pos/auth'
 
-export default function TabConfig({ pro }: { pro: Professional }) {
+export default function TabConfig({ pro, usuario }: { pro: Professional; usuario: PosUsuario }) {
   const [qrUrl, setQrUrl] = useState<string | null>(null)
   // Se conservan tal cual al guardar: el upsert de admin-write escribe las tres
   // columnas juntas, así que si no los mandamos se borra el cobro anticipado.
@@ -75,11 +77,6 @@ export default function TabConfig({ pro }: { pro: Professional }) {
           </span>
         </div>
 
-        <p style={{ fontSize: '.85rem', color: 'var(--color-ink-dim)', lineHeight: 1.6, marginBottom: '1rem' }}>
-          Es el que se le muestra al cliente cuando paga por QR en el mostrador.
-          {requierePago && ' También es el que ven los clientes al reservar con pago anticipado.'}
-        </p>
-
         <input ref={archivoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={elegirArchivo} />
 
         {cargando ? (
@@ -98,9 +95,6 @@ export default function TabConfig({ pro }: { pro: Professional }) {
               <button onClick={quitar} disabled={subiendo} style={{ ...btnFantasma('md'), color: '#c47070', borderColor: 'var(--color-rim-l)' }}>
                 <Trash2 size={13} /> Quitar
               </button>
-              <p style={{ fontSize: '.75rem', color: 'var(--color-ink-ghost)', lineHeight: 1.5 }}>
-                Usá una captura nítida del QR de tu billetera. Al mostrarlo, subí el brillo de la pantalla.
-              </p>
             </div>
           </div>
         ) : (
@@ -126,6 +120,8 @@ export default function TabConfig({ pro }: { pro: Professional }) {
           <p role="alert" style={{ fontSize: '.78rem', color: '#c47070', marginTop: '.75rem' }}>{error}</p>
         )}
       </section>
+
+      <SeccionEquipo pro={pro} usuario={usuario} />
     </div>
   )
 }

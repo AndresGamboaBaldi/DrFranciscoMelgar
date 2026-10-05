@@ -111,7 +111,7 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
           </h1>
         </div>
 
-        <MenuCuenta nombre={usuario.nombre} rol={esDueno ? 'Dueño' : 'Cajera'} />
+        <MenuCuenta nombre={usuario.nombre} rol={esDueno ? 'Dueño' : 'Caja'} />
       </header>
 
       {/* ── Pestañas (desktop/tablet) ── */}
@@ -157,7 +157,7 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
             : activa === 'caja' ? <TabCaja pro={pro} usuario={usuario} />
             : activa === 'comisiones' ? <TabComisiones pro={pro} usuario={usuario} />
             : activa === 'reportes' ? <TabReportes pro={pro} />
-            : activa === 'config' ? <TabConfig pro={pro} />
+            : activa === 'config' ? <TabConfig pro={pro} usuario={usuario} />
             : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
         </div>
       </main>

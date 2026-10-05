@@ -33,7 +33,8 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
   const [usuario, setUsuario] = useState<PosUsuario | null>(null)
   const [rechazo, setRechazo] = useState<PosAccesoError | null>(null)
 
-  const [email, setEmail] = useState('')
+  /** Usuario a secas, o un correo: las cuentas viejas se crearon con correo. */
+  const [identificador, setIdentificador] = useState('')
   const [password, setPassword] = useState('')
   const [verClave, setVerClave] = useState(false)
   const [error, setError] = useState('')
@@ -59,10 +60,10 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password) { setError('Completa correo y contraseña'); return }
+    if (!identificador.trim() || !password) { setError('Completá usuario y contraseña'); return }
     setEnviando(true)
     setError('')
-    const err = await signIn(email, password)
+    const err = await signIn(identificador, password, businessId)
     if (err) { setError(err); setEnviando(false) }
     // Si salió bien, onAuthChange dispara revisar() y el guard se abre solo.
   }
@@ -140,10 +141,13 @@ export default function CajaGuard({ businessId, nombreNegocio, slug, children }:
               Inicia sesión para registrar cobros.
             </p>
             <form onSubmit={entrar} style={{ display: 'flex', flexDirection: 'column', gap: '.7rem' }}>
+              {/* type="text", no "email": el campo acepta un usuario a secas,
+                  y con type="email" el navegador lo marcaría como inválido. */}
               <input
-                type="email" value={email} autoFocus autoComplete="username"
-                onChange={e => { setEmail(e.target.value); setError('') }}
-                placeholder="Correo" style={input}
+                type="text" value={identificador} autoFocus autoComplete="username"
+                autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                onChange={e => { setIdentificador(e.target.value); setError('') }}
+                placeholder="Usuario" style={input}
               />
               <div style={{ position: 'relative' }}>
                 <input
