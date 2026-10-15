@@ -198,13 +198,27 @@ export async function getReporte(
   }
 }
 
-/** Facturación por día de los últimos `dias`, incluyendo los días sin ventas. */
-export async function getCurvaDiaria(businessId: string, dias = 14): Promise<PuntoDia[]> {
-  if (!posSupabase) return []
+/**
+ * Rango que cubre la curva diaria según el período elegido arriba.
+ *
+ * No es el mismo que `calcularPeriodoReporte`: la curva de «semana» muestra los
+ * últimos 7 días y no la semana corrida, porque con un lunes a la mañana la
+ * semana corrida es un solo punto y no se ve ninguna tendencia. «Mes» sí es el
+ * mes en curso, que es como se mira la facturación de un mes.
+ */
+export function calcularPeriodoCurva(cual: 'hoy' | 'semana' | 'mes' | 'anio'): Periodo {
+  const hoy = new Date()
+  const hasta = iso(hoy)
+  if (cual === 'mes') return { desde: iso(new Date(hoy.getFullYear(), hoy.getMonth(), 1)), hasta }
+  const dias = cual === 'anio' ? 365 : 7
+  const d = new Date(hoy)
+  d.setDate(d.getDate() - (dias - 1))
+  return { desde: iso(d), hasta }
+}
 
-  const fin = new Date()
-  const inicio = new Date(fin)
-  inicio.setDate(inicio.getDate() - (dias - 1))
+/** Facturación por día del período, incluyendo los días sin ventas. */
+export async function getCurvaDiaria(businessId: string, periodo: Periodo): Promise<PuntoDia[]> {
+  if (!posSupabase) return []
 
   const { data } = await posSupabase
     .from('pos_ventas')
@@ -214,13 +228,17 @@ export async function getCurvaDiaria(businessId: string, dias = 14): Promise<Pun
     .eq('business_id', businessId)
     .eq('anulada', false)
     // Por `fecha` y no por `created_at`: es el día al que pertenece el cobro.
-    .gte('fecha', iso(inicio))
-    .lte('fecha', iso(fin))
+    .gte('fecha', periodo.desde)
+    .lte('fecha', periodo.hasta)
 
   const porDia = new Map<string, number>()
   for (const v of (data ?? []) as { subtotal: number; propina: number; fecha: string }[]) {
     porDia.set(v.fecha, (porDia.get(v.fecha) ?? 0) + Number(v.subtotal) + Number(v.propina))
   }
+
+  const inicio = new Date(`${periodo.desde}T00:00:00`)
+  const fin = new Date(`${periodo.hasta}T00:00:00`)
+  const dias = Math.round((fin.getTime() - inicio.getTime()) / 86400000) + 1
 
   // Los días vacíos van en 0: si se omiten, la curva miente sobre el ritmo.
   const puntos: PuntoDia[] = []

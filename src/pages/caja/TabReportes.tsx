@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { TrendingUp, TrendingDown, Scissors, Receipt, Wallet, Banknote, QrCode, CreditCard } from 'lucide-react'
 import type { Professional, StaffMember } from '../../types/professional'
 import {
-  calcularPeriodoReporte, getReporte, getCurvaDiaria,
+  calcularPeriodoReporte, calcularPeriodoCurva, getReporte, getCurvaDiaria,
   type Reporte, type PuntoDia, type TotalPorHora,
 } from '../../lib/pos/reportes'
 import { bs, bsCorto } from './cajaTheme'
 import { btnPrimario, chip } from '../../lib/panelUI'
-import { useEsMobile } from '../../lib/useHideOnScroll'
 
 type Rango = 'hoy' | 'semana' | 'mes' | 'anio'
 
@@ -18,21 +17,18 @@ const RANGOS: { id: Rango; label: string }[] = [
   { id: 'anio',   label: 'Año' },
 ]
 
-/**
- * 7 días en celular y 14 en pantallas anchas.
- *
- * Con 14 puntos a 343px de ancho, cada zona de toque queda en 24px — menos
- * del mínimo de 44px para el dedo. Con 7 sube a ~49px.
- */
-const DIAS_MOVIL = 7
-const DIAS_ESCRITORIO = 14
+/** Qué abarca la curva en cada período, para el subtítulo de la sección. */
+const CURVA_LABEL: Record<Rango, string> = {
+  hoy:    'Últimos 7 días',
+  semana: 'Últimos 7 días',
+  mes:    'Mes en curso',
+  anio:   'Últimos 365 días',
+}
 
 const ICONO_METODO = { efectivo: Banknote, qr: QrCode, tarjeta: CreditCard } as const
 const ETIQUETA_METODO = { efectivo: 'Efectivo', qr: 'QR', tarjeta: 'Tarjeta' } as const
 
 export default function TabReportes({ pro }: { pro: Professional }) {
-  const esMobile = useEsMobile()
-  const diasCurva = esMobile ? DIAS_MOVIL : DIAS_ESCRITORIO
   const barberos: StaffMember[] = useMemo(() => pro.staff ?? [], [pro.staff])
   const barberoIds = useMemo(
     () => (barberos.length ? barberos.map(b => b.businessId) : [pro.businessId]),
@@ -41,6 +37,9 @@ export default function TabReportes({ pro }: { pro: Professional }) {
 
   const [rango, setRango] = useState<Rango>('mes')
   const periodo = useMemo(() => calcularPeriodoReporte(rango), [rango])
+  // La curva sigue al período elegido, pero con su propio rango: ver un solo
+  // punto cuando está en «Hoy» no muestra ninguna tendencia.
+  const periodoCurva = useMemo(() => calcularPeriodoCurva(rango), [rango])
 
   const [rep, setRep] = useState<Reporte | null>(null)
   const [curva, setCurva] = useState<PuntoDia[]>([])
@@ -51,7 +50,7 @@ export default function TabReportes({ pro }: { pro: Professional }) {
     try {
       const [r, c] = await Promise.all([
         getReporte(pro.businessId, periodo, barberoIds),
-        getCurvaDiaria(pro.businessId, diasCurva),
+        getCurvaDiaria(pro.businessId, periodoCurva),
       ])
       setRep(r); setCurva(c); setFallo(false)
     } catch {
@@ -59,7 +58,7 @@ export default function TabReportes({ pro }: { pro: Professional }) {
     } finally {
       setCargando(false)
     }
-  }, [pro.businessId, periodo, barberoIds, diasCurva])
+  }, [pro.businessId, periodo, periodoCurva, barberoIds])
 
   useEffect(() => { setCargando(true); cargar() }, [cargar])
 
@@ -209,7 +208,7 @@ export default function TabReportes({ pro }: { pro: Professional }) {
       </div>
 
       {/* ── Curva ── */}
-      <Seccion titulo="Facturación diaria" sub={`Últimos ${diasCurva} días`}>
+      <Seccion titulo="Facturación diaria" sub={CURVA_LABEL[rango]}>
         <Curva puntos={curva} />
       </Seccion>
 
@@ -318,15 +317,30 @@ export default function TabReportes({ pro }: { pro: Professional }) {
 
 /* ── Curva ────────────────────────────────────────────────── */
 
+/** 'YYYY-MM-DD' → 'mar 15 oct' */
+function fechaLectura(f: string): string {
+  return new Date(`${f}T00:00:00`).toLocaleDateString('es-BO', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  })
+}
+
+/**
+ * Facturación por día.
+ *
+ * Sin ejes ni grilla: unas líneas punteadas sin números no decían nada, y las
+ * fechas de las puntas se volvían ilegibles al pasar de 7 a 365 días. En vez de
+ * eso, el día y el monto se leen tocando la curva.
+ */
 function Curva({ puntos }: { puntos: PuntoDia[] }) {
   const [sel, setSel] = useState<number | null>(null)
+  const svgRef = useRef<SVGSVGElement | null>(null)
 
   if (puntos.length === 0) return <Vacio texto="Sin datos todavía." />
 
   const max = Math.max(...puntos.map(p => p.total), 1)
   const W = 320, H = 110
-  // Margen superior para que el punto y su anillo no se corten en el borde.
-  const PAD_T = 10, PAD_B = 16
+  // Margen para que el punto activo y su anillo no se corten contra el borde.
+  const PAD_T = 10, PAD_B = 8
 
   const x = (i: number) => (i / Math.max(puntos.length - 1, 1)) * W
   const y = (v: number) => PAD_T + (1 - v / max) * (H - PAD_T - PAD_B)
@@ -334,53 +348,90 @@ function Curva({ puntos }: { puntos: PuntoDia[] }) {
   const linea = puntos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)},${y(p.total).toFixed(1)}`).join(' ')
   const area = `${linea} L ${W},${H - PAD_B} L 0,${H - PAD_B} Z`
 
-  const pico = puntos.reduce((mejor, p, i) => (p.total > puntos[mejor].total ? i : mejor), 0)
-  const activo = sel ?? pico
-  const p = puntos[activo]
+  const p = sel !== null ? puntos[sel] : null
 
-  const fechaCorta = (f: string) => {
-    const [, m, d] = f.split('-')
-    return `${d}/${m}`
+  /**
+   * Índice más cercano al dedo.
+   *
+   * Se calcula con la posición en vez de poner una zona de toque por día: con
+   * 365 puntos cada zona mediría menos de un píxel, y así funciona igual con 7
+   * que con 365.
+   */
+  const indiceEn = (clientX: number): number => {
+    const r = svgRef.current?.getBoundingClientRect()
+    if (!r || r.width === 0) return 0
+    const prop = (clientX - r.left) / r.width
+    const i = Math.round(prop * (puntos.length - 1))
+    return Math.max(0, Math.min(puntos.length - 1, i))
   }
+
+  // Con muchos días la línea se apretuja; más fina se sigue leyendo.
+  const grosor = puntos.length > 90 ? 1.2 : 2
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.5rem' }}>
+      {/* Lectura del día tocado. La altura está reservada aunque esté vacía:
+          si apareciera y desapareciera, el gráfico saltaría bajo el dedo. */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+        gap: '.75rem', marginBottom: '.5rem', minHeight: '1.6rem',
+      }}>
         <span style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)' }}>
-          {fechaCorta(p.fecha)}{activo === pico && sel === null ? ' · máximo' : ''}
+          {p ? fechaLectura(p.fecha) : ''}
         </span>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums' }}>
-          {bs(p.total)}
+        <span style={{
+          fontFamily: 'var(--font-display)', fontSize: '1.3rem', lineHeight: 1,
+          color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums',
+        }}>
+          {p ? bs(p.total) : ''}
         </span>
       </div>
 
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: '8rem', display: 'block', overflow: 'visible' }} role="img" aria-label="Facturación por día">
-        {/* Grilla discreta: tres referencias, nada más */}
-        {[0, 0.5, 1].map(f => (
-          <line key={f} x1="0" x2={W} y1={y(max * f)} y2={y(max * f)}
-            stroke="var(--color-rim)" strokeWidth="0.8" strokeDasharray={f === 0 ? undefined : '3,3'} fill="none" />
-        ))}
+      {/* relative: el punto activo va como elemento HTML encima del svg.
+          Dentro del svg se deformaría, porque preserveAspectRatio="none"
+          estira el viewBox para que la curva ocupe todo el ancho. */}
+      <div style={{ position: 'relative' }}>
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="none"
+          style={{ width: '100%', height: '8rem', display: 'block', touchAction: 'pan-y', cursor: 'crosshair' }}
+          role="img" aria-label="Facturación por día"
+          onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); setSel(indiceEn(e.clientX)) }}
+          onPointerMove={e => { if (e.buttons > 0 || e.pointerType === 'mouse') setSel(indiceEn(e.clientX)) }}
+          // Al soltar NO se borra: en celular la lectura desaparecería justo al
+          // levantar el dedo, que es cuando recién se va a mirar.
+          onPointerLeave={() => { if (window.matchMedia('(hover: hover)').matches) setSel(null) }}
+        >
+          <path d={area} fill="var(--color-gold-glow)" />
+          <path
+            d={linea} fill="none" stroke="var(--color-gold)"
+            strokeWidth={grosor} strokeLinecap="round" strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
 
-        <path d={area} fill="var(--color-gold-glow)" />
-        <path d={linea} fill="none" stroke="var(--color-gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Guía vertical: ancla la lectura a un punto concreto de la curva.
+              Una línea vertical no se deforma al estirar en x. */}
+          {sel !== null && (
+            <line
+              x1={x(sel)} x2={x(sel)} y1={0} y2={H - PAD_B}
+              stroke="var(--color-gold)" strokeWidth="1" strokeDasharray="3,3"
+              vectorEffect="non-scaling-stroke" opacity={0.55}
+            />
+          )}
+        </svg>
 
-        {puntos.map((pt, i) => (
-          <g key={pt.fecha}>
-            {/* Área de toque mucho mayor que el punto, para el dedo */}
-            <rect x={x(i) - W / puntos.length / 2} y="0" width={W / puntos.length} height={H}
-              fill="transparent" style={{ cursor: 'pointer' }}
-              onClick={() => setSel(i)} onMouseEnter={() => setSel(i)} />
-            {i === activo && (
-              <circle cx={x(i)} cy={y(pt.total)} r="4.5"
-                fill="var(--color-gold)" stroke="var(--color-surface)" strokeWidth="2" />
-            )}
-          </g>
-        ))}
-      </svg>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.64rem', color: 'var(--color-ink-ghost)', marginTop: '.3rem' }}>
-        <span>{fechaCorta(puntos[0].fecha)}</span>
-        <span>Hoy</span>
+        {sel !== null && (
+          <span style={{
+            position: 'absolute', pointerEvents: 'none',
+            left: `${(x(sel) / W) * 100}%`,
+            top: `${(y(puntos[sel].total) / H) * 100}%`,
+            transform: 'translate(-50%, -50%)',
+            width: '.6rem', height: '.6rem', borderRadius: '50%',
+            background: 'var(--color-gold)',
+            boxShadow: '0 0 0 2px var(--color-surface)',
+          }} />
+        )}
       </div>
     </div>
   )
