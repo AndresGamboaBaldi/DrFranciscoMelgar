@@ -559,12 +559,11 @@ export default function CobroDialog({
           {error && (
             <p role="alert" style={{ fontSize: '.78rem', lineHeight: 1.5, color: '#c47070', margin: 0 }}>{error}</p>
           )}
-        </div>
 
-        {/* ── Total y acción ── */}
-        <footer style={{ padding: '1rem 1.15rem', borderTop: '1px solid var(--color-rim)', background: 'var(--color-surface)' }}>
-          {/* El QR vive en el pie y no en la sección de pago: ahí quedaba
-              debajo del pliegue y había que volver a scrollear para verlo. */}
+          {/* ── Total y acción ── */}
+          {/* Va dentro del área que scrollea, no como pie fijo: el pie pegado
+              comía alto en pantallas chicas y tapaba el formulario. */}
+          <section style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1rem' }}>
           {metodo === 'qr' && qrUrl && (
             <button onClick={() => setVerQr(true)} style={{
               width: '100%', marginBottom: '.75rem',
@@ -579,8 +578,8 @@ export default function CobroDialog({
             </button>
           )}
           {/* Siempre presente, aunque la propina sea 0: si apareciera al elegir
-              propina, el pie crecería y empujaría los botones de arriba justo
-              mientras los estás tocando. */}
+              propina, el bloque crecería y correría el botón de abajo justo
+              mientras lo estás tocando. */}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginBottom: '.3rem', minHeight: '1.1rem' }}>
             <span>Servicios {bs(subtotal)}</span>
             <span>{propina > 0 ? `Propina + ${bs(propina)}` : ''}</span>
@@ -609,7 +608,8 @@ export default function CobroDialog({
               ? (editando ? 'Guardando…' : 'Registrando…')
               : (editando ? 'Guardar cambios' : 'Registrar cobro')}
           </button>
-        </footer>
+          </section>
+        </div>
       </div>
 
       {verQr && qrUrl && <VisorQr url={qrUrl} total={total} onCerrar={() => setVerQr(false)} />}
