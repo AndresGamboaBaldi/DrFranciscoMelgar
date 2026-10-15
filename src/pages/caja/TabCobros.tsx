@@ -116,6 +116,8 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
       .filter(c => c.id && !cobradasIds.has(c.id) && c.status !== 'cancelled')
       .map(c => ({
         tipo: 'pendiente' as const,
+        // La clave sale de la CITA, no del tipo de fila: al cobrarla la venta
+        // reusa esta misma clave, así la fila no se desmonta ni cambia de sitio.
         key: `c-${c.id}`,
         hora: (c.appointment_time ?? '').substring(0, 5),
         cliente: c.name ?? 'Sin nombre',
@@ -126,7 +128,8 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
 
     const hechas: Fila[] = ventas.map(v => ({
       tipo: 'cobrado' as const,
-      key: `v-${v.id}`,
+      // Si vino de una cita, la misma clave que tenía como pendiente.
+      key: v.appointment_id ? `c-${v.appointment_id}` : `v-${v.id}`,
       // La hora de la cita manda; solo los walk-in caen en la hora del cobro.
       // hour12:false mantiene el formato HH:MM que usa el orden alfabético.
       hora: (v.appointment_id ? horaDeCita.get(v.appointment_id) : null)
@@ -138,7 +141,17 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
     }))
 
     // De la hora más temprana a la más tardía: sigue el orden del día.
-    return [...pendientes, ...hechas].sort((a, b) => a.hora.localeCompare(b.hora))
+    //
+    // Los desempates importan tanto como la hora. Ordenar solo por hora deja
+    // que los empates caigan en el orden de inserción (primero las pendientes,
+    // después las cobradas), así que al cobrar una cita de las 10:00 la fila
+    // saltaba debajo de las otras citas de las 10:00. Barbero y clave no
+    // cambian al cobrar, así que el orden queda igual antes y después.
+    return [...pendientes, ...hechas].sort((a, b) =>
+      a.hora.localeCompare(b.hora)
+      || a.barberoId.localeCompare(b.barberoId)
+      || a.key.localeCompare(b.key),
+    )
   }, [citas, ventas, cobradasIds, horaDeCita, pro.businessId])
 
   const visibles = filas.filter(f =>
