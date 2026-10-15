@@ -564,50 +564,50 @@ export default function CobroDialog({
           {/* Va dentro del área que scrollea, no como pie fijo: el pie pegado
               comía alto en pantallas chicas y tapaba el formulario. */}
           <section style={{ borderTop: '1px solid var(--color-rim)', paddingTop: '1rem' }}>
-          {metodo === 'qr' && qrUrl && (
-            <button onClick={() => setVerQr(true)} style={{
-              width: '100%', marginBottom: '.75rem',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
-              padding: '.75rem', borderRadius: 'var(--r-md)',
-              background: 'var(--color-surface2)', border: '1px solid var(--color-rim-l)',
-              color: 'var(--color-ink)', cursor: 'pointer',
-              fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: 600,
-              letterSpacing: '.1em', textTransform: 'uppercase',
-            }}>
-              <QrCode size={15} /> Mostrar QR al cliente
+            {metodo === 'qr' && qrUrl && (
+              <button onClick={() => setVerQr(true)} style={{
+                width: '100%', marginBottom: '.75rem',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+                padding: '.75rem', borderRadius: 'var(--r-md)',
+                background: 'var(--color-surface2)', border: '1px solid var(--color-rim-l)',
+                color: 'var(--color-ink)', cursor: 'pointer',
+                fontFamily: 'var(--font-body)', fontSize: '.7rem', fontWeight: 600,
+                letterSpacing: '.1em', textTransform: 'uppercase',
+              }}>
+                <QrCode size={15} /> Mostrar QR al cliente
+              </button>
+            )}
+            {/* Siempre presente, aunque la propina sea 0: si apareciera al elegir
+                propina, el bloque crecería y correría el botón de abajo justo
+                mientras lo estás tocando. */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginBottom: '.3rem', minHeight: '1.1rem' }}>
+              <span>Servicios {bs(subtotal)}</span>
+              <span>{propina > 0 ? `Propina + ${bs(propina)}` : ''}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.85rem' }}>
+              <span style={{ fontSize: '.66rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
+                {editando ? 'Nuevo total' : 'Total a cobrar'}
+              </span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                {bs(total)}
+              </span>
+            </div>
+
+            {/* El total viejo, al lado del nuevo: sin esto no se ve qué cambió
+                ni cuánto se movió la caja del día. */}
+            {editando && Math.abs(total - Number(venta!.total)) > 0.005 && (
+              <p style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', textAlign: 'right', marginTop: '-.6rem', marginBottom: '.85rem' }}>
+                Antes {bs(Number(venta!.total))} · {total > Number(venta!.total) ? '+' : '−'}
+                {' '}{bs(Math.abs(total - Number(venta!.total)))}
+              </p>
+            )}
+
+            <button onClick={guardar} disabled={guardando}
+              style={{ ...btnPrimario('lg', guardando), width: '100%' }}>
+              {guardando
+                ? (editando ? 'Guardando…' : 'Registrando…')
+                : (editando ? 'Guardar cambios' : 'Registrar cobro')}
             </button>
-          )}
-          {/* Siempre presente, aunque la propina sea 0: si apareciera al elegir
-              propina, el bloque crecería y correría el botón de abajo justo
-              mientras lo estás tocando. */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.74rem', color: 'var(--color-ink-ghost)', marginBottom: '.3rem', minHeight: '1.1rem' }}>
-            <span>Servicios {bs(subtotal)}</span>
-            <span>{propina > 0 ? `Propina + ${bs(propina)}` : ''}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '.85rem' }}>
-            <span style={{ fontSize: '.66rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)' }}>
-              {editando ? 'Nuevo total' : 'Total a cobrar'}
-            </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-              {bs(total)}
-            </span>
-          </div>
-
-          {/* El total viejo, al lado del nuevo: sin esto no se ve qué cambió
-              ni cuánto se movió la caja del día. */}
-          {editando && Math.abs(total - Number(venta!.total)) > 0.005 && (
-            <p style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', textAlign: 'right', marginTop: '-.6rem', marginBottom: '.85rem' }}>
-              Antes {bs(Number(venta!.total))} · {total > Number(venta!.total) ? '+' : '−'}
-              {' '}{bs(Math.abs(total - Number(venta!.total)))}
-            </p>
-          )}
-
-          <button onClick={guardar} disabled={guardando}
-            style={{ ...btnPrimario('lg', guardando), width: '100%' }}>
-            {guardando
-              ? (editando ? 'Guardando…' : 'Registrando…')
-              : (editando ? 'Guardar cambios' : 'Registrar cobro')}
-          </button>
           </section>
         </div>
       </div>
