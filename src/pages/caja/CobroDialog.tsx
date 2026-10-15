@@ -239,7 +239,9 @@ export default function CobroDialog({
         // el clic — al abrir la lista de servicios o al aparecer el botón de QR.
         // Anclado, crece hacia abajo y el borde de arriba no se mueve nunca.
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: 'clamp(1rem, 5dvh, 3rem) 1rem 1rem',
+        // El −24px sube el diálogo; sigue siendo un offset fijo para el alto
+        // del diálogo, así que no reintroduce el desplazamiento al crecer.
+        padding: 'clamp(.75rem, calc(5dvh - 24px), 1.5rem) 1rem 1rem',
       }}
     >
       <div
