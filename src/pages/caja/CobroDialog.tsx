@@ -234,19 +234,22 @@ export default function CobroDialog({
       onClick={() => !guardando && onCerrar()}
       style={{
         position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.75)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+        // Anclado arriba, no centrado. Centrado, cualquier cambio de alto movía
+        // el diálogo media diferencia y los botones se corrían entre el toque y
+        // el clic — al abrir la lista de servicios o al aparecer el botón de QR.
+        // Anclado, crece hacia abajo y el borde de arriba no se mueve nunca.
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        padding: 'clamp(1rem, 5dvh, 3rem) 1rem 1rem',
       }}
     >
       <div
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: '26rem',
-          // Alto FIJO, no maxHeight: el diálogo está centrado, así que si crece
-          // o se encoge se desplaza media diferencia. Eso movía los botones
-          // entre el toque y el clic — al colapsar la lista de servicios o al
-          // aparecer el botón de QR — y terminabas activando el de arriba.
-          // Con alto fijo, todo cambio lo absorbe el área que scrollea.
-          height: 'min(94dvh, 42rem)',
+          // Ahora sí maxHeight: al estar anclado arriba, ajustarse al contenido
+          // ya no desplaza nada. Si el formulario es corto el diálogo es corto,
+          // y si es largo tope contra la pantalla y scrollea.
+          maxHeight: '100%',
           background: 'var(--color-bg)', border: '1px solid var(--color-rim)',
           borderRadius: 'var(--r-xl)', overflow: 'hidden',
           display: 'flex', flexDirection: 'column',

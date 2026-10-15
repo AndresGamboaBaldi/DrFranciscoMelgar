@@ -251,9 +251,19 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
   const [verDesglose, setVerDesglose] = useState(false)
 
   const contado = Number(contadoTxt) || 0
-  // Se mira el campo, no el monto: una gaveta que de verdad quedó en cero es
-  // un conteo válido y tiene que poder cerrarse igual.
-  const hayConteo = contadoTxt.trim() !== ''
+
+  /**
+   * Cuándo se considera hecho el conteo.
+   *
+   * Se mira el campo y no el monto: una gaveta que de verdad quedó en cero es
+   * un conteo válido y tiene que poder cerrarse.
+   *
+   * Y si no se espera nada en la gaveta —sin fondo y sin cobros en efectivo—
+   * ya cuadra sola: pedirle a la cajera que tipee «0» es fricción sin ningún
+   * control detrás, así que el campo vacío vale como cero.
+   */
+  const sinNadaQueContar = esperado === 0
+  const hayConteo = contadoTxt.trim() !== '' || sinNadaQueContar
 
   const totalGastos = gastos.reduce((s, g) => s + Number(g.monto), 0)
   // La gaveta solo pierde lo que se pagó en efectivo: un gasto por QR es gasto
