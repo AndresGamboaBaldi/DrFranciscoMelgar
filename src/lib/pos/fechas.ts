@@ -31,14 +31,18 @@ export function correrDias(fechaISO: string, dias: number): string {
   return iso(x)
 }
 
-/** 'jueves 2 de octubre', o 'Hoy' / 'Ayer' cuando corresponde. */
-export function etiquetaDia(fechaISO: string): string {
+/**
+ * 'jueves 2 de octubre', o 'Hoy' / 'Ayer' cuando corresponde.
+ * Con `corto`, 'jue 2 oct' — para botones donde no entra la forma larga.
+ */
+export function etiquetaDia(fechaISO: string, corto = false): string {
   if (fechaISO === hoyISO()) return 'Hoy'
   if (fechaISO === ayerISO()) return 'Ayer'
   const [a, m, d] = fechaISO.split('-').map(Number)
-  return new Date(a, m - 1, d).toLocaleDateString('es-BO', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  })
+  return new Date(a, m - 1, d).toLocaleDateString('es-BO',
+    corto
+      ? { weekday: 'short', day: 'numeric', month: 'short' }
+      : { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
 /**

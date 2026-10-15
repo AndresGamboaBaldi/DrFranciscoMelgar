@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, type CSSProperties } from 'react'
 import {
-  Lock, LockOpen, Banknote, QrCode, CreditCard, Plus, X,
+  Lock, LockOpen, Banknote, QrCode, CreditCard, Plus, X, Info,
   CircleUser, CircleCheck, TriangleAlert, Trash2, Clock,
 } from 'lucide-react'
 import type { Professional } from '../../types/professional'
@@ -248,6 +248,7 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
   const [contadoTxt, setContadoTxt] = useState('')
   const [nuevoGasto, setNuevoGasto] = useState(false)
   const [cerrando, setCerrando] = useState(false)
+  const [verDesglose, setVerDesglose] = useState(false)
 
   const contado = Number(contadoTxt) || 0
   // Se mira el campo, no el monto: una gaveta que de verdad quedó en cero es
@@ -477,10 +478,29 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
                 {v.monto(diferencia)}
               </span>
             </div>
-            <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.5rem', lineHeight: 1.55 }}>
-              Esperado {bs(esperado)} = fondo {bs(Number(arqueo.fondo_inicial))}
-              {' + '}efectivo {bs(mov?.porMetodo.efectivo.total ?? 0)}
-              {gastosEfectivo > 0 ? ` − gastos en efectivo ${bs(gastosEfectivo)}` : ''}
+            {/* El desglose va detrás del icono: en la línea entraba una fórmula
+                larga que había que leer entera para sacar un solo número. */}
+            <p style={{
+              display: 'flex', alignItems: 'center', gap: '.4rem',
+              fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.5rem',
+            }}>
+              <span style={{ letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>
+                Esperado
+              </span>
+              <span style={{ fontWeight: 700, color: 'var(--color-ink-dim)', fontVariantNumeric: 'tabular-nums' }}>
+                {bs(esperado)}
+              </span>
+              <button
+                onClick={() => setVerDesglose(true)}
+                aria-label="Ver de dónde sale el esperado" title="Ver de dónde sale el esperado"
+                style={{
+                  display: 'grid', placeItems: 'center', width: '1.25rem', height: '1.25rem',
+                  padding: 0, background: 'none', border: 'none', borderRadius: '50%',
+                  cursor: 'pointer', color: 'var(--color-ink-ghost)', flexShrink: 0,
+                }}
+              >
+                <Info size={13} />
+              </button>
             </p>
           </div>
         )}
@@ -507,6 +527,16 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
         />
       )}
 
+      {verDesglose && (
+        <DialogoEsperado
+          fondo={Number(arqueo.fondo_inicial)}
+          cobrosEfectivo={mov?.porMetodo.efectivo.total ?? 0}
+          gastosEfectivo={gastosEfectivo}
+          esperado={esperado}
+          onCerrar={() => setVerDesglose(false)}
+        />
+      )}
+
       {cerrando && (
         <DialogoCierre
           arqueo={arqueo} contado={contado} esperado={esperado} userId={usuario.user_id}
@@ -515,6 +545,84 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
         />
       )}
     </div>
+  )
+}
+
+/* ── Diálogo: de dónde sale el esperado ───────────────────── */
+
+/**
+ * Las tres partes que forman el efectivo esperado en la gaveta.
+ *
+ * Los cobros por QR y tarjeta no aparecen a propósito: no entran al cajón.
+ * Los gastos pagados por QR tampoco, por lo mismo.
+ */
+function DialogoEsperado({ fondo, cobrosEfectivo, gastosEfectivo, esperado, onCerrar }: {
+  fondo: number
+  cobrosEfectivo: number
+  gastosEfectivo: number
+  esperado: number
+  onCerrar: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCerrar() }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [onCerrar])
+
+  const partes = [
+    { label: 'Fondo inicial',      monto: fondo,          signo: '+' },
+    { label: 'Cobros en efectivo', monto: cobrosEfectivo, signo: '+' },
+    { label: 'Gastos en efectivo', monto: gastosEfectivo, signo: '−' },
+  ]
+
+  return (
+    <Modal titulo="Efectivo esperado" sub="Lo que debería haber en la gaveta" onCerrar={onCerrar}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+        {partes.map(p => (
+          <div key={p.label} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.9rem',
+            background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
+            borderRadius: 'var(--r-md)', padding: '.7rem .85rem',
+          }}>
+            <span style={{ fontSize: '.8rem', color: 'var(--color-ink-dim)' }}>{p.label}</span>
+            <span style={{
+              fontSize: '.86rem', fontWeight: 600, flexShrink: 0, fontVariantNumeric: 'tabular-nums',
+              color: p.signo === '−' ? ROJO : 'var(--color-ink)',
+            }}>
+              {p.signo} {bs(p.monto)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
+        marginTop: '.6rem', background: 'var(--color-gold-glow)',
+        border: '1px solid var(--color-gold)', borderRadius: 'var(--r-md)', padding: '.85rem 1rem',
+      }}>
+        <span style={{
+          fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600,
+          letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-gold)',
+        }}>
+          Esperado
+        </span>
+        <span style={{
+          fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 400,
+          color: 'var(--color-gold)', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
+        }}>
+          {bs(esperado)}
+        </span>
+      </div>
+
+      <p style={{ fontSize: '.7rem', color: 'var(--color-ink-ghost)', marginTop: '.75rem', lineHeight: 1.55 }}>
+        Los cobros por QR y tarjeta no entran al cajón, así que no cuentan acá.
+      </p>
+
+      <button onClick={onCerrar} style={{ ...btnPrimario('md'), width: '100%', marginTop: '1rem' }}>
+        Listo
+      </button>
+    </Modal>
   )
 }
 

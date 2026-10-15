@@ -6,9 +6,12 @@ import type { PosUsuario } from '../../lib/pos/auth'
 import { getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta } from '../../lib/pos/cobros'
 import { getArqueoAbierto, type ArqueoDetalle } from '../../lib/pos/arqueo'
 import { bs, bsCorto } from './cajaTheme'
-import { hoyISO, correrDias } from '../../lib/pos/fechas'
+import { hoyISO, correrDias, etiquetaDia } from '../../lib/pos/fechas'
 import { btnPrimario, btnSecundario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard, Pencil, Lock, LockOpen } from 'lucide-react'
+import {
+  Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard,
+  Pencil, Lock, LockOpen, Plus, CalendarDays, ChevronDown,
+} from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -76,9 +79,8 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
     window.clearTimeout(temporizador.current)
     temporizador.current = window.setTimeout(() => setResaltado(false), 1000)
   }
-  /** Por ahora siempre hoy. La columna `fecha` de pos_ventas ya permite
-   *  imputar un cobro a otro día si se vuelve a agregar el selector. */
-  const fecha = hoyISO()
+  /** Día que se está mirando. Los cobros nuevos se imputan a este día. */
+  const [fecha, setFecha] = useState(hoyISO())
   const [detalle, setDetalle] = useState<Venta | null>(null)
   const [nombres, setNombres] = useState<Record<string, string>>({})
 
@@ -200,14 +202,20 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
   return (
     <div>
       {/* ── Encabezado ── */}
-      <div style={{ marginBottom: '1.25rem' }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        gap: '.75rem', marginBottom: '1.25rem',
+      }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,3.5vw,2.5rem)', fontWeight: 400, letterSpacing: '-.02em', color: 'var(--color-ink)' }}>
           Cobros
         </h2>
+        <SelectorDia fecha={fecha} onCambio={setFecha} />
       </div>
 
       {/* ── Resumen ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.5rem', marginBottom: '1.25rem' }}>
+      {/* El + va como tercera columna angosta: la acción vive al lado de los
+          números del día en vez de ocupar una franja entera. */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '.5rem', marginBottom: '1.25rem' }}>
         <Tile
           label="Cobrado" valor={bsCorto(hoyCobrado)} unidad="Bs"
           pie={variacion === null
@@ -220,25 +228,25 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
           unidad={ventas.length === 1 ? 'cobro' : 'cobros'}
           pie={`${nPendientes} por cobrar`}
         />
+        {/* El cobro se imputa al día que se está mirando, no al de hoy: por eso
+            también se puede cobrar una cita de un día pasado. */}
+        <button
+          onClick={() => { if (!arqueo) { pedirAbrirCaja(); return } setPrefill({}) }}
+          aria-label="Nuevo cobro" title="Nuevo cobro"
+          style={{
+            ...btnPrimario('md'),
+            width: '3.1rem', padding: 0, alignSelf: 'stretch',
+            opacity: arqueo ? 1 : .55,
+          }}
+        >
+          <Plus size={22} strokeWidth={2.5} />
+        </button>
       </div>
 
-      {/* ── Nuevo cobro ── */}
       {/* Sin turno abierto no se cobra. Antes la caja se abría sola al entrar
           acá, con fondo 0 y sin que nadie lo pidiera; ahora se avisa y se manda
           a abrirla a mano. */}
-      {arqueo ? (
-        // El cobro se imputa al día que se está mirando, no al de hoy: por eso
-        // también se puede cobrar una cita de un día pasado.
-        <button
-          onClick={() => setPrefill({})}
-          style={{ ...btnPrimario('lg'), width: '100%', marginBottom: '1.5rem' }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Nuevo cobro
-        </button>
-      ) : (
+      {!arqueo && (
         <div ref={avisoRef} style={{
           background: resaltado ? 'var(--color-gold-glow)' : 'var(--color-surface)',
           border: '1px solid var(--color-rim)',
@@ -359,6 +367,100 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
             : undefined}
           onCerrar={() => setDetalle(null)}
         />
+      )}
+    </div>
+  )
+}
+
+/* ── Selector de día ──────────────────────────────────────── */
+
+/**
+ * Elige el día que se está mirando.
+ *
+ * Atajos para hoy y ayer, que es el 95% de los casos, y el calendario nativo
+ * para cualquier otro. No deja elegir días futuros: no se puede cobrar algo
+ * que todavía no pasó.
+ */
+function SelectorDia({ fecha, onCambio }: { fecha: string; onCambio: (f: string) => void }) {
+  const [abierto, setAbierto] = useState(false)
+  const cajaRef = useRef<HTMLDivElement | null>(null)
+  const hoy = hoyISO()
+
+  useEffect(() => {
+    if (!abierto) return
+    const fuera = (e: MouseEvent) => {
+      if (!cajaRef.current?.contains(e.target as Node)) setAbierto(false)
+    }
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false) }
+    document.addEventListener('mousedown', fuera)
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.removeEventListener('mousedown', fuera)
+      document.removeEventListener('keydown', esc)
+    }
+  }, [abierto])
+
+  const esHoy = fecha === hoy
+
+  return (
+    <div ref={cajaRef} style={{ position: 'relative', flexShrink: 0 }}>
+      <button
+        onClick={() => setAbierto(v => !v)}
+        aria-haspopup="menu" aria-expanded={abierto}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: '.4rem',
+          padding: '.5rem .7rem', borderRadius: 'var(--r-md)', cursor: 'pointer',
+          // Un día pasado se marca con el acento: si no, es fácil cobrar en el
+          // día equivocado sin darse cuenta.
+          background: esHoy ? 'var(--color-surface2)' : 'var(--color-gold-glow)',
+          border: `1px solid ${esHoy ? 'var(--color-rim-l)' : 'var(--color-gold)'}`,
+          color: esHoy ? 'var(--color-ink-dim)' : 'var(--color-gold)',
+          fontFamily: 'var(--font-body)', fontSize: '.72rem', fontWeight: 600,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <CalendarDays size={14} style={{ flexShrink: 0 }} />
+        {etiquetaDia(fecha, true)}
+        <ChevronDown size={13} style={{ flexShrink: 0, transform: abierto ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+      </button>
+
+      {abierto && (
+        <div role="menu" style={{
+          position: 'absolute', top: 'calc(100% + .4rem)', right: 0, zIndex: 60,
+          minWidth: '13rem', padding: '.5rem',
+          background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+          borderRadius: 'var(--r-md)', boxShadow: '0 8px 24px rgba(0,0,0,.35)',
+        }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.35rem' }}>
+            {[
+              { f: hoy, label: 'Hoy' },
+              { f: correrDias(hoy, -1), label: 'Ayer' },
+            ].map(o => (
+              <button key={o.f} onClick={() => { onCambio(o.f); setAbierto(false) }}
+                style={{ ...chip(fecha === o.f), padding: '.5rem .3rem', fontSize: '.66rem' }}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+
+          <p style={{
+            fontFamily: 'var(--font-body)', fontSize: '.58rem', fontWeight: 600,
+            letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-ghost)',
+            margin: '.7rem 0 .35rem',
+          }}>
+            Otro día
+          </p>
+          <input
+            type="date" value={fecha} max={hoy}
+            onChange={e => { if (e.target.value) { onCambio(e.target.value); setAbierto(false) } }}
+            style={{
+              width: '100%', padding: '.5rem .6rem',
+              background: 'var(--color-bg)', border: '1px solid var(--color-rim-l)',
+              borderRadius: 'var(--r-sm)', color: 'var(--color-ink)',
+              fontFamily: 'var(--font-body)', fontSize: '16px',
+            }}
+          />
+        </div>
       )}
     </div>
   )
