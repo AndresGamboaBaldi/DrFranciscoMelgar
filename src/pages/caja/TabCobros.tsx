@@ -3,11 +3,12 @@ import { getAppointmentsByDate, getScheduleSettings } from '../../lib/supabase'
 import type { Appointment } from '../../types/booking'
 import type { Professional, StaffMember } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
-import { getOAbrirArqueo, getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta, type Arqueo } from '../../lib/pos/cobros'
+import { getVentasDelDia, getTotalDelDia, getNombresUsuarios, type Venta } from '../../lib/pos/cobros'
+import { getArqueoAbierto, type ArqueoDetalle } from '../../lib/pos/arqueo'
 import { bs, bsCorto } from './cajaTheme'
 import { hoyISO, correrDias } from '../../lib/pos/fechas'
 import { btnPrimario, btnSecundario, chip } from '../../lib/panelUI'
-import { Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard, Pencil } from 'lucide-react'
+import { Scissors, Clock, Check, Info, X, QrCode, Banknote, CreditCard, Pencil, Lock, LockOpen } from 'lucide-react'
 import CobroDialog, { type CobroPrefill } from './CobroDialog'
 
 type Filtro = 'todos' | 'por-cobrar' | 'cobrados'
@@ -30,7 +31,12 @@ const METODO_LABEL: Record<string, string> = {
 }
 
 
-export default function TabCobros({ pro, usuario }: { pro: Professional; usuario: PosUsuario }) {
+export default function TabCobros({ pro, usuario, onIrACaja }: {
+  pro: Professional
+  usuario: PosUsuario
+  /** Lleva a la pestaña Caja, que es donde se abre el turno. */
+  onIrACaja: () => void
+}) {
   const barberos: StaffMember[] = useMemo(() => pro.staff ?? [], [pro.staff])
   const businessIds = useMemo(
     () => (barberos.length ? barberos.map(b => b.businessId) : [pro.businessId]),
@@ -46,7 +52,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
   const [citas, setCitas] = useState<Appointment[]>([])
   const [ventas, setVentas] = useState<Venta[]>([])
   const [totalAyer, setTotalAyer] = useState(0)
-  const [arqueo, setArqueo] = useState<Arqueo | null>(null)
+  const [arqueo, setArqueo] = useState<ArqueoDetalle | null>(null)
   // El mismo QR que ya usa el flujo de pago de reservas; se sube desde Setup → Pagos
   const [qrUrl, setQrUrl] = useState<string | null>(null)
   const [cargando, setCargando] = useState(true)
@@ -67,7 +73,8 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
         getAppointmentsByDate(businessIds, fecha),
         getVentasDelDia(pro.businessId, fecha),
         getTotalDelDia(pro.businessId, correrDias(fecha, -1)),
-        getOAbrirArqueo(pro.businessId, usuario.user_id),
+        // Solo lee. Abrir el turno es deliberado y se hace desde la pestaña Caja.
+        getArqueoAbierto(pro.businessId),
         getScheduleSettings(pro.businessId),
         getNombresUsuarios(pro.businessId),
       ])
@@ -84,7 +91,7 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
       // En finally: sin esto, un fallo deja la pantalla cargando para siempre.
       setCargando(false)
     }
-  }, [businessIds, pro.businessId, usuario.user_id, fecha])
+  }, [businessIds, pro.businessId, fecha])
 
   useEffect(() => { cargar() }, [cargar])
 
@@ -183,18 +190,39 @@ export default function TabCobros({ pro, usuario }: { pro: Professional; usuario
       </div>
 
       {/* ── Nuevo cobro ── */}
-      {/* El cobro se imputa al día que se está mirando, no al de hoy: por eso
-          también se puede cobrar una cita de un día pasado. */}
-      <button
-        onClick={() => setPrefill({})}
-        disabled={!arqueo}
-        style={{ ...btnPrimario('lg', !arqueo), width: '100%', marginBottom: '1.5rem' }}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        Nuevo cobro
-      </button>
+      {/* Sin turno abierto no se cobra. Antes la caja se abría sola al entrar
+          acá, con fondo 0 y sin que nadie lo pidiera; ahora se avisa y se manda
+          a abrirla a mano. */}
+      {arqueo ? (
+        // El cobro se imputa al día que se está mirando, no al de hoy: por eso
+        // también se puede cobrar una cita de un día pasado.
+        <button
+          onClick={() => setPrefill({})}
+          style={{ ...btnPrimario('lg'), width: '100%', marginBottom: '1.5rem' }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Nuevo cobro
+        </button>
+      ) : (
+        <div style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+          borderLeft: '3px solid var(--color-gold)', borderRadius: 'var(--r-lg)',
+          padding: '1rem 1.1rem', marginBottom: '1.5rem',
+        }}>
+          <p style={{ display: 'flex', alignItems: 'center', gap: '.45rem', fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.15 }}>
+            <Lock size={15} color="var(--color-gold)" style={{ flexShrink: 0 }} />
+            Caja cerrada
+          </p>
+          <p style={{ fontSize: '.8rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, margin: '.35rem 0 .9rem' }}>
+            Para registrar cobros hay que abrir el turno y contar el fondo que queda en la gaveta.
+          </p>
+          <button onClick={onIrACaja} style={{ ...btnPrimario('md'), width: '100%' }}>
+            <LockOpen size={15} /> Abrir caja
+          </button>
+        </div>
+      )}
 
       {/* ── Filtros ── */}
       {/* Grid de 3 columnas iguales para que ocupen todo el ancho — con flex

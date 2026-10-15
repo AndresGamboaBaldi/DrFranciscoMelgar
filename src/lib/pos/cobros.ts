@@ -36,54 +36,14 @@ export interface Venta {
   items: VentaItem[]
 }
 
-export interface Arqueo {
-  id: string
-  fecha: string
-  fondo_inicial: number
-  estado: 'abierto' | 'cerrado'
-}
-
 /**
- * Devuelve el arqueo abierto del negocio, creándolo si no existe.
+ * NOTA · acá había un getOAbrirArqueo() que abría el turno solo si no existía.
  *
- * Todavía no hay pantalla de apertura de caja, así que el fondo arranca en 0
- * y se abre solo con el primer cobro del día. Cuando exista el arqueo formal,
- * esto pasa a ser el respaldo para cuando alguien cobra sin haber abierto.
+ * Era el parche de cuando no había pantalla de apertura. Con la pestaña Caja
+ * ya hecha pasó a ser un bug: entrar a Cobros bastaba para abrir un turno con
+ * fondo 0 sin que nadie lo pidiera. Abrir caja es un acto deliberado y se hace
+ * desde Caja; acá solo se lee con getArqueoAbierto().
  */
-export async function getOAbrirArqueo(businessId: string, userId: string): Promise<Arqueo | null> {
-  if (!posSupabase) return null
-
-  const { data: abierto } = await posSupabase
-    .from('pos_arqueos')
-    .select('id, fecha, fondo_inicial, estado')
-    .eq('business_id', businessId)
-    .eq('estado', 'abierto')
-    .maybeSingle()
-
-  if (abierto) return abierto as Arqueo
-
-  const { data: nuevo, error } = await posSupabase
-    .from('pos_arqueos')
-    // `fecha` explícita: el default de la columna es current_date, que en
-    // Supabase corre en UTC y desde las 20:00 en Bolivia ya marca el día siguiente.
-    .insert([{ business_id: businessId, fecha: hoyISO(), fondo_inicial: 0, abierto_por: userId }])
-    .select('id, fecha, fondo_inicial, estado')
-    .single()
-
-  if (error) {
-    // Carrera con otra pestaña: el índice único dejó pasar solo una.
-    // Volvemos a leer en vez de propagar el error.
-    const { data: reintento } = await posSupabase
-      .from('pos_arqueos')
-      .select('id, fecha, fondo_inicial, estado')
-      .eq('business_id', businessId)
-      .eq('estado', 'abierto')
-      .maybeSingle()
-    return (reintento as Arqueo) ?? null
-  }
-
-  return nuevo as Arqueo
-}
 
 /** Ventas no anuladas de una fecha, con sus items. */
 export async function getVentasDelDia(businessId: string, fecha = hoyISO()): Promise<Venta[]> {

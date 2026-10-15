@@ -153,7 +153,7 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
         } : null),
       }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
-          {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} />
+          {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} onIrACaja={() => setActiva('caja')} />
             : activa === 'caja' ? <TabCaja pro={pro} usuario={usuario} />
             : activa === 'comisiones' ? <TabComisiones pro={pro} usuario={usuario} />
             : activa === 'reportes' ? <TabReportes pro={pro} />
