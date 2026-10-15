@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, useCallback, type CSSProperties } from 'react'
 import { Banknote, Vault, Percent, ChartColumn, Settings, CircleUser, ChevronDown, LogOut } from 'lucide-react'
 import { useHideOnScroll, useAltura, useEsMobile } from '../../lib/useHideOnScroll'
 import { useParams } from 'react-router-dom'
@@ -11,6 +11,7 @@ import TabCaja from './TabCaja'
 import TabComisiones from './TabComisiones'
 import TabReportes from './TabReportes'
 import TabConfig from './TabConfig'
+import LimiteDeError from './LimiteDeError'
 import type { Professional } from '../../types/professional'
 
 type Pestana = 'cobros' | 'caja' | 'comisiones' | 'reportes' | 'config'
@@ -78,6 +79,17 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
   const barrasOcultas = useHideOnScroll(mainRef, esMobile)
   const altoHeader = useAltura(headerRef)
   const altoTabbar = useAltura(tabbarRef)
+
+  /**
+   * Devuelve el scroll al tope.
+   *
+   * Lo pide la caja cuando abre o cierra un turno: el contenido pasa de muy
+   * alto a muy corto, y si el scroll se queda abajo quedás mirando el fondo
+   * vacío con las barras escondidas — o sea, una pantalla en negro.
+   */
+  const volverArriba = useCallback(() => {
+    mainRef.current?.scrollTo({ top: 0 })
+  }, [])
 
   return (
     <div className="panel-shell" style={{ position: 'relative', height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -153,12 +165,16 @@ function CajaShell({ usuario, pro }: { usuario: PosUsuario; pro: Professional })
         } : null),
       }}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
-          {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} onIrACaja={() => setActiva('caja')} />
-            : activa === 'caja' ? <TabCaja pro={pro} usuario={usuario} />
-            : activa === 'comisiones' ? <TabComisiones pro={pro} usuario={usuario} />
-            : activa === 'reportes' ? <TabReportes pro={pro} />
-            : activa === 'config' ? <TabConfig pro={pro} usuario={usuario} />
-            : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
+          {/* key por pestaña: al cambiar de pestaña el límite se reinicia solo,
+              así un error en una no deja inutilizables a las demás. */}
+          <LimiteDeError key={activa} donde={visibles.find(p => p.id === activa)?.label ?? activa}>
+            {activa === 'cobros' ? <TabCobros pro={pro} usuario={usuario} onIrACaja={() => setActiva('caja')} />
+              : activa === 'caja' ? <TabCaja pro={pro} usuario={usuario} onVolverArriba={volverArriba} />
+              : activa === 'comisiones' ? <TabComisiones pro={pro} usuario={usuario} />
+              : activa === 'reportes' ? <TabReportes pro={pro} />
+              : activa === 'config' ? <TabConfig pro={pro} usuario={usuario} />
+              : <EnConstruccion pestana={visibles.find(p => p.id === activa)?.label ?? ''} />}
+          </LimiteDeError>
         </div>
       </main>
 

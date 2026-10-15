@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, type CSSProperties } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, type CSSProperties } from 'react'
 import {
   Lock, LockOpen, Banknote, QrCode, CreditCard, Plus, Minus, X,
   RotateCcw, CircleUser, CircleCheck, TriangleAlert, Trash2, Clock,
@@ -35,7 +35,12 @@ type Conteo = Record<number, number>
 
 const CONTEO_VACIO: Conteo = Object.fromEntries(DENOMINACIONES.map(d => [d, 0]))
 
-export default function TabCaja({ pro, usuario }: { pro: Professional; usuario: PosUsuario }) {
+export default function TabCaja({ pro, usuario, onVolverArriba }: {
+  pro: Professional
+  usuario: PosUsuario
+  /** Devuelve el scroll al tope cuando la pantalla cambia de alto de golpe. */
+  onVolverArriba: () => void
+}) {
   const [arqueo, setArqueo] = useState<ArqueoDetalle | null>(null)
   const [ultimo, setUltimo] = useState<ArqueoDetalle | null>(null)
   const [mov, setMov] = useState<MovimientoTurno | null>(null)
@@ -71,6 +76,22 @@ export default function TabCaja({ pro, usuario }: { pro: Professional; usuario: 
   }, [pro.businessId])
 
   useEffect(() => { setCargando(true); cargar() }, [cargar])
+
+  /**
+   * Al abrir o cerrar un turno la pantalla cambia de alto radicalmente: el
+   * turno abierto trae conteo y gastos, la caja cerrada entra en una pantalla.
+   * Si el scroll se queda donde estaba —al pie, que es desde donde se cierra—
+   * quedás mirando fondo vacío con las barras escondidas. Se vuelve al tope.
+   *
+   * null en el primer render: al entrar a la pestaña no hay nada que corregir.
+   */
+  const habiaTurno = useRef<boolean | null>(null)
+  useEffect(() => {
+    if (cargando) return
+    const hay = !!arqueo
+    if (habiaTurno.current !== null && habiaTurno.current !== hay) onVolverArriba()
+    habiaTurno.current = hay
+  }, [arqueo, cargando, onVolverArriba])
 
   if (cargando) {
     return (
