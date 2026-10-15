@@ -258,17 +258,14 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
   usuario: PosUsuario
   onCambio: () => void
 }) {
-  const [conteo, setConteo] = useState<Conteo>(CONTEO_VACIO)
-  const [sueltos, setSueltos] = useState('')
-  const [editandoFondo, setEditandoFondo] = useState(false)
+  const [contadoTxt, setContadoTxt] = useState('')
   const [nuevoGasto, setNuevoGasto] = useState(false)
   const [cerrando, setCerrando] = useState(false)
 
-  const contado = useMemo(
-    () => DENOMINACIONES.reduce((s, d) => s + d * (conteo[d] ?? 0), 0) + (Number(sueltos) || 0),
-    [conteo, sueltos],
-  )
-  const hayConteo = DENOMINACIONES.some(d => (conteo[d] ?? 0) > 0) || Number(sueltos) > 0
+  const contado = Number(contadoTxt) || 0
+  // Se mira el campo, no el monto: una gaveta que de verdad quedó en cero es
+  // un conteo válido y tiene que poder cerrarse igual.
+  const hayConteo = contadoTxt.trim() !== ''
 
   const totalGastos = gastos.reduce((s, g) => s + Number(g.monto), 0)
   const diferencia = Math.round((contado - esperado) * 100) / 100
@@ -317,31 +314,6 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
           </div>
         )}
 
-        {/* ── Fondo inicial ── */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem',
-          marginTop: '.8rem', paddingTop: '.8rem', borderTop: '1px solid var(--color-rim)',
-        }}>
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>
-            Fondo inicial
-          </span>
-          {editandoFondo ? (
-            <EditarFondo
-              valor={Number(arqueo.fondo_inicial)}
-              onGuardar={async m => { await setFondoInicial(arqueo.id, m); setEditandoFondo(false); onCambio() }}
-              onCancelar={() => setEditandoFondo(false)}
-            />
-          ) : (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums' }}>
-                {bs(Number(arqueo.fondo_inicial))}
-              </span>
-              <button onClick={() => setEditandoFondo(true)} style={{ ...btnSecundario('sm'), padding: '.35rem .65rem', fontSize: '.6rem' }}>
-                Cambiar
-              </button>
-            </span>
-          )}
-        </div>
       </div>
 
       {/* ── Cobrado en el turno ── */}
@@ -353,11 +325,32 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
           <span style={{ fontFamily: 'var(--font-body)', fontSize: '.68rem', fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>
             Cobrado en el turno
           </span>
+          {/* El fondo va como placa al lado, no sumado: el número grande junta
+              efectivo, QR y tarjeta, y el fondo es solo efectivo en la gaveta.
+              Sumarlos daría un total que no significa nada. */}
           <p style={{
-            fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem,9vw,3rem)', fontWeight: 400,
-            lineHeight: 1.05, color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums', marginTop: '.35rem',
+            display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '.55rem',
+            marginTop: '.35rem',
           }}>
-            Bs. {bsCorto(mov.total)}
+            <span style={{
+              fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem,9vw,3rem)', fontWeight: 400,
+              lineHeight: 1.05, color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums',
+            }}>
+              Bs. {bsCorto(mov.total)}
+            </span>
+            <span
+              title="Fondo con el que se abrió el turno. Se define al abrir la caja."
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '.3rem', flexShrink: 0,
+                padding: '.25rem .55rem', borderRadius: 'var(--r-sm)',
+                background: 'var(--color-gold-glow)', border: '1px solid var(--color-gold)',
+                fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600,
+                letterSpacing: '.04em', color: 'var(--color-gold)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              + {bs(Number(arqueo.fondo_inicial))} de fondo
+            </span>
           </p>
           <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', marginTop: '.3rem' }}>
             {mov.nVentas === 0 ? 'Todavía sin cobros' : `${mov.nVentas} ${mov.nVentas === 1 ? 'cobro' : 'cobros'} registrados`}
@@ -445,66 +438,21 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
       </Seccion>
 
       {/* ── Conteo físico ── */}
-      <Seccion
-        titulo="Conteo físico de gaveta"
-        accion={hayConteo ? (
-          <button
-            onClick={() => { setConteo(CONTEO_VACIO); setSueltos('') }}
-            style={{ ...btnSecundario('sm'), padding: '.3rem .6rem', fontSize: '.58rem' }}
-          >
-            <RotateCcw size={11} /> Limpiar
-          </button>
-        ) : undefined}
-      >
-        <p style={{ fontSize: '.72rem', color: 'var(--color-ink-ghost)', lineHeight: 1.6, marginBottom: '.8rem' }}>
-          Contá la gaveta antes de mirar la diferencia: aparece recién cuando cargás el conteo.
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem' }}>
-          {DENOMINACIONES.map(d => (
-            <FilaDenominacion
-              key={d} valor={d} cantidad={conteo[d] ?? 0}
-              onCambio={n => setConteo(c => ({ ...c, [d]: Math.max(0, n) }))}
-            />
-          ))}
-
-          {/* Monedas chicas: contarlas una por una no vale la pena, se pesa
-              el puñado y se escribe el monto. */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '.6rem',
-            background: 'var(--color-surface2)', border: '1px solid var(--color-rim)',
-            borderRadius: 'var(--r-md)', padding: '.5rem .6rem',
-          }}>
-            <span style={{
-              width: '2.4rem', flexShrink: 0, textAlign: 'center',
-              fontFamily: 'var(--font-body)', fontSize: '.6rem', fontWeight: 700,
-              color: 'var(--color-ink-ghost)', letterSpacing: '.04em',
-            }}>¢</span>
-            <span style={{ flex: 1, minWidth: 0, fontSize: '.75rem', color: 'var(--color-ink-dim)' }}>
-              Monedas sueltas
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '.3rem', flexShrink: 0 }}>
-              <span style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)' }}>Bs</span>
-              <input
-                type="number" inputMode="decimal" min="0" step="0.1"
-                value={sueltos} onChange={e => setSueltos(e.target.value)} placeholder="0"
-                style={{ ...estiloInput, width: '5rem', padding: '.4rem .5rem', textAlign: 'right', fontWeight: 600 }}
-              />
-            </span>
-          </div>
-        </div>
-
-        {/* ── Total contado ── */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '.75rem',
-          marginTop: '.9rem', paddingTop: '.8rem', borderTop: '1px solid var(--color-rim)',
-        }}>
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: '.66rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--color-ink-dim)' }}>
-            Total contado
+      <Seccion titulo="Conteo físico de gaveta">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--color-ink-ghost)', flexShrink: 0 }}>
+            Bs.
           </span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--color-ink)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
-            {bs(contado)}
-          </span>
+          <input
+            type="number" inputMode="decimal" min="0" step="1"
+            value={contadoTxt} onChange={e => setContadoTxt(e.target.value)}
+            placeholder="0"
+            aria-label="Total contado en la gaveta"
+            style={{
+              ...estiloInput, flex: 1, minWidth: 0, textAlign: 'right',
+              fontFamily: 'var(--font-display)', fontSize: '1.6rem', padding: '.55rem .75rem',
+            }}
+          />
         </div>
 
         {/* El esperado y la diferencia salen recién con el conteo cargado: si
