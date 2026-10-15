@@ -26,6 +26,17 @@ export const CATEGORIAS: { id: CategoriaGasto; label: string }[] = [
   { id: 'otro',      label: 'Otro' },
 ]
 
+/**
+ * Con qué se pagó el gasto. Solo el efectivo sale de la gaveta, así que es lo
+ * único que descuenta el arqueo. Ver migration_pos_gasto_metodo.sql.
+ */
+export type MetodoGasto = 'efectivo' | 'qr'
+
+export const METODOS_GASTO: { id: MetodoGasto; label: string }[] = [
+  { id: 'efectivo', label: 'Efectivo' },
+  { id: 'qr',       label: 'QR / Transf.' },
+]
+
 export interface ArqueoDetalle {
   id: string
   fecha: string
@@ -46,6 +57,7 @@ export interface Gasto {
   concepto: string
   categoria: string
   monto: number
+  metodo_pago: MetodoGasto
   registrado_por: string
   created_at: string
 }
@@ -162,7 +174,7 @@ export async function getGastos(arqueoId: string): Promise<Gasto[]> {
   if (!posSupabase) return []
   const { data } = await posSupabase
     .from('pos_gastos')
-    .select('id, concepto, categoria, monto, registrado_por, created_at')
+    .select('id, concepto, categoria, monto, metodo_pago, registrado_por, created_at')
     .eq('arqueo_id', arqueoId)
     .order('created_at', { ascending: false })
   return (data ?? []) as Gasto[]
@@ -173,6 +185,7 @@ export async function registrarGasto(g: {
   arqueoId: string
   concepto: string
   categoria: CategoriaGasto
+  metodoPago: MetodoGasto
   monto: number
   userId: string
 }): Promise<void> {
@@ -185,6 +198,7 @@ export async function registrarGasto(g: {
       fecha: hoyISO(),
       concepto: g.concepto.trim(),
       categoria: g.categoria,
+      metodo_pago: g.metodoPago,
       monto: g.monto,
       registrado_por: g.userId,
     }])

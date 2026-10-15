@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback, useMemo, useRef, type CSSProperties } from 'react'
+import { useState, useEffect, useCallback, useRef, type CSSProperties } from 'react'
 import {
-  Lock, LockOpen, Banknote, QrCode, CreditCard, Plus, Minus, X,
-  RotateCcw, CircleUser, CircleCheck, TriangleAlert, Trash2, Clock,
+  Lock, LockOpen, Banknote, QrCode, CreditCard, Plus, X,
+  CircleUser, CircleCheck, TriangleAlert, Trash2, Clock,
 } from 'lucide-react'
 import type { Professional } from '../../types/professional'
 import type { PosUsuario } from '../../lib/pos/auth'
 import { getEfectivoEsperado, getNombresUsuarios, type MetodoPago } from '../../lib/pos/cobros'
 import {
-  getArqueoAbierto, getUltimoCerrado, abrirArqueo, setFondoInicial,
+  getArqueoAbierto, getUltimoCerrado, abrirArqueo,
   getMovimiento, getGastos, registrarGasto, borrarGasto, cerrarArqueo,
-  CajaYaAbiertaError, CATEGORIAS,
-  type ArqueoDetalle, type Gasto, type MovimientoTurno, type CategoriaGasto,
+  CajaYaAbiertaError, CATEGORIAS, METODOS_GASTO,
+  type ArqueoDetalle, type Gasto, type MovimientoTurno, type CategoriaGasto, type MetodoGasto,
 } from '../../lib/pos/arqueo'
 import { bs, bsCorto } from './cajaTheme'
 import { btnPrimario, btnSecundario, chip } from '../../lib/panelUI'
@@ -21,19 +21,6 @@ const ROJO = '#c47070'
 
 const ICONO_METODO = { efectivo: Banknote, qr: QrCode, tarjeta: CreditCard } as const
 const ETIQUETA_METODO = { efectivo: 'Efectivo', qr: 'QR', tarjeta: 'Tarjeta' } as const
-
-/**
- * Denominaciones en circulación en Bolivia.
- *
- * Los Bs 10 son billete y moneda a la vez; va una sola fila porque lo que
- * importa es cuántas piezas de ese valor hay, no de qué material son.
- */
-const DENOMINACIONES = [200, 100, 50, 20, 10, 5, 2, 1] as const
-const CORTE_BILLETE = 10   // de 10 para arriba se cuentan como billetes
-
-type Conteo = Record<number, number>
-
-const CONTEO_VACIO: Conteo = Object.fromEntries(DENOMINACIONES.map(d => [d, 0]))
 
 export default function TabCaja({ pro, usuario, onVolverArriba }: {
   pro: Professional
@@ -268,6 +255,11 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
   const hayConteo = contadoTxt.trim() !== ''
 
   const totalGastos = gastos.reduce((s, g) => s + Number(g.monto), 0)
+  // La gaveta solo pierde lo que se pagó en efectivo: un gasto por QR es gasto
+  // del negocio, pero la plata no salió del cajón.
+  const gastosEfectivo = gastos
+    .filter(g => g.metodo_pago === 'efectivo')
+    .reduce((s, g) => s + Number(g.monto), 0)
   const diferencia = Math.round((contado - esperado) * 100) / 100
   const v = veredicto(diferencia)
   const desactualizado = arqueo.fecha !== hoyISO()
@@ -407,8 +399,17 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
                 borderLeft: `3px solid ${ROJO}`, borderRadius: 'var(--r-md)', padding: '.65rem .8rem',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '.8rem', fontWeight: 500, color: 'var(--color-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {g.concepto}
+                  <p style={{
+                    display: 'flex', alignItems: 'center', gap: '.35rem', minWidth: 0,
+                    fontSize: '.8rem', fontWeight: 500, color: 'var(--color-ink)',
+                  }}>
+                    {/* Qué pagó la gaveta y qué no se ve de un vistazo */}
+                    {g.metodo_pago === 'qr'
+                      ? <QrCode size={12} color="var(--color-ink-ghost)" style={{ flexShrink: 0 }} />
+                      : <Banknote size={12} color="var(--color-gold)" style={{ flexShrink: 0 }} />}
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {g.concepto}
+                    </span>
                   </p>
                   <p style={{ fontSize: '.66rem', color: 'var(--color-ink-ghost)', marginTop: '.12rem' }}>
                     {hora(g.created_at)} · {CATEGORIAS.find(c => c.id === g.categoria)?.label ?? g.categoria}
@@ -479,7 +480,7 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
             <p style={{ fontSize: '.68rem', color: 'var(--color-ink-ghost)', marginTop: '.5rem', lineHeight: 1.55 }}>
               Esperado {bs(esperado)} = fondo {bs(Number(arqueo.fondo_inicial))}
               {' + '}efectivo {bs(mov?.porMetodo.efectivo.total ?? 0)}
-              {totalGastos > 0 ? ` − gastos ${bs(totalGastos)}` : ''}
+              {gastosEfectivo > 0 ? ` − gastos en efectivo ${bs(gastosEfectivo)}` : ''}
             </p>
           </div>
         )}
@@ -517,94 +518,6 @@ function TurnoAbierto({ arqueo, mov, gastos, esperado, nombres, pro, usuario, on
   )
 }
 
-/* ── Fila de denominación ─────────────────────────────────── */
-
-function FilaDenominacion({ valor, cantidad, onCambio }: {
-  valor: number
-  cantidad: number
-  onCambio: (n: number) => void
-}) {
-  const activa = cantidad > 0
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: '.6rem',
-      background: activa ? 'var(--color-surface2)' : 'transparent',
-      border: `1px solid ${activa ? 'var(--color-rim-l)' : 'var(--color-rim)'}`,
-      borderRadius: 'var(--r-md)', padding: '.5rem .6rem',
-      transition: 'background .15s, border-color .15s',
-    }}>
-      {/* Placa con el corte: se reconoce el billete sin leer la etiqueta */}
-      <span style={{
-        width: '2.4rem', flexShrink: 0, textAlign: 'center', padding: '.2rem 0',
-        borderRadius: 'var(--r-sm)',
-        background: activa ? 'var(--color-gold)' : 'var(--color-surface2)',
-        color: activa ? 'var(--color-on-gold)' : 'var(--color-ink-ghost)',
-        fontFamily: 'var(--font-body)', fontSize: '.64rem', fontWeight: 700,
-        fontVariantNumeric: 'tabular-nums',
-      }}>{valor}</span>
-
-      <span style={{ flex: 1, minWidth: 0, fontSize: '.75rem', color: 'var(--color-ink-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {valor >= CORTE_BILLETE ? 'Billetes' : 'Monedas'} de Bs {valor}
-      </span>
-
-      <span style={{ display: 'flex', alignItems: 'center', gap: '.2rem', flexShrink: 0 }}>
-        <button onClick={() => onCambio(cantidad - 1)} disabled={cantidad === 0}
-          aria-label={`Quitar un Bs ${valor}`}
-          style={{ ...btnPaso, opacity: cantidad === 0 ? .4 : 1, cursor: cantidad === 0 ? 'default' : 'pointer' }}>
-          <Minus size={13} />
-        </button>
-        <input
-          type="number" inputMode="numeric" min="0" step="1"
-          value={cantidad || ''} onChange={e => onCambio(Number(e.target.value) || 0)}
-          placeholder="0" aria-label={`Cantidad de Bs ${valor}`}
-          style={{ ...estiloInput, width: '2.9rem', padding: '.35rem .25rem', textAlign: 'center', fontWeight: 700 }}
-        />
-        <button onClick={() => onCambio(cantidad + 1)} aria-label={`Sumar un Bs ${valor}`} style={btnPaso}>
-          <Plus size={13} />
-        </button>
-      </span>
-
-      {/* Subtotal: ancho fijo para que la columna no baile al tipear */}
-      <span style={{
-        width: '4.6rem', flexShrink: 0, textAlign: 'right',
-        fontSize: '.78rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums',
-        color: activa ? 'var(--color-ink)' : 'var(--color-ink-ghost)',
-      }}>
-        {activa ? `Bs ${(valor * cantidad).toLocaleString('es-BO')}` : '—'}
-      </span>
-    </div>
-  )
-}
-
-/* ── Editar el fondo en línea ─────────────────────────────── */
-
-function EditarFondo({ valor, onGuardar, onCancelar }: {
-  valor: number
-  onGuardar: (m: number) => Promise<void>
-  onCancelar: () => void
-}) {
-  const [txt, setTxt] = useState(String(valor))
-  const [guardando, setGuardando] = useState(false)
-
-  return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: '.3rem', flexShrink: 0 }}>
-      <input
-        type="number" inputMode="decimal" min="0" step="10" autoFocus
-        value={txt} onChange={e => setTxt(e.target.value)}
-        style={{ ...estiloInput, width: '5.5rem', padding: '.4rem .5rem', textAlign: 'right', fontWeight: 600 }}
-      />
-      <button
-        onClick={async () => { setGuardando(true); await onGuardar(Number(txt) || 0) }}
-        disabled={guardando}
-        style={{ ...btnPrimario('sm', guardando), padding: '.4rem .7rem', fontSize: '.6rem' }}
-      >OK</button>
-      <button onClick={onCancelar} aria-label="Cancelar" style={{ ...btnPaso, width: '2rem', height: '2rem' }}>
-        <X size={13} />
-      </button>
-    </span>
-  )
-}
-
 /* ── Diálogo: registrar gasto ─────────────────────────────── */
 
 function DialogoGasto({ businessId, arqueoId, userId, onCerrar, onGuardado }: {
@@ -616,6 +529,7 @@ function DialogoGasto({ businessId, arqueoId, userId, onCerrar, onGuardado }: {
 }) {
   const [concepto, setConcepto] = useState('')
   const [categoria, setCategoria] = useState<CategoriaGasto>('insumos')
+  const [metodoPago, setMetodoPago] = useState<MetodoGasto>('efectivo')
   const [monto, setMonto] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -632,7 +546,7 @@ function DialogoGasto({ businessId, arqueoId, userId, onCerrar, onGuardado }: {
   const guardar = async () => {
     setGuardando(true); setError(null)
     try {
-      await registrarGasto({ businessId, arqueoId, concepto, categoria, monto: Number(monto), userId })
+      await registrarGasto({ businessId, arqueoId, concepto, categoria, metodoPago, monto: Number(monto), userId })
       onGuardado()
     } catch {
       setError('No se pudo guardar el gasto. Intentá de nuevo.')
@@ -641,7 +555,11 @@ function DialogoGasto({ businessId, arqueoId, userId, onCerrar, onGuardado }: {
   }
 
   return (
-    <Modal titulo="Registrar gasto" sub="Sale de la gaveta" onCerrar={onCerrar}>
+    <Modal
+      titulo="Registrar gasto"
+      sub={metodoPago === 'efectivo' ? 'Sale de la gaveta' : 'No toca la gaveta'}
+      onCerrar={onCerrar}
+    >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
         <section>
           <Rotulo>Concepto</Rotulo>
@@ -658,6 +576,25 @@ function DialogoGasto({ businessId, arqueoId, userId, onCerrar, onGuardado }: {
                 {c.label}
               </button>
             ))}
+          </div>
+        </section>
+
+        <section>
+          {/* Solo el efectivo descuenta de la gaveta: un gasto por QR no saca
+              plata del cajón y restarlo daría faltante en el arqueo. */}
+          <Rotulo extra={metodoPago === 'efectivo' ? 'descuenta de la gaveta' : 'no descuenta'}>
+            Pagado con
+          </Rotulo>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '.35rem' }}>
+            {METODOS_GASTO.map(m => {
+              const Icono = m.id === 'efectivo' ? Banknote : QrCode
+              return (
+                <button key={m.id} onClick={() => setMetodoPago(m.id)}
+                  style={{ ...chip(m.id === metodoPago), padding: '.6rem .3rem', fontSize: '.64rem', letterSpacing: '.04em' }}>
+                  <Icono size={14} /> {m.label}
+                </button>
+              )
+            })}
           </div>
         </section>
 
@@ -898,20 +835,6 @@ function fechaLarga(f: string): string {
 function fechaCorta(f: string): string {
   const [, m, d] = f.split('-')
   return `${d}/${m}`
-}
-
-const btnPaso: CSSProperties = {
-  width: '2.2rem',
-  height: '2.2rem',
-  flexShrink: 0,
-  display: 'grid',
-  placeItems: 'center',
-  background: 'var(--color-surface2)',
-  border: '1px solid var(--color-rim-l)',
-  borderRadius: 'var(--r-sm)',
-  color: 'var(--color-ink-dim)',
-  cursor: 'pointer',
-  padding: 0,
 }
 
 const estiloInput: CSSProperties = {
