@@ -34,7 +34,8 @@ interface Props {
    */
   venta?: Venta | null
   onCerrar: () => void
-  onCobrado: () => void
+  /** Recibe el id de la venta guardada, sea nueva o corregida. */
+  onCobrado: (ventaId: string) => void
 }
 
 /**
@@ -190,6 +191,7 @@ export default function CobroDialog({
     setGuardando(true)
     setError('')
     try {
+      let ventaId: string
       if (venta) {
         await editarCobro({
           ventaId: venta.id, businessId,
@@ -197,8 +199,9 @@ export default function CobroDialog({
           clienteNombre: cliente.trim() || null,
           items, propina, metodoPago: metodo, editadoPor: userId,
         })
+        ventaId = venta.id
       } else {
-        await registrarCobro({
+        ventaId = await registrarCobro({
           businessId, arqueoId, fecha,
           barberoBusinessId: barbero,
           appointmentId: prefill.appointmentId ?? null,
@@ -206,7 +209,8 @@ export default function CobroDialog({
           items, propina, metodoPago: metodo, cobradoPor: userId,
         })
       }
-      onCobrado()
+      // Se devuelve para que la lista pueda abrir el detalle de lo recién hecho.
+      onCobrado(ventaId)
     } catch (e) {
       setError(
         e instanceof SinPermisoEditarError

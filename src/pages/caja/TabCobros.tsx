@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { getAppointmentsByDate, getScheduleSettings } from '../../lib/supabase'
 import type { Appointment } from '../../types/booking'
 import type { Professional, StaffMember } from '../../types/professional'
@@ -61,13 +61,31 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
   const [prefill, setPrefill] = useState<CobroPrefill | null>(null)
   /** La venta que se está corrigiendo. Solo el dueño puede (política pos_ventas_update). */
   const [editando, setEditando] = useState<Venta | null>(null)
+
+  // Aviso de caja cerrada: al intentar cobrar sin turno abierto se lo trae a la
+  // vista y se lo resalta un segundo, en vez de que el botón no haga nada.
+  const avisoRef = useRef<HTMLDivElement | null>(null)
+  const [resaltado, setResaltado] = useState(false)
+  const temporizador = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(temporizador.current), [])
+
+  const pedirAbrirCaja = () => {
+    avisoRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    setResaltado(true)
+    window.clearTimeout(temporizador.current)
+    temporizador.current = window.setTimeout(() => setResaltado(false), 1000)
+  }
   /** Por ahora siempre hoy. La columna `fecha` de pos_ventas ya permite
    *  imputar un cobro a otro día si se vuelve a agregar el selector. */
   const fecha = hoyISO()
   const [detalle, setDetalle] = useState<Venta | null>(null)
   const [nombres, setNombres] = useState<Record<string, string>>({})
 
-  const cargar = useCallback(async () => {
+  // Devuelve las ventas además de guardarlas: al terminar un cobro hay que
+  // encontrar el recién hecho para abrirle el detalle, y el estado todavía no
+  // se actualizó en este tick.
+  const cargar = useCallback(async (): Promise<Venta[]> => {
     try {
       const [cs, vs, ayer, arq, cfg, noms] = await Promise.all([
         getAppointmentsByDate(businessIds, fecha),
@@ -85,8 +103,10 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
       setQrUrl(cfg?.qr_image_url ?? null)
       setNombres(noms)
       setFalloCarga(false)
+      return vs
     } catch {
       setFalloCarga(true)
+      return []
     } finally {
       // En finally: sin esto, un fallo deja la pantalla cargando para siempre.
       setCargando(false)
@@ -219,10 +239,15 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
           Nuevo cobro
         </button>
       ) : (
-        <div style={{
-          background: 'var(--color-surface)', border: '1px solid var(--color-rim)',
+        <div ref={avisoRef} style={{
+          background: resaltado ? 'var(--color-gold-glow)' : 'var(--color-surface)',
+          border: '1px solid var(--color-rim)',
           borderLeft: '3px solid var(--color-gold)', borderRadius: 'var(--r-lg)',
           padding: '1rem 1.1rem', marginBottom: '1.5rem',
+          // Anillo del acento mientras dura el resaltado. No cambia el tamaño,
+          // así que no empuja la lista ni mueve nada debajo.
+          boxShadow: resaltado ? '0 0 0 2px var(--color-gold)' : 'none',
+          transition: 'box-shadow .25s ease, background .25s ease',
         }}>
           <p style={{ display: 'flex', alignItems: 'center', gap: '.45rem', fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 400, color: 'var(--color-ink)', lineHeight: 1.15 }}>
             <Lock size={15} color="var(--color-gold)" style={{ flexShrink: 0 }} />
@@ -277,12 +302,17 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
             <FilaCard
               key={f.key} fila={f}
               barbero={nombrePorId.get(f.barberoId) ?? f.barberoId}
-              onCobrar={() => setPrefill({
-                appointmentId: f.tipo === 'pendiente' ? f.appointmentId : null,
-                clienteNombre: f.cliente,
-                barberoBusinessId: f.barberoId,
-                servicioNombre: f.servicio,
-              })}
+              onCobrar={() => {
+                // Sin turno abierto el diálogo no se puede montar: en vez de
+                // que el botón no haga nada, se señala dónde se abre la caja.
+                if (!arqueo) { pedirAbrirCaja(); return }
+                setPrefill({
+                  appointmentId: f.tipo === 'pendiente' ? f.appointmentId : null,
+                  clienteNombre: f.cliente,
+                  barberoBusinessId: f.barberoId,
+                  servicioNombre: f.servicio,
+                })
+              }}
               onVerDetalle={() => { if (f.tipo === 'cobrado') setDetalle(f.venta) }}
             />
           ))}
@@ -304,7 +334,14 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
           // porque su estado inicial se calcula una sola vez.
           key={editando ? `edit-${editando.id}` : 'nuevo'}
           onCerrar={() => { setPrefill(null); setEditando(null) }}
-          onCobrado={() => { setPrefill(null); setEditando(null); cargar() }}
+          onCobrado={async ventaId => {
+            setPrefill(null); setEditando(null)
+            // El detalle se abre solo con lo que se acaba de guardar: cierra el
+            // cobro mostrando qué quedó registrado, sin tener que buscarlo.
+            const vs = await cargar()
+            const v = vs.find(x => x.id === ventaId)
+            if (v) setDetalle(v)
+          }}
         />
       )}
 
