@@ -319,10 +319,13 @@ export default function TabCobros({ pro, usuario, onIrACaja }: {
         </div>
       )}
 
-      {(prefill || editando) && arqueo && (
+      {/* Un cobro nuevo necesita turno abierto; una corrección no — cambia una
+          venta que ya existe y no toca la apertura de caja. */}
+      {(editando || (prefill && arqueo)) && (
         <CobroDialog
           businessId={pro.businessId}
-          arqueoId={arqueo.id}
+          // Solo lo usa el alta. Al corregir no se mira.
+          arqueoId={arqueo?.id ?? ''}
           userId={usuario.user_id}
           barberos={barberos}
           servicios={pro.services}
